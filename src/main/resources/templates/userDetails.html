@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+ 
+</head>
+<body>
+
+<div th:if="${user}">
+	<p><strong>UserID:</strong> <span th:text="${user.id}"></span></p>
+    <p><strong>Name:</strong> <span th:text="${user.donorname}"></span></p> 	
+    <p><strong>Mobile Number:</strong> <span th:text="${user.mobile}"></span></p>
+     <p><strong>Gender:</strong> <span th:text="${user.gender}"></span></p>
+   	<p><strong>City:</strong> <span th:text="${user.city}"></span></p>
+    <!--  <p><strong>Address:</strong> <span th:text="${user.address}"></span></p>
+     <p><strong>State:</strong> <span th:text="${user.state}"></span></p>
+    <p><strong>Date of Birth:</strong> <span th:text="${user.dateofbirth}"></span></p>
+    <p><strong>Blood Group:</strong> <span th:text="${user.bloodgroup}"></span></p>
+    <p><strong>Age:</strong> <span th:text="${user.age}"></span></p>
+   
+    <p><strong>Email:</strong> <span th:text="${user.emailid}"></span></p> -->
+</div>
+<div th:if="${message}">
+    <p th:text="${message}"></p>
+</div>
+</body>
+</html>

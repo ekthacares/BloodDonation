@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Search Requests</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <h1>All Search Requests</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Blood Group</th>
+                <th>City</th>
+                <th>State</th>
+                <th>TimeStamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="request : ${searchRequests}">
+                <td>
+                    <a href="#" 
+                       data-toggle="modal" data-target="#userProfileModal" 
+                       th:attr="data-user-id=${request.userId}" 
+                       class="view-profile">
+                       <span th:text="${request.userId}">User ID</span>
+                    </a>
+                </td>
+                <td th:text="${request.bloodgroup}">Blood Group</td>
+                <td th:text="${request.city}">City</td>
+                <td th:text="${request.state}">State</td>
+                <td th:text="${request.timestamp}">TimeStamp</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="userProfileModal" tabindex="-1" role="dialog" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userProfileModalLabel">User Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Placeholder for loading spinner or error message -->
+                    <p>Loading...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.view-profile').click(function(e) {
+                e.preventDefault();  // Prevent default link behavior
+
+                var userId = $(this).data('user-id');
+                
+                // Clear the modal body and show loading message
+                $('#userProfileModal .modal-body').html('<p>Loading...</p>');
+                
+                // Perform the AJAX request to load the user profile
+                $.ajax({
+                    url: '/user/' + userId,
+                    method: 'GET',
+                    success: function(data) {
+                        // Load the returned data into the modal body
+                        $('#userProfileModal .modal-body').html(data);
+                    },
+                    error: function() {
+                        // Show an error message in case of failure
+                        $('#userProfileModal .modal-body').html('<p>Error loading profile</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

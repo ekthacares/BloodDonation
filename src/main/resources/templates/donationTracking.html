@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Donation Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 4px;
+            background-color: #ccc;
+            z-index: -1;
+        }
+
+        .step.active::after,
+        .step.completed::after {
+            background-color: #4CAF50;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #ccc;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            line-height: 30px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .step.completed .step-icon,
+        .step.active .step-icon {
+            background-color: #4CAF50;
+        }
+
+        .step-title {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .step.completed .step-title,
+        .step.active .step-title {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Donation Tracking</h1>
+
+    <div class="container">
+        <div class="progress" th:if="${confirmation != null}">
+            <div class="step" th:classappend="${confirmation.isConfirmed()} ? 'completed' : ''">
+                <div class="step-icon">1</div>
+                <div class="step-title">Request Sent</div>
+                <div class="timestamp" th:if="${confirmation.getFormattedConfirmedAt() != null}" th:text="${confirmation.getFormattedConfirmedAt()}"></div>
+            </div>
+            
+            <div class="step" th:classappend="${confirmation.isConfirmed()} ? 'active completed' : ''">
+                <div class="step-icon">2</div>
+                <div class="step-title">Request Accepted</div>
+                <div class="timestamp" th:if="${confirmation.getFormattedConfirmedAt() != null}" th:text="${confirmation.getFormattedConfirmedAt()}"></div>
+            </div>
+            
+            <div class="step" th:classappend="${confirmation.isStarted()} ? 'active completed' : ''">
+                <div class="step-icon">3</div>
+                <div class="step-title">Donation Started</div>
+                <div class="timestamp" th:if="${confirmation.getFormattedStartedAt() != null}" th:text="${confirmation.getFormattedStartedAt()}"></div>
+            </div>
+            
+            <div class="step" th:classappend="${confirmation.isCompleted()} ? 'active completed' : ''">
+                <div class="step-icon">4</div>
+                <div class="step-title">Donation Completed</div>
+                <div class="timestamp" th:if="${confirmation.getFormattedStoppedAt() != null}" th:text="${confirmation.getFormattedStoppedAt()}"></div>
+            </div>
+        </div>
+
+        <div class="message">
+            <p th:if="${confirmation != null && !confirmation.isConfirmed()}">Waiting for recipient to accept the request...</p>
+            <p th:if="${confirmation != null && confirmation.isConfirmed() && !confirmation.isStarted()}">Request accepted. Waiting for donation to start...</p>
+            <p th:if="${confirmation != null && confirmation.isStarted() && !confirmation.isCompleted()}">Donation in progress...</p>
+            <p th:if="${confirmation != null && confirmation.isCompleted()}">Donation completed. Thank you for your contribution!</p>
+            <p th:if="${message != null}" style="color: red;">
+                <span th:text="${message}"></span>
+            </p>
+        </div>
+
+        <form th:if="${confirmation != null && confirmation.isConfirmed() && !confirmation.isStarted()}" th:action="@{/startDonation}" method="post">
+            <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
+            <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
+            <button type="submit">Start Donation</button>
+        </form>
+
+        <form th:if="${confirmation != null && confirmation.isStarted() && !confirmation.isCompleted()}" th:action="@{/stopDonation}" method="post">
+            <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
+            <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
+            <button type="submit">Donation Finished</button>
+        </form>
+    </div>
+</body>
+</html>

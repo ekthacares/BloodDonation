@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Users</title>
+</head>
+<body>
+    <h2>All Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Donor Name</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th>Date of Birth</th>
+                <th>Blood Group</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Donations</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.donorname}"></td>
+                <td th:text="${user.mobile}"></td>
+                <td th:text="${user.emailid}"></td>
+                <td th:text="${user.dateofbirth}"></td>
+                <td th:text="${user.bloodgroup}"></td>
+                <td th:text="${user.age}"></td>
+                <td th:text="${user.gender}"></td>
+                <td th:text="${user.address}"></td>
+                <td th:text="${user.city}"></td>
+                <td th:text="${user.state}"></td>
+                
+                <td>
+                    <!-- Link to view donations -->
+                    <a th:href="@{/donations/{userId}(userId=${user.id})}" th:text="'View Donations'">View Donations</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

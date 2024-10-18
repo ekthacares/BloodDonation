@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminHome</title>
+    <style>
+        .header {
+            background-color: #2c3e50;
+            width: 100%;
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-right a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .header-right a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            margin-top: 100px; /* Space for the fixed header */
+            background: white;
+            padding: 40px;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto; /* Centering the container */
+            
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            color: #34495e;
+            font-size: 1.2em;
+        }
+
+        /* Card styling for anchor tags */
+       	 .card {
+            display: inline-block;
+            background: #ecf0f1;
+            padding-top:10px;
+           	height: 30px;
+            margin-top: 100px;
+            margin-right:60px;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 200px;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="#default" class="logo"><img src="Logo.png" alt="Logo"></a>
+        <div class="header-right">
+            <a href="adminhome">Home</a>
+            <a href="logout1">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Welcome, Admin!<span th:text="${user.name}"></span></h2>
+         <a href="adminregister" class="card"> Create New Admin</a>
+        <a href="adminviewprofile" class="card">Profile</a>
+        <a href="alldonorsdata" class="card">All Donors Data</a>
+        <a href="alladmindata" class="card">All AdminUsers Data</a>
+         <a href="viewbloodrequestdata" class="card">View BloodRequests Data</a>
+         <a href="allsearchrequestdata" class="card">View SearchRequests Data</a>
+         <a href="alldonationlist" class="card">View Donation Data</a>
+          <a href="allconfirmations" class="card">Tracking Donors </a>
+    </div>
+</body>
+</html>

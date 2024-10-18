@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Confirmations</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- Add your styles -->
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px; 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 40%; 
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .center-align {
+    text-align: center;
+}
+
+/* Optional: Style the link for better visibility */
+.user-link {
+    color: #007bff;
+    text-decoration: none;
+}
+.user-link:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+
+<h2>List of Confirmations</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Donor Accepted to Donate</th>
+            <th>Requested User for Blood</th>
+            <th>Confirmed At</th>
+            <th>Started At</th>
+            <th>Stopped At</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Loop through confirmations and display each one -->
+        <tr th:each="confirmation : ${confirmations}">
+            <td th:text="${confirmation.id}"></td>
+            <td class="center-align">
+                <a href="#" class="user-link" th:data-id="${confirmation.recipientId}"> <span th:text="${confirmation.recipientId}"></span></a>
+            </td>
+            <td class="center-align">
+                <a href="#" class="user-link" th:data-id="${confirmation.loggedInUserId}"> <span th:text="${confirmation.loggedInUserId}"></span></a>
+            </td>
+            <td th:text="${confirmation.formattedConfirmedAt}"></td>
+            <td th:text="${confirmation.formattedStartedAt}"></td>
+            <td th:text="${confirmation.formattedStoppedAt}"></td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- The Modal -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>User Details</h2>
+        <div id="userDetails"></div>
+    </div>
+</div>
+
+<script>
+    // Get the modal
+    var modal = document.getElementById("detailsModal");
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // Function to fetch user details
+    function fetchUserDetails(userId) {
+        fetch(`/api/user?id=${userId}`)
+            .then(response => response.json())
+            .then(user => {
+                var userDetails = `
+                    <p><strong>ID:</strong> ${user.id}</p>
+                    <p><strong>Name:</strong> ${user.donorname}</p>
+                    <p><strong>Email:</strong> ${user.emailid}</p>
+                    <p><strong>Mobile:</strong> ${user.mobile}</p>
+                    
+                `;
+                document.getElementById("userDetails").innerHTML = userDetails;
+                modal.style.display = "block";
+            })
+            .catch(error => console.error('Error fetching user details:', error));
+    }
+
+    // When the user clicks on a link, open the modal and show details
+    document.querySelectorAll(".user-link").forEach(link => {
+        link.addEventListener("click", function(event) {
+            event.preventDefault();
+            var userId = this.getAttribute("data-id");
+            fetchUserDetails(userId);
+        });
+    });
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
