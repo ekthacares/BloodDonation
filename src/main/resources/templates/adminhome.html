@@ -1,111 +1,394 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminHome</title>
-    <style>
-        .header {
-            background-color: #2c3e50;
-            width: 100%;
-            padding: 20px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
 
-        .header img {
-            height: 50px;
-        }
+    <head>
+        <meta charset="utf-8">
+        <title>Admin's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="description" content="Ekthacares – A Drop of Hope, A Lifeline for Lives">
+        <meta name="author" content="">
+        <link rel="shortcut icon" href="images/favicon.png" />
 
-        .header-right {
-            display: flex;
-            align-items: center;
-        }
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 
-        .header-right a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
+        <!-- The styles --> 
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css" >
+        <link href="css/animate.css" rel="stylesheet" type="text/css" >
+        <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" >
+        <link href="css/venobox.css" rel="stylesheet" type="text/css" >
+        <link rel="stylesheet" href="css/styles.css" />
 
-        .header-right a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+    <body> 
 
-        .container {
-            margin-top: 100px; /* Space for the fixed header */
-            background: white;
-            padding: 40px;
-            width: 80%;
-            max-width: 800px;
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto; /* Centering the container */
-            
-        }
+        <div id="preloader">
+            <span class="margin-bottom"><img src="images/loader.gif" alt="" /></span>
+        </div>
 
-        h1 {
-            color: #2c3e50;
-            font-size: 3em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
+        <!--  HEADER -->
 
-        p {
-            color: #34495e;
-            font-size: 1.2em;
-        }
+        <header class="main-header clearfix" data-sticky_header="true">
 
-        /* Card styling for anchor tags */
-       	 .card {
-            display: inline-block;
-            background: #ecf0f1;
-            padding-top:10px;
-           	height: 30px;
-            margin-top: 100px;
-            margin-right:60px;
-            text-align: center;
-            text-decoration: none;
-            color: #2c3e50;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-            width: 200px;
-        }
+            <div class="top-bar clearfix">
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <a href="#default" class="logo"><img src="Logo.png" alt="Logo"></a>
-        <div class="header-right">
-            <a href="adminhome">Home</a>
-            <a href="logout1">Logout</a>
+                <div class="container">
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-sm-12">
+
+                            <p>
+                                <span><i class="fa fa-building-o"></i> <strong>Contact: </strong>  4th floor, ektha towers, kondapur</span>
+                                <span>&nbsp;<i class="fa fa-phone"></i> <strong>Call Us:</strong> +91 99999 99999</span>
+                            </p>
+
+                        </div>
+
+                        <div class="col-md-4col-sm-12">
+                            <div class="top-bar-social">
+                                <a href="#"><i class="fa fa-facebook rounded-box"></i></a>
+                                <a href="#"><i class="fa fa-twitter rounded-box"></i></a>
+                                <a href="#"><i class="fa fa-google-plus rounded-box"></i></a>
+                                <a href="#"><i class="fa fa-instagram rounded-box"></i></a>
+                                <a href="#"><i class="fa fa-youtube rounded-box"></i></a>
+                            </div>   
+                        </div> 
+
+                    </div>
+
+                </div> <!--  end .container -->
+
+            </div> <!--  end .top-bar  -->
+
+            <section class="header-wrapper navgiation-wrapper">
+
+                <div class="navbar navbar-default">			
+                    <div class="container">
+
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="logo" href="index.html"><img alt="" src="images/logo1.png"></a>
+                        </div>
+
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                                
+                                <li>
+                                    <a href="adminhome">Home</a>
+                                    <!--<ul class="drop-down">
+                                        <li><a href="index.html" title="Home Layout 01">Home 01</a></li>
+                                        <li><a href="home-2.html" title="Home Layout 02">Home 02</a></li>
+                                    </ul>-->
+                                </li>
+
+                                
+                                <li><a href="about-us" title="About Us">About Us</a></li>                              
+
+                                <li><a href="contact">Contact</a></li>
+                                
+                                  <li>
+          						  <a href="adminviewprofile"><i class="fa fa-user"></i> Profile</a>
+        							</li>
+                                <li><a href="logout1">Logout</a></li>
+                                <li>&nbsp;</li>
+                               
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </header> <!-- end main-header  -->
+
+      
+        
+        <!--  FEATURED ABOUT US SECTION-->
+          <section class="section-content-block">
+	<h2>Welcome, Admin!<span th:text="${user.name}"></span></h2>
+        <section class="section-content-block">
+    <div class="form_container">
+        <div class="content-grid">
+            <!-- Column 1: Profile Link Section -->
+<!--             <div class="profile">
+                <a href="viewprofile" class="btn">Profile</a>
+            </div>
+ -->
+            <!-- Column 2: Blood Services Section -->
+            <!-- <div class="blood-services">
+                <h2>Blood Services</h2>
+                <ul>
+                    <li><a href="searchforblood" class="btn">Quick Search</a></li>
+                    <li><a href="requestforblood" class="btn">Request for Blood</a></li>
+                </ul>
+            </div> 
+             <div class="blood-services">                
+                    <a href="searchforblood" class="btn">Quick Search</a>
+                  
+                
+            </div>
+            <div class="blood-services">                
+                   
+                    <a href="requestforblood" class="btn">Request for Blood</a>
+                
+            </div>-->
+            <!-- Column 3: Donation Details -->
+            <div class="donate-blood">
+                <a href="adminregister" class="card"> Create New Admin</a>
+            </div>
+            <!-- Column 4: Request Received -->
+            <div class="email-request">
+                 <a href="alladmindata" class="card">All AdminUsers Data</a>
+            </div>
+            <!-- Column 5: Track Your Request -->
+            <div class="tracking">
+                 <a href="alldonorsdata" class="card">All Donors Data</a>
+            </div>
+            <div class="tracking">
+                 <a href="allconfirmations" class="card">Tracking Donors </a>
+            </div>
+             <div class="donate-blood">
+                 <a href="alldonationlist" class="card">View Donation Data</a>
+            </div>    
+            <br> 
+             <br> 
+              <br>     
+             <div class="donate-blood">
+                 <a href="viewbloodrequestdata" class="card">View BloodRequests Data</a>
+            </div>
+             <div class="donate-blood">
+                <a href="allsearchrequestdata" class="card">View SearchRequests Data</a>
+            </div>
         </div>
     </div>
+</section> <!--  end .section-about-us -->
 
-    <div class="container">
-        <h2>Welcome, Admin!<span th:text="${user.name}"></span></h2>
-         <a href="adminregister" class="card"> Create New Admin</a>
-        <a href="adminviewprofile" class="card">Profile</a>
-        <a href="alldonorsdata" class="card">All Donors Data</a>
-        <a href="alladmindata" class="card">All AdminUsers Data</a>
-         <a href="viewbloodrequestdata" class="card">View BloodRequests Data</a>
-         <a href="allsearchrequestdata" class="card">View SearchRequests Data</a>
-         <a href="alldonationlist" class="card">View Donation Data</a>
-          <a href="allconfirmations" class="card">Tracking Donors </a>
-    </div>
-</body>
+        <!-- START FOOTER  -->
+
+        <footer>            
+
+            <section class="footer-widget-area footer-widget-area-bg">
+
+                <div class="container">
+
+                    <div class="row">
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <div class="about-footer">
+
+                                <div class="row">
+
+                                    <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                                        <img src="images/logo-footer.png" alt="" />
+                                    </div> <!--  end col-lg-3-->
+
+                                    <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                                        <p>
+                                            At Ekthacares, we believe in the power of community and the difference one person can make. Our mission is to connect generous donors with those in urgent need of blood. Whether you're here to donate, request blood, or simply learn more, your involvement can save lives.
+                                        </p>
+                                    </div> <!--  end .col-lg-9  -->
+
+                                </div> <!--  end .row -->
+
+                            </div> <!--  end .about-footer  -->
+
+                        </div> <!--  end .col-md-12  -->
+
+                    </div> <!--  end .row  -->
+
+                    <div class="row"> 						                      
+
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+
+                            <div class="footer-widget">
+
+                                <div class="sidebar-widget-wrapper">
+
+                                    <div class="footer-widget-header clearfix">
+                                        <h3>Contact Us</h3>
+                                    </div>  <!--  end .footer-widget-header --> 
+
+
+                                    <div class="textwidget">                                       
+
+                                        <i class="fa fa-envelope-o fa-contact"></i> <p><a href="#">support@ekthacares.com</a><br/><a href="#">helpme@ekthacares.com</a></p>
+
+                                        <i class="fa fa-location-arrow fa-contact"></i> <p>4th floor, ektha towers,<br/> kondapur. Hyderabad-18, India</p>
+
+                                        <i class="fa fa-phone fa-contact"></i> <p>Office:&nbsp; +91 99999 99999<br/>Cell:&nbsp; +91 99999 99999</p>                              
+
+                                    </div>
+
+                                </div> <!-- end .footer-widget-wrapper  -->
+
+                            </div> <!--  end .footer-widget  -->
+
+                        </div> <!--  end .col-md-4 col-sm-12 -->   
+
+                        <div class="col-md-4 col-sm-12 col-xs-12">
+
+                            <div class="footer-widget clearfix">
+
+                                <div class="sidebar-widget-wrapper">
+
+                                    <div class="footer-widget-header clearfix">
+                                        <h3>Support Links</h3>
+                                    </div>  <!--  end .footer-widget-header --> 
+
+
+                                    <ul class="footer-useful-links">
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Thalassemia
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Cell Elofrosis
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Myelodysasia
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Blood Count
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Hemolytimia
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Ychromas Eosis 
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Hyrcoagulable
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Thrombo Xtosis
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Sicklenemiaxs
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-caret-right fa-footer"></i>
+                                                Aplastic Anemia
+                                            </a>
+                                        </li>                                       
+
+                                    </ul>
+
+                                </div> <!--  end .footer-widget  -->        
+
+                            </div> <!--  end .footer-widget  -->            
+
+                        </div> <!--  end .col-md-4 col-sm-12 -->    
+
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+
+                            <div class="footer-widget">
+                                <div class="sidebar-widget-wrapper">
+                                    <div class="footer-widget-header clearfix">
+                                        <h3>Subscribe Us</h3>
+                                    </div>
+                                    <p>Signup for regular newsletter and stay up to date with our latest news.</p>
+                                    <div class="footer-subscription">
+                                        <p>
+                                            <input id="mc4wp_email" class="form-control" required="" placeholder="Enter Your Email" name="EMAIL" type="email">
+                                        </p>
+                                        <p>
+                                            <input class="btn btn-default" value="Subscribe Now" type="submit">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div> <!--  end .col-md-4 col-sm-12 -->  
+
+                    </div> <!-- end row  -->
+
+                </div> <!-- end .container  -->
+
+            </section> <!--  end .footer-widget-area  -->
+
+            <!--FOOTER CONTENT  -->
+
+            <section class="footer-contents">
+
+                <div class="container">
+
+                    <div class="row clearfix">
+                        
+                        <div class="col-md-12 col-sm-12 text-center">
+                            <p class="copyright-text"> Powered by ektha.com, Copyright 2024 - ekthacares. All Rights Reserved. </p>
+                        </div>  <!-- end .col-sm-6  -->
+
+                    </div> <!-- end .row  -->                                    
+
+                </div> <!--  end .container  -->
+
+            </section> <!--  end .footer-content  -->
+
+        </footer>
+
+        <!-- END FOOTER  -->
+
+        <!-- Back To Top Button  -->
+
+        <a id="backTop">Back To Top</a>
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/wow.min.js"></script>
+        <script src="js/jquery.backTop.min.js "></script>
+        <script src="js/waypoints.min.js"></script>
+        <script src="js/waypoints-sticky.min.js"></script>
+        <script src="js/owl.carousel.min.js"></script>
+        <script src="js/jquery.stellar.min.js"></script>
+        <script src="js/jquery.counterup.min.js"></script>
+        <script src="js/venobox.min.js"></script>
+        <script src="js/custom-scripts.js"></script>
+    </body>
+
 </html>

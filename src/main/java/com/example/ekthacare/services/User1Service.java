@@ -1,12 +1,14 @@
 package com.example.ekthacare.services;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.example.ekthacare.entity.ChangeLog;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.User1Repository;
@@ -41,5 +43,43 @@ public class User1Service {
         }
         return user1Repository.save(user);
     }
+    
+    public void updateUser1(User1 user) {
+	    User1 existingUser = user1Repository.findById(user.getId()).orElseThrow();
+	    // Check for changes and save to change log
+	    if (!existingUser.getName().equals(user.getName())) {
+	        saveChangeLog(user.getId(), "name", existingUser.getName(), user.getName());
+	    }
+	    if (!existingUser.getMobile().equals(user.getMobile())) {
+	        saveChangeLog(user.getId(), "mobile", existingUser.getMobile(), user.getMobile());
+	    }  
+	    if (!existingUser.getEmailid().equals(user.getEmailid())) {
+	        saveChangeLog(user.getId(), "emailid", existingUser.getEmailid(), user.getEmailid());
+	    }	   
+	    if (!existingUser.getGender().equals(user.getGender())) {
+	        saveChangeLog(user.getId(), "gender", existingUser.getGender(), user.getGender());
+	    }
+	    if (!existingUser.getAddress().equals(user.getAddress())) {
+	        saveChangeLog(user.getId(), "address", existingUser.getAddress(), user.getAddress());
+	    }
+	    if (!existingUser.getCity().equals(user.getCity())) {
+	        saveChangeLog(user.getId(), "city", existingUser.getCity(), user.getCity());
+	    }
+	    if (!existingUser.getState().equals(user.getState())) {
+	        saveChangeLog(user.getId(), "state", existingUser.getState(), user.getState());
+	    } 
+       
+	    user1Repository.save(user);
+	}
+
+	private void saveChangeLog(Long userId, String changedField, String oldValue, String newValue) {
+	    ChangeLog log = new ChangeLog();
+	    log.setUserId(userId);
+	    log.setChangedField(changedField);
+	    log.setOldValue(oldValue);
+	    log.setNewValue(newValue);
+	    log.setChangedAt(LocalDateTime.now());
+	    user1Repository.save(log); // Assuming you have a repository for ChangeLog
+	}
 }
 

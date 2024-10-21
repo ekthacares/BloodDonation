@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.BloodRequest;
 import com.example.ekthacare.entity.SearchRequest;
@@ -240,6 +241,16 @@ public class AdminController {
 	  public User getUser(@RequestParam Long id) {
 	      return userService.findById(id);
 	  }
+	  
+	  
+	  @PostMapping("/updateProfile1")
+	    public String updateProfile(@ModelAttribute User1 user, RedirectAttributes redirectAttributes) {
+	        // Save change logs here if necessary
+	        user1Service.updateUser1(user); // Your service method to update user data
+	        redirectAttributes.addFlashAttribute("message", "Profile updated successfully!");
+	        return "redirect:/adminviewprofile"; // Redirect back to the profile page
+	    }
+	  
 	  }
 
-
+	
