@@ -99,12 +99,15 @@
         </header> 
         <section class="section-content-block">
 				<div class="registration_container">
-  		  <h2>Request for Blood</h2>
+  		 <div class="contact-form-block">
+        <h2 class="contact-title"> <h2>Request for blood</h2>
+</h2>
+    </div>
         <div  class="success-message" style="text-align: center;" th:if="${message}" th:text="${message}"></div>
       <form th:action="@{/requestforblood}" method="post" th:object="${bloodRequest}">
         <!-- Name -->
         <div class="form-group">
-           <label for="name">Request for:</label>
+           <label for="name">Request for Others:</label>
             <input type="text" id="name" name="name" placeholder="Enter name" required>
         </div>
         <!-- bloodgroup -->
