@@ -63,4 +63,11 @@ public class BloodDonation {
     public void setLastDonationDate(LocalDateTime lastDonationDate) {
         this.lastDonationDate = lastDonationDate;
     }
+
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	
 }

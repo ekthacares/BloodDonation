@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.BloodRequest;
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.User;
@@ -28,6 +29,7 @@ import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.Otp1Repository;
 import com.example.ekthacare.repo.User1Repository;
 import com.example.ekthacare.repo.UserRepository;
+import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.BloodRequestService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.Otp1Service;
@@ -67,7 +69,8 @@ public class AdminController {
 	  @Autowired
 	    private SearchRequestService searchRequestService;
 	  
- 
+	  @Autowired
+	    private BloodDonationService donationService;
 	  
 	  @Autowired
 	    private SmsService smsService;
@@ -251,6 +254,38 @@ public class AdminController {
 	        return "redirect:/adminviewprofile"; // Redirect back to the profile page
 	    }
 	  
+	  
+		/*
+		 * @GetMapping("/donations/{userId}") public String
+		 * viewUserDonations(@PathVariable("userId") Long userId, Model model) {
+		 * BloodDonation donations = donationService.findDonationsByUserId(userId);
+		 * model.addAttribute("donations", donations); model.addAttribute("userId",
+		 * userId); return "redirect:/alldonationlist"; // This refers to a separate
+		 * Thymeleaf template "userDonations.html"
+		 * 
+		 * }
+		 */
+	  
+	  
+	 
+	  
+	  @GetMapping("/donations/{recipientId}")
+	  public String viewUserDonations(@PathVariable("recipientId") Long recipientId, Model model) {
+	      // Fetch donations for the recipient
+	      List<BloodDonation> donations = donationService.findDonationsByRecipientId(recipientId); // Ensure this method returns a List
+
+	      // Check if donations exist
+	      if (donations != null && !donations.isEmpty()) {
+	          model.addAttribute("donations", donations);
+	      } else {
+	          model.addAttribute("message", "No donations found for this recipient.");
+	      }
+	      
+	      model.addAttribute("recipientId", recipientId);
+	      return "alldonationlist"; // Ensure this is the name of your Thymeleaf template
+	  }
+
+
 	  }
 
 	

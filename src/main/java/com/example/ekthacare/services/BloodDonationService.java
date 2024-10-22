@@ -66,5 +66,11 @@ public class BloodDonationService {
                 ));
     }
 
+    public BloodDonation findDonationsByUserId(Long userId) {
+        return bloodDonationRepository.findByUserId(userId);
+    }
 
+    public List<BloodDonation> findDonationsByRecipientId(Long recipientId) {
+        return bloodDonationRepository.findByRecipientId(recipientId);
+    }
 }
