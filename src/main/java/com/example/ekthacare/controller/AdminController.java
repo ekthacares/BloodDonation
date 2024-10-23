@@ -220,15 +220,48 @@ public class AdminController {
 	        return "viewbloodrequestdata";
 	    }
 	    
+
 	    @GetMapping("/allsearchrequestdata")
-	    public String viewAllSearchRequests(Model model) {
-	    	
-	        List<SearchRequest> searchRequests = searchRequestService.getAllSearchRequests();	       
+	    public String viewAllSearchRequests(@RequestParam(required = false) String filter, Model model, HttpSession session, @RequestParam(defaultValue = "0") int page) {
+	    	Long userId = (Long) session.getAttribute("userId");
+	        System.out.println("Retrieved userId from session1: " + userId);
+	        if (userId != null) {
+	            User1 user = user1Service.findById(userId);
+	            if (userId != null) {
+	            	
+	            	 int pageSize = 10;
+	            	 List<SearchRequest> searchRequests = searchRequestService.findAll(page, pageSize);
+	            	    long totalRequests = searchRequestService.countAllRequests();
+	            	    int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+
+	        if ("week".equals(filter)) {
+	            searchRequests = searchRequestService.findByTimestampThisWeek();
+	        } else if ("month".equals(filter)) {
+	            searchRequests = searchRequestService.findByTimestampThisMonth();
+	        } else if ("last3months".equals(filter)) {
+	            searchRequests = searchRequestService.findByTimestampLast3Months();
+	        } else {
+	            // Default case, get all search requests
+	            searchRequests = searchRequestService.getAllSearchRequests();
+	        }
+
 	        model.addAttribute("searchRequests", searchRequests);
+	        model.addAttribute("currentPage", page);
+	        model.addAttribute("totalPages", totalPages);
 	        return "allsearchrequestdata";  // Name of the template
-	    }
+	    }else {
+            model.addAttribute("error", "User not found.");
+            return "home";
+        }
+    } else {
+        model.addAttribute("error", "No user logged in.");
+        return "adminlogin";
+    }
+}
+
 	    
 	    
+	   
 	  @GetMapping("/user/{userId}")
 	   public String viewUserProfile(@PathVariable("userId") Long userId, Model model) {
 	      User user = userService.findById(userId);

@@ -239,13 +239,7 @@ public class DonorController {
 	            loggedInUser = userService.findById(userId);
 	            if (loggedInUser != null) {
 	                System.out.println("User Details: " + loggedInUser);
-	                model.addAttribute("user", loggedInUser);
-	            } else {
-	                System.out.println("User not found with ID: " + userId);
-	            }
-	        } else {
-	            System.out.println("No user ID found in session.");
-	        }
+	                model.addAttribute("user", loggedInUser);	            
 
 	        // Perform the search
 	        List<User> results = List.of();
@@ -288,7 +282,15 @@ public class DonorController {
 	        model.addAttribute("states", userService.getAllStates());
 
 	        return "searchforblood";
-	    }
+	    } else {
+            model.addAttribute("error", "User not found.");
+            return "home";
+        }
+    } else {
+        model.addAttribute("error", "No user logged in.");
+        return "donorlogin";
+    }
+}
 
 	    
 	    

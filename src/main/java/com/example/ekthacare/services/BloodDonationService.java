@@ -73,4 +73,6 @@ public class BloodDonationService {
     public List<BloodDonation> findDonationsByRecipientId(Long recipientId) {
         return bloodDonationRepository.findByRecipientId(recipientId);
     }
+    
+    
 }

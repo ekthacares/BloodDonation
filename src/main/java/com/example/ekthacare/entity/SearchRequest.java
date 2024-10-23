@@ -2,8 +2,7 @@ package com.example.ekthacare.entity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,145 +12,86 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
 @Entity
-	public class SearchRequest {
-	    @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long id;
+public class SearchRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	    private Long userId;
-	    private String bloodgroup;
-	    private String city;
-	    private String state;
-	    private String timestamp;
-	    
-	     
+    private Long userId;
+    private String bloodgroup;
+    private String city;
+    private String state;
+    private LocalDateTime timestamp; // Keep as LocalDateTime for internal processing
 
+    public SearchRequest() {
+        // Default constructor
+    }
 
-		public SearchRequest() {
-			// TODO Auto-generated constructor stub
-		}
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
+    public Long getUserId() {
+        return userId;
+    }
 
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-		public Long getId() {
-			return id;
-		}
+    public String getBloodgroup() {
+        return bloodgroup;
+    }
 
+    public void setBloodgroup(String bloodgroup) {
+        this.bloodgroup = bloodgroup;
+    }
 
+    public String getCity() {
+        return city;
+    }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-		public void setId(Long id) {
-			this.id = id;
-		}
+    public String getState() {
+        return state;
+    }
 
+    public void setState(String state) {
+        this.state = state;
+    }
 
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS); // Ensure timestamp has no milliseconds/nanoseconds
+    }
 
-		public Long getUserId() {
-			return userId;
-		}
+    @PrePersist
+    @PreUpdate
+    public void updateTimestamp() {
+        this.timestamp = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS); // Set current time without milliseconds/nanoseconds
+    }
 
-
-
-
-		public void setUserId(Long userId) {
-			this.userId = userId;
-		}
-
-
-
-
-		public String getBloodgroup() {
-			return bloodgroup;
-		}
-
-
-
-
-		public void setBloodgroup(String bloodgroup) {
-			this.bloodgroup = bloodgroup;
-		}
-
-
-
-
-		public String getCity() {
-			return city;
-		}
-
-
-
-
-		public void setCity(String city) {
-			this.city = city;
-		}
-
-
-
-
-		public String getState() {
-			return state;
-		}
+    
+    public String getFormattedTimestamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return this.timestamp.format(formatter);
+    }
 
 
-
-
-		public void setState(String state) {
-			this.state = state;
-		}
-
-
-		 @PrePersist
-		    @PreUpdate
-		    public void formatTimestamp() {
-		        if (this.timestamp == null) {
-		            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd:MM:yyyy HH:mm:ss");
-		            this.timestamp = LocalDateTime.now().withNano(0).format(formatter);
-		        }
-		    }
-
-
-		 public String getTimestamp() {
-		        return timestamp;
-		    }
-
-	
-		 public void setTimestamp(LocalDateTime timestamp) {
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd:MM:yyyy HH:mm:ss");
-		        this.timestamp = timestamp.withNano(0).format(formatter);
-		    }
-
-
-
-		public SearchRequest(Long id, Long userId, String bloodgroup, String city, String state,
-				String timestamp) {
-			super();
-			this.id = id;
-			this.userId = userId;
-			this.bloodgroup = bloodgroup;
-			this.city = city;
-			this.state = state;
-			this.timestamp = timestamp;
-		}
-
-
-
-
-		@Override
-		public String toString() {
-			return "SearchRequest [id=" + id + ", userId=" + userId + ", bloodgroup=" + bloodgroup + ", city=" + city
-					+ ", state=" + state + ", timestamp=" + timestamp + "]";
-		}
-
-
-		
-		
-
-		
-	    
-	    
-	     
-	    
-
+    @Override
+    public String toString() {
+        return "SearchRequest [id=" + id + ", userId=" + userId + ", bloodgroup=" + bloodgroup + ", city=" + city
+                + ", state=" + state + ", timestamp=" + timestamp + "]";
+    }
 }

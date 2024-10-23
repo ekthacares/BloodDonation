@@ -61,6 +61,16 @@
 		a:hover {
    			 color: #ff0000; /* Optional hover effect */
 		}
+		
+		input[type="text"], input[type="number"], input[type="tel"], input[type="email"], input[type="date"], select, textarea {
+    width: 20%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    float: right;
+}
 	</style>
     <body> 
 
@@ -134,13 +144,32 @@
 
         </header> 
         
-			<div class="donortracking_container">
+			<div class="donortracking_container" style="padding:70px">
 			 <div class="contact-form-block">
         <h2 class="contact-title"> <h2>All Search Requests</h2>
 </h2>
+    </div> 
+    
+     <!--  Applying Filter  -->   
+     <div class="filter-container">
+        <select id="filterSelect" onchange="filterRequests()">
+            <option value="">-- Select Filter --</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="last3months">Last 3 Months</option>
+        </select>
     </div>
-   
-    <div class="results" >          
+    
+    
+   <!--  Row count of filter's data  -->
+    <div id="resultCount" style="display: none;"></div>
+    
+     <!--  Row count of all search request data  -->
+    <div class="results-count">
+    <span>Total Results: </span>
+    <span id="totalResultsCount" th:text="${#lists.size(searchRequests)}">0</span> <!-- Displaying the count of searchRequests -->
+</div>
+     <div class="results" >          
             <table >
              <thead>
             <tr>
@@ -166,11 +195,30 @@
                 <td th:text="${request.bloodgroup}">Blood Group</td>
                 <td th:text="${request.city}">City</td>
                 <td th:text="${request.state}">State</td>
-                <td th:text="${request.timestamp}">TimeStamp</td>
+                <td th:text="${request.formattedTimestamp}">TimeStamp</td>
+                
             </tr>
         </tbody>
   
             </table>
+            <nav>
+        <ul class="pagination" style ="float:right">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/search-requests(page=${currentPage - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/search-requests(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/search-requests(page=${currentPage + 1})}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
             <!-- Modal -->
     <div class="modal fade" id="userProfileModal" tabindex="-1" role="dialog" aria-labelledby="userProfileModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -191,6 +239,7 @@
             </div>
         </div>
     </div>
+    
            </div>
     
 </div>
@@ -446,6 +495,73 @@
             });
         });
     </script>
-    </body>
+<script>
+    function filterRequests() {
+        const filter = document.getElementById("filterSelect").value;
+        const rows = document.querySelectorAll("tbody tr");
+        let visibleRowCount = 0; // Variable to count visible rows
+
+        const resultCountElement = document.getElementById("resultCount");
+        const totalResultsCountElement = document.getElementById("totalResultsCount");
+
+        rows.forEach(row => {
+            const timestampStr = row.cells[5].innerText.trim(); // Get the formatted timestamp string
+            const timestamp = parseFormattedTimestamp(timestampStr); // Parse the timestamp to a Date object
+            const now = new Date();
+
+            let showRow = true;
+
+            // Apply filter logic based on selection
+            if (filter === "week") {
+                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(endOfWeek.getDate() + 6);
+                showRow = timestamp >= startOfWeek && timestamp <= endOfWeek;
+            } else if (filter === "month") {
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                showRow = timestamp >= startOfMonth && timestamp <= endOfMonth;
+            } else if (filter === "last3months") {
+                const startOf3MonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                showRow = timestamp >= startOf3MonthsAgo;
+            } else {
+                // If no filter is selected, show all rows
+                showRow = true;
+            }
+
+            // Show or hide row based on filter condition
+            if (showRow) {
+                row.style.display = ""; // Show row
+                visibleRowCount++; // Increment visible row count
+            } else {
+                row.style.display = "none"; // Hide row
+            }
+        });
+
+        // Show the result count if a filter is applied
+        if (filter !== "") {
+            resultCountElement.style.display = "block"; // Show result count when filter is applied
+            resultCountElement.innerText = visibleRowCount + " results found";
+
+            // Hide total results count when a filter is applied
+            totalResultsCountElement.parentElement.style.display = "none"; 
+        } else {
+            // Show total results count when no filter is selected
+            resultCountElement.style.display = "none"; // Hide result count
+            totalResultsCountElement.parentElement.style.display = "block"; // Show total results
+        }
+    }
+
+    // Function to parse 'dd/MM/yyyy HH:mm:ss' into a JavaScript Date object
+    function parseFormattedTimestamp(timestampStr) {
+        const [datePart, timePart] = timestampStr.split(" ");
+        const [day, month, year] = datePart.split("/").map(Number);
+        const [hours, minutes, seconds] = timePart.split(":").map(Number);
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+</script>
+
+
+ </body>
 
 </html>
