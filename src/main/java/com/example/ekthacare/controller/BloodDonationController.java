@@ -2,6 +2,7 @@ package com.example.ekthacare.controller;
 
 import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.UserService;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -47,12 +49,27 @@ public class BloodDonationController {
     }
     
     
-    @GetMapping("/alldonationlist")
-    public String getAllDonations(HttpSession session, Model model) {
-        // Retrieve the list of all donations
-        List<BloodDonation> donations = bloodDonationService.getAllDonations();
-        model.addAttribute("donations", donations); // Add donations to the model
+    @GetMapping("/totaldonationlist")
+    public String getAllDonations(HttpSession session, Model model, @RequestParam(defaultValue = "0") int page) {
+                        int pageSize = 10;
 
-        return "alldonationlist"; // The name of your Thymeleaf template
-    }
+                // Fetch the donations based on the current page and page size
+                List<BloodDonation> donations = bloodDonationService.getAllDonations(page, pageSize);
+
+                // Calculate the total number of donations
+                long totalDonations = bloodDonationService.countAllDonations();
+                int totalPages = (int) Math.ceil((double) totalDonations / pageSize);
+
+                // Add attributes to the model to be used in the Thymeleaf template
+                model.addAttribute("donations", donations);
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", totalPages);
+                model.addAttribute("pageSize", pageSize);
+               
+
+                // Return the Thymeleaf template name
+                return "totaldonationlist";
+            } 
+    
+    
 }

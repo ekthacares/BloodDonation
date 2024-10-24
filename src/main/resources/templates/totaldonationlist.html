@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Admin's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
+        <title>Admins's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta name="description" content="Ekthacares – A Drop of Hope, A Lifeline for Lives">
         <meta name="author" content="xenioushk">
@@ -61,6 +61,8 @@
 		a:hover {
    			 color: #ff0000; /* Optional hover effect */
 		}
+		
+		
 	</style>
     <body> 
 
@@ -133,74 +135,66 @@
             </section>
 
         </header> 
+       
 			<div class="donortracking_container" style="padding:70px">
 			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>List of Confirmations</h2>
+        <h2 class="contact-title"> <h2>All Donations Data</h2>
 </h2>
     </div>
    		 
-     	<!-- Display message if any -->
-    <div  th:if="${message}" class="message" style="text-align: center;font-weight: bold;color: red;" th:text="${message}"></div>
-
-    <!-- Display user information if available 
-    <p th:if="${user}">Logged-in User: <span th:text="${user.donorname}"></span></p>-->
-
-    <!-- Display the confirmations if available
-    <h2 th:if="${confirmations}">List of Confirmations</h2> -->
-    <div class="results" th:if="${confirmations}">          
+     	
+    <div class="results">          
             <table >
               <thead>
-        <tr>
+           <tr>
             <th>ID</th>
-            <th>Donor Accepted to Donate</th>
-            <th>User Requested for Blood</th>
-            <th>Confirmed At</th>
-            <th>Started At</th>
-            <th>Stopped At</th>
+            <th>Donated to</th>
+            <th>Donated by</th>
+            <th>Last Donation Date</th>
         </tr>
-    </thead>
-             <tbody>
+        </thead>
+              <tbody>
         <!-- Loop through confirmations and display each one -->
-        <tr th:each="confirmation : ${confirmations}">
-            <td th:text="${confirmation.id}"></td>
-            <td class="center-align">
-			<a href="#" 
+       <tr th:each="donation : ${donations}">
+		<td th:text="${donation.id}"></td>
+                <td>
+                    <a href="#" 
                        data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${confirmation.recipientId}" 
+                       th:attr="data-user-id=${donation.userId}" 
                        class="view-profile1">
-                       <span th:text="${confirmation.recipientId}">User ID</span>
-                    </a>            </td>
-            <td class="center-align">
-                <a href="#" 
-                       data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${confirmation.loggedInUserId}" 
-                       class="view-profile1">
-                       <span th:text="${confirmation.loggedInUserId}">User ID</span>
+                       <span th:text="${donation.userId}">User ID</span>
                     </a>
-            </td>
-            <td th:text="${confirmation.formattedConfirmedAt}"></td>
-            <td th:text="${confirmation.formattedStartedAt}"></td>
-            <td th:text="${confirmation.formattedStoppedAt}"></td>
-        </tr>
-    </tbody>
+                </td>
+                 <td>
+                    <a href="#" 
+                       data-toggle="modal" data-target="#userProfileModal" 
+                       th:attr="data-user-id=${donation.recipientId}" 
+                       class="view-profile1">
+                       <span th:text="${donation.recipientId}">Reciepient ID</span>
+                    </a>
+                </td>
+                 <td th:text="${donation.lastDonationDate}">DonationDate</td>
+               
+            </tr>
+        </tbody>
             </table>
-           <nav>
+            <nav>
     <ul class="pagination" style="float:right">
         <!-- Previous Button: Disable if on the first page -->
         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{/confirmations(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
+            <a class="page-link" th:href="@{/alldonorsdata(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
 
         <!-- Page Numbers: Loop through the total number of pages -->
         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{/confirmations(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
+            <a class="page-link" th:href="@{/alldonordata(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
         </li>
 
         <!-- Next Button: Disable if on the last page -->
         <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/confirmations(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
+            <a class="page-link" th:href="@{/alldonorsdata(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>

@@ -6,6 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.Confirmation;
@@ -142,6 +143,14 @@ public class ConfirmationService {
 	        return (confirmation != null && confirmation.isCompleted()) ? confirmation : null;
 	    }
 	  
-	  
+	  public List<Confirmation> getAllConfirmations(int page, int pageSize) {
+		  PageRequest pageable = PageRequest.of(page, pageSize);
+	        return confirmationRepository.findAll(pageable).getContent(); // Assuming you are using Spring Data JPA
+	        
+	    }
+
+	    public long countAllRequests() {
+	        return confirmationRepository.count(); // This assumes count() is defined in your repository
+	    }
 	  
 }

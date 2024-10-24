@@ -153,11 +153,24 @@ public class ConfirmationController {
         }
     }
 
+  
+    
     @GetMapping("allconfirmations")
-    public String viewAllConfirmations(Model model) {
-        List<Confirmation> confirmations = confirmationService.getAllConfirmations();
-        model.addAttribute("confirmations", confirmations);
-        return "allconfirmations"; // Path to the Thymeleaf template
-    }
+    public String getConfirmations(Model model, 
+                                   @RequestParam(defaultValue = "0") int page) {
+        int pageSize = 10; // Define the number of confirmations per page
 
+        // Fetch paginated list of confirmations
+        List<Confirmation> confirmations = confirmationService.getAllConfirmations(page, pageSize);
+        long totalRequests = confirmationService.countAllRequests();
+        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+
+        // Add attributes to the model
+        model.addAttribute("confirmations", confirmations);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages); // Use totalPages variable directly
+        model.addAttribute("pageSize", pageSize);
+
+        return "allconfirmations"; // The Thymeleaf template name
+    }
 }

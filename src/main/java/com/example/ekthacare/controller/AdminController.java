@@ -205,20 +205,53 @@ public class AdminController {
 	    }
 	    
 	    @GetMapping("/alladmindata")
-	    public String getAllUsers(Model model) {
-	        List<User1> users = user1Service.getAllUsers();
-	        model.addAttribute("users", users);
-	        System.out.println("users data is  "+users);
-	        return "alladmindata";
+	    public String getAllUsers(Model model, HttpSession session, @RequestParam(defaultValue = "0") int page) {
+	        Long userId = (Long) session.getAttribute("userId");
+	        if (userId != null) {
+	            User1 user = user1Service.findById(userId);
+	            if (user != null) {
+	                int pageSize = 10;
+	                List<User1> users = user1Service.findAll(page, pageSize);
+	                long totalUsers = user1Service.countAllUsers();
+	                int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+
+	                model.addAttribute("users", users);
+	                model.addAttribute("currentPage", page);
+	                model.addAttribute("totalPages", totalPages);
+	                model.addAttribute("pageSize", pageSize);
+
+	                return "alladmindata";
+	            } else {
+	                model.addAttribute("error", "User not found.");
+	                return "home";
+	            }
+	        } else {
+	            model.addAttribute("error", "No user logged in.");
+	            return "adminlogin";
+	        }
 	    }
+
+
 	    
 	    @GetMapping("/viewbloodrequestdata")
-	    public String viewRequests(Model model) {
-	    	List<BloodRequest> bloodRequests = bloodRequestService.getAllBloodRequests();
-		        model.addAttribute("bloodRequests", bloodRequests);
-		        System.out.println("bloodRequests data is  "+bloodRequests);
-	        return "viewbloodrequestdata";
+	    public String viewRequests(Model model, @RequestParam(defaultValue = "0") int page) {
+	        int pageSize = 10; // Define the number of requests per page
+
+	        // Fetch paginated list of blood requests
+	        List<BloodRequest> bloodRequests = bloodRequestService.getAllBloodRequests(page, pageSize);
+	        long totalRequests = bloodRequestService.countAllRequests();
+	        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+
+	        // Add necessary attributes to the model
+	        model.addAttribute("bloodRequests", bloodRequests); // List of blood requests
+	        model.addAttribute("currentPage", page);            // Current page number
+	        model.addAttribute("totalPages", totalPages);       // Total number of pages
+	        model.addAttribute("pageSize", pageSize);           // Page size
+
+	        System.out.println("bloodRequests data is " + bloodRequests);
+	        return "viewbloodrequestdata"; // Return the Thymeleaf template for the request list
 	    }
+
 	    
 
 	    @GetMapping("/allsearchrequestdata")
@@ -288,6 +321,7 @@ public class AdminController {
 	    }
 	  
 	  
+		
 		/*
 		 * @GetMapping("/donations/{userId}") public String
 		 * viewUserDonations(@PathVariable("userId") Long userId, Model model) {
@@ -314,6 +348,7 @@ public class AdminController {
 	          model.addAttribute("message", "No donations found for this recipient.");
 	      }
 	      
+	     
 	      model.addAttribute("recipientId", recipientId);
 	      return "alldonationlist"; // Ensure this is the name of your Thymeleaf template
 	  }

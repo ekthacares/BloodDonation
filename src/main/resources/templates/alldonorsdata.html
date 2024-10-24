@@ -138,7 +138,7 @@
 
         </header> 
        
-			<div class="donortracking_container">
+			<div class="donortracking_container" style="padding:70px">
 			<div class="contact-form-block">
         <h2 class="contact-title"> <h2>All Registered Donors data</h2>
 </h2>
@@ -191,7 +191,31 @@
             </tr>
         </tbody>
             </table>
+           <nav>
+    <ul class="pagination" style="float:right">
+        <!-- Previous Button: Disable if on the first page -->
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link" th:href="@{/allusers(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        <!-- Page Numbers: Loop through the total number of pages -->
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+            <a class="page-link" th:href="@{/allusers(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
+        </li>
+
+        <!-- Next Button: Disable if on the last page -->
+        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+            <a class="page-link" th:href="@{/allusers(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+            
             <!-- Donations Modal -->
+<!-- Donations Modal -->
 <div class="modal fade" id="donationsModal" tabindex="-1" role="dialog" aria-labelledby="donationsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -211,6 +235,7 @@
         </div>
     </div>
 </div>
+
             
                  </div>
     

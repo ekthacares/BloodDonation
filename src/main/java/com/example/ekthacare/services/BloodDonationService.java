@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.BloodDonation;
@@ -74,5 +76,13 @@ public class BloodDonationService {
         return bloodDonationRepository.findByRecipientId(recipientId);
     }
     
-    
+    public List<BloodDonation> getAllDonations(int page, int pageSize) {
+        // Fetch paginated donations
+        return bloodDonationRepository.findAll(PageRequest.of(page, pageSize)).getContent();
+    }
+
+    public long countAllDonations() {
+        // Count the total number of donations
+        return bloodDonationRepository.count();
+    }
 }

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -81,5 +83,18 @@ public class User1Service {
 	    log.setChangedAt(LocalDateTime.now());
 	    user1Repository.save(log); // Assuming you have a repository for ChangeLog
 	}
+
+	public List<User1> findAll(int page, int pageSize) {
+        PageRequest pageable = PageRequest.of(page, pageSize);
+        Page<User1> usersPage = user1Repository.findAll(pageable);
+        return usersPage.getContent();
+    }
+
+    // Count total number of users
+    public long countAllUsers() {
+        return user1Repository.count();
+    }
+	
+	
 }
 

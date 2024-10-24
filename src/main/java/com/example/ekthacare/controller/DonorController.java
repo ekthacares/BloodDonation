@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -213,15 +214,27 @@ public class DonorController {
 	        return "redirect:/home"; // Redirect to the login page or home page
 	    }
 	
+	  
+	    
 	    @GetMapping("/alldonorsdata")
-	    public String getAllUsers(Model model) {
-	        List<User> users = userService.getAllUsers();
-	        model.addAttribute("users", users);
-	        System.out.println("users data is  "+users);
-	        return "alldonorsdata";
+	    public String getAllUsers(Model model, @RequestParam(defaultValue = "0") int page) {
+	        int pageSize = 10; // Define the number of users per page
+
+	        // Fetch the paginated list of users
+	        List<User> users = userService.getAllUsers(page, pageSize);
+	        long totalUsers = userService.countAllRequests(); // Count the total number of users
+	        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+
+	        // Add necessary attributes to the model
+	        model.addAttribute("users", users);           // List of users on current page
+	        model.addAttribute("currentPage", page);      // Current page number
+	        model.addAttribute("totalPages", totalPages); // Total number of pages
+	        model.addAttribute("pageSize", pageSize);     // Page size
+
+	        return "alldonorsdata"; // The Thymeleaf template for displaying users
 	    }
 	    
-	   	   
+	    
 	    	    
 	    @GetMapping("/searchforblood")
 	    public String searchForBlood(

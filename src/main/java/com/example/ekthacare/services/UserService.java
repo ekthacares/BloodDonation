@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -126,5 +128,13 @@ public class UserService {
 	    changeLogRepository.save(log); // Assuming you have a repository for ChangeLog
 	}
 
+	public List<User> getAllUsers(int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page, pageSize); // Create a PageRequest with the specified page and size
+        Page<User> pagedResult = userRepository.findAll(pageRequest); // Fetch paginated users
+        return pagedResult.getContent(); // Return the list of users
+    }
 
+    public long countAllRequests() {
+        return userRepository.count(); // Count the total number of users
+    }
 }
