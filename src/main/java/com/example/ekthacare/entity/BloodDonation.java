@@ -1,7 +1,7 @@
 package com.example.ekthacare.entity;
 
-
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +22,7 @@ public class BloodDonation {
     private Long userId;
 
     @Column(name = "recipient_id", nullable = false)
-    private Long recipientId;  // Added field for recipient ID
+    private Long recipientId;
 
     @Column(name = "last_donation_date")
     private LocalDateTime lastDonationDate;
@@ -61,13 +61,23 @@ public class BloodDonation {
     }
 
     public void setLastDonationDate(LocalDateTime lastDonationDate) {
-        this.lastDonationDate = lastDonationDate;
+        if (lastDonationDate != null) {
+            this.lastDonationDate = lastDonationDate.withNano(0);
+        } else {
+            this.lastDonationDate = null;
+        }
     }
 
-	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public String getFormattedTimestamp() {
+        if (lastDonationDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            return lastDonationDate.format(formatter);
+        }
+        return null; // or return an empty string if preferred
+    }
 
-	
+    public boolean isEmpty() {
+        // Implement your logic here
+        return false;
+    }
 }

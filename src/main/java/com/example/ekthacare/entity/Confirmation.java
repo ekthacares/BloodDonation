@@ -61,7 +61,7 @@ public class Confirmation {
 	}
 
 	public String getFormattedConfirmedAt() {
-        return confirmedAt != null ? confirmedAt.format(DateTimeFormatter.ofPattern("dd:MM:yyyy HH:mm:ss")) : "";
+        return confirmedAt != null ? confirmedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : "";
     }
 
 	public void setConfirmedAt(LocalDateTime confirmedAt) {
@@ -69,14 +69,14 @@ public class Confirmation {
 	}
 
 	public String getFormattedStartedAt() {
-        return startedAt != null ? startedAt.format(DateTimeFormatter.ofPattern("dd:MM:yyyy HH:mm:ss")) : "";
+        return startedAt != null ? startedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : "";
     }
 	public void setStartedAt(LocalDateTime startedAt) {
 		this.startedAt = startedAt;
 	}
 
 	public String getFormattedStoppedAt() {
-        return stoppedAt != null ? stoppedAt.format(DateTimeFormatter.ofPattern("dd:MM:yyyy HH:mm:ss")) : "";
+        return stoppedAt != null ? stoppedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : "";
     }
 
 	public void setStoppedAt(LocalDateTime stoppedAt) {

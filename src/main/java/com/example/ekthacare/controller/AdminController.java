@@ -172,10 +172,10 @@ public class AdminController {
 	             model.addAttribute("userId", userId);
 	             return "adminhome";
 	         } else {
-	             return "redirect:/auth/login";
+	             return "redirect:/adminlogin";
 	         }
 	     }
-	     return "redirect:/auth/login";
+	     return "redirect:/adminlogin";
 	 }
 	 
 	   @GetMapping("/adminviewprofile")
@@ -190,18 +190,18 @@ public class AdminController {
 	                return "adminviewprofile";
 	            } else {
 	                model.addAttribute("error", "User not found.");
-	                return "home";
+	                return "redirect:/adminlogin";
 	            }
 	        } else {
 	            model.addAttribute("error", "No user logged in.");
-	            return "adminlogin";
+	            return "redirect:/adminlogin";
 	        }
 	    }
 	    
 	    @GetMapping("/logout1")
 	    public String logout(HttpSession session) {
 	        session.invalidate(); // Invalidate the session to log out the user
-	        return "redirect:/home"; // Redirect to the login page or home page
+	        return "redirect:/adminlogin"; // Redirect to the login page or home page
 	    }
 	    
 	    @GetMapping("/alladmindata")
@@ -223,11 +223,11 @@ public class AdminController {
 	                return "alladmindata";
 	            } else {
 	                model.addAttribute("error", "User not found.");
-	                return "home";
+	                return "redirect:/adminlogin";
 	            }
 	        } else {
 	            model.addAttribute("error", "No user logged in.");
-	            return "adminlogin";
+	            return "redirect:/adminlogin";
 	        }
 	    }
 
