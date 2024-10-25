@@ -1,5 +1,6 @@
 package com.example.ekthacare.controller;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -32,6 +33,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.SearchRequestRepository;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
@@ -347,9 +349,6 @@ public class DonorController {
 	    }
 	   
 
-
-		 
-		
 		
 	    @PostMapping("/updateProfile")
 	    public String updateProfile(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
@@ -359,6 +358,39 @@ public class DonorController {
 	        return "redirect:/viewprofile"; // Redirect back to the profile page
 	    }
 
+	    
+	    @GetMapping("/donorusers/download")
+	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
+	        List<User> users = userService.getAllUsers(); // Fetch all users from database
 
-	   	}
+	        // Generate CSV
+	        StringBuilder csvBuilder = new StringBuilder();
+	        csvBuilder.append("ID,Name,Mobile,Email,Date of Birth,Blood Group,Age,Gender,Address,City,State\n");
+	        for (User user : users) {
+	            csvBuilder.append(user.getId()).append(",")
+	                      .append(user.getDonorname()).append(",")
+	                      .append(user.getMobile()).append(",")
+	                      .append(user.getEmailid()).append(",")
+	                      .append(user.getDateofbirth()).append(",")
+	                      .append(user.getBloodgroup()).append(",")
+	                      .append(user.getAge()).append(",")
+	                      .append(user.getGender()).append(",")
+	                      .append(user.getAddress()).append(",")
+	                      .append(user.getCity()).append(",")
+	                      .append(user.getState()).append("\n");
+	        }
+
+	        byte[] csvData = csvBuilder.toString().getBytes();
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Disposition", "attachment; filename=donorusers.csv");
+	        headers.add("Content-Type", "text/csv");
+
+	        return ResponseEntity.ok()
+	                .headers(headers)
+	                .body(csvData);
+	    }
+	  }
+
+	   	
 

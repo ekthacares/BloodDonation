@@ -64,7 +64,7 @@ public class ConfirmationController {
         if (existingConfirmation != null) {
             // If another user has an existing confirmation, show message and do not allow new confirmation
             if (!existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
-                model.addAttribute("message", "A completed donation process already exists for this recipient by another user.");
+                model.addAttribute("message", "You have already donated to the Register UserID : " + existingConfirmation.getLoggedInUserId()  + " .");
                 System.out.println("donation found for recipient ID: " + recipientId + 
                                    " by another user. Current User ID: " + loggedInUserId + " cannot confirm.");
                 return "donationTracking";

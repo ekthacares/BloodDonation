@@ -1,11 +1,13 @@
 package com.example.ekthacare.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -354,6 +356,37 @@ public class AdminController {
 	  }
 
 
+	  @GetMapping("/adminusers/download")
+	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
+	        List<User1> users = user1Service.getAllUsers(); // Fetch all users from database
+
+	        // Generate CSV
+	        StringBuilder csvBuilder = new StringBuilder();
+	        csvBuilder.append("ID,Name,Mobile,Email,Date of Birth,Blood Group,Age,Gender,Address,City,State\n");
+	        for (User1 user : users) {
+	            csvBuilder.append(user.getId()).append(",")
+	                      .append(user.getName()).append(",")
+	                      .append(user.getMobile()).append(",")
+	                      .append(user.getEmailid()).append(",")
+	                      .append(user.getDateofbirth()).append(",")
+	                      .append(user.getBloodgroup()).append(",")
+	                      .append(user.getAge()).append(",")
+	                      .append(user.getGender()).append(",")
+	                      .append(user.getAddress()).append(",")
+	                      .append(user.getCity()).append(",")
+	                      .append(user.getState()).append("\n");
+	        }
+
+	        byte[] csvData = csvBuilder.toString().getBytes();
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Disposition", "attachment; filename=adminusers.csv");
+	        headers.add("Content-Type", "text/csv");
+
+	        return ResponseEntity.ok()
+	                .headers(headers)
+	                .body(csvData);
+	    }
 	  }
 
 	

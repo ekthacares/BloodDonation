@@ -49,7 +49,7 @@ public class SentEmailController {
 
                 // Check if the sentEmails list is empty and add the appropriate message or data to the model
                 if (sentEmails.isEmpty()) {
-                    model.addAttribute("message", "No sent emails available for this user as a recipient.");
+                    model.addAttribute("message", "No Emails recieved for this user.");
                 } else {
                     model.addAttribute("sentEmails", sentEmails); // Add the sent emails to the model
                 }

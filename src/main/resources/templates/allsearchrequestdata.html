@@ -71,6 +71,17 @@
     font-size: 16px;
     float: right;
 }
+
+ #profileTooltip {
+   		 position: absolute;
+    	 display: none;
+ 	  	 background-color: #fff;  /* Background color for readability */
+  		 border: 1px solid #ccc;
+   	 	 padding: 5px;  /* Small padding */
+   		 z-index: 1000;
+   		 width: 250px;   /* Auto width to fit content */
+  		  
+		}
 	</style>
     <body> 
 
@@ -169,7 +180,8 @@
     <span>Total Results: </span>
     <span id="totalResultsCount" th:text="${#lists.size(searchRequests)}">0</span> <!-- Displaying the count of searchRequests -->
 </div>
-     <div class="results" >          
+     <div class="results" > 
+      <a th:href="@{/allsearchrequestdata/download}" class="download-btn">Download Data</a>               
             <table >
              <thead>
             <tr>
@@ -201,6 +213,9 @@
         </tbody>
   
             </table>
+            
+            <div id="profileTooltip" class="profile-tooltip"></div>
+            
             <nav>
         <ul class="pagination" style ="float:right">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
@@ -219,27 +234,7 @@
             </li>
         </ul>
     </nav>
-            <!-- Modal -->
-    <div class="modal fade" id="userProfileModal" tabindex="-1" role="dialog" aria-labelledby="userProfileModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userProfileModalLabel">User Profile</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Placeholder for loading spinner or error message -->
-                    <p>Loading...</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+                
            </div>
     
 </div>
@@ -470,31 +465,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('.view-profile1').click(function(e) {
-                e.preventDefault();  // Prevent default link behavior
+    $(document).ready(function() {
+        $('.view-profile1').hover(function(e) {
+            var userId = $(this).data('user-id');
+            var tooltip = $('#profileTooltip');
+            
+            // Show tooltip close to cursor position
+            tooltip.css({
+                top: e.pageY + 10 + 'px',  // Slight offset for visibility
+                left: e.pageX + 10 + 'px'
+            }).show();
 
-                var userId = $(this).data('user-id');
-                
-                // Clear the modal body and show loading message
-                $('#userProfileModal .modal-body').html('<p>Loading...</p>');
-                
-                // Perform the AJAX request to load the user profile
-                $.ajax({
-                    url: '/user/' + userId,
-                    method: 'GET',
-                    success: function(data) {
-                        // Load the returned data into the modal body
-                        $('#userProfileModal .modal-body').html(data);
-                    },
-                    error: function() {
-                        // Show an error message in case of failure
-                        $('#userProfileModal .modal-body').html('<p>Error loading profile</p>');
-                    }
-                });
+            // AJAX request to load the user profile
+            $.ajax({
+                url: '/user/' + userId,
+                method: 'GET',
+                success: function(data) {
+                    tooltip.html(data);
+                },
+                error: function() {
+                    tooltip.html('<p>Error loading profile</p>');
+                }
+            });
+        }, function() {
+            $('#profileTooltip').hide().html('');
+        });
+
+        // Update tooltip position as the mouse moves
+        $('.view-profile1').mousemove(function(e) {
+            $('#profileTooltip').css({
+                top: e.pageY + 10 + 'px',   // Minimal offset to keep it near the cursor
+                left: e.pageX + 10 + 'px'
             });
         });
-    </script>
+    });
+</script>
 <script>
     function filterRequests() {
         const filter = document.getElementById("filterSelect").value;
