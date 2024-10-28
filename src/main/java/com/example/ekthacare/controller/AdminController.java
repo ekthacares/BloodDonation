@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.BloodDonation;
@@ -34,6 +35,7 @@ import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.BloodRequestService;
 import com.example.ekthacare.services.EmailService;
+import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.Otp1Service;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
@@ -63,9 +65,9 @@ public class AdminController {
 	    private UserService userService;
 	  
 	  @Autowired
-	    private EmailService emailService;
+	    private EmailService emailService;  
 	  
-	  @Autowired
+	  	@Autowired
 	    private BloodRequestService bloodRequestService;
 	  
 	  @Autowired
@@ -77,6 +79,8 @@ public class AdminController {
 	  @Autowired
 	    private SmsService smsService;
 	  
+	  
+	
 	 @GetMapping("/adminlogin")
 	    public String showAdminHomePage(Model model) {
 	        // Add any necessary attributes to the model
@@ -387,6 +391,9 @@ public class AdminController {
 	                .headers(headers)
 	                .body(csvData);
 	    }
+	    
+	   
+	    
 	  }
 
 	

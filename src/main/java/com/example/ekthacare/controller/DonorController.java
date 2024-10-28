@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
@@ -28,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.SearchRequest;
@@ -39,10 +46,12 @@ import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.EmailService;
+import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
 import com.example.ekthacare.services.UserService;
+import com.example.ekthacare.services.UserUploadResult;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -82,6 +91,9 @@ public class DonorController {
 	    @Autowired
 	    private BloodDonationService bloodDonationService;
 	    
+	    @Autowired
+	    private ExcelService excelService;
+	  
 	    
 	 @GetMapping("/donorlogin")
 	    public String showDonorHomePage(Model model) {
@@ -390,6 +402,62 @@ public class DonorController {
 	                .headers(headers)
 	                .body(csvData);
 	    }
+	    
+	    
+	    // Serve the upload form
+	    @GetMapping("/uploadexcel")
+	    public String showUploadForm() {
+	        return "uploadexcel";
+	    }
+	    
+	    
+	 
+	 // Handle file upload
+	    @PostMapping("/upload")
+	    public String uploadExcelFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+	        try {
+	            UserUploadResult result = excelService.parseExcelFile(file);
+	            excelService.saveUsersFromFile(file); // Save valid users
+
+	            // Prepare messages
+	            StringBuilder duplicateMessage = new StringBuilder();
+	            if (!result.getDuplicateUsers().isEmpty()) {
+	                duplicateMessage.append("Duplicate users detected: ");
+	                for (User duplicate : result.getDuplicateUsers()) {
+	                    duplicateMessage.append(duplicate.getMobile()).append(", ");
+	                }
+	                duplicateMessage.setLength(duplicateMessage.length() - 2); // Remove last comma
+	                redirectAttributes.addFlashAttribute("duplicateMessage", duplicateMessage.toString());
+	            } else {
+	                redirectAttributes.addFlashAttribute("message", "File uploaded and valid data saved successfully!");
+	            }
+
+	            // Store valid users in the redirect attributes for display
+	            redirectAttributes.addFlashAttribute("users", result.getValidUsers());
+	            
+	        } catch (IOException e) {
+	            redirectAttributes.addFlashAttribute("message", "Failed to upload file: " + e.getMessage());
+	        }
+	        
+	        // Redirect to the GET method to refresh the page
+	        return "redirect:/upload"; // Redirect to the upload page
+	    }
+
+	    // Add a GET method to handle the upload page
+	    @GetMapping("/upload")
+	    public String showUploadPage(Model model) {
+	        // Clear the model to ensure no previous data is displayed
+	        model.addAttribute("message", model.containsAttribute("message") ? model.getAttribute("message") : null);
+	        model.addAttribute("duplicateMessage", model.containsAttribute("duplicateMessage") ? model.getAttribute("duplicateMessage") : null);
+	        model.addAttribute("users", model.containsAttribute("users") ? model.getAttribute("users") : new ArrayList<>()); // Clear user list
+
+	        return "uploadexcel"; // Return the upload page
+	    }
+
+
+	    	
+
+	    
 	  }
 
 	   	

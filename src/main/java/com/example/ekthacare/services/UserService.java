@@ -20,6 +20,9 @@ import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.ChangeLogRepository;
 import com.example.ekthacare.repo.UserRepository;
 
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Component
@@ -136,5 +139,27 @@ public class UserService {
 
     public long countAllRequests() {
         return userRepository.count(); // Count the total number of users
+    }
+    
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    
+    @Transactional
+    public void saveUsers(List<User> users) {
+        for (User user : users) {
+            User existingUser = userRepository.findByMobile(user.getMobile());
+            if (existingUser != null) {  // Check if existingUser is null
+                logger.warn("User with mobile {} already exists. Skipping.", user.getMobile());
+                continue; // Skip existing users
+            }
+            userRepository.save(user);
+        }
+    }
+    
+    public boolean userExists(String mobile) {
+        return userRepository.findByMobile(mobile).isPresent(); // Check if a user with the mobile number exists
     }
 }
