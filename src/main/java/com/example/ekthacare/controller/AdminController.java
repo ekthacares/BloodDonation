@@ -41,8 +41,19 @@ import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
 import com.example.ekthacare.services.User1Service;
 import com.example.ekthacare.services.UserService;
-
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.layout.element.Cell;
 import jakarta.servlet.http.HttpSession;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
 
 
@@ -240,7 +251,12 @@ public class AdminController {
 
 	    
 	    @GetMapping("/viewbloodrequestdata")
-	    public String viewRequests(Model model, @RequestParam(defaultValue = "0") int page) {
+	    public String viewRequests(Model model,HttpSession session, @RequestParam(defaultValue = "0") int page) {
+	    	Long userId = (Long) session.getAttribute("userId");
+	        System.out.println("Retrieved userId from session1: " + userId);
+	        if (userId != null) {
+	            User1 user = user1Service.findById(userId);
+	            if (userId != null) {
 	        int pageSize = 10; // Define the number of requests per page
 
 	        // Fetch paginated list of blood requests
@@ -256,6 +272,14 @@ public class AdminController {
 
 	        System.out.println("bloodRequests data is " + bloodRequests);
 	        return "viewbloodrequestdata"; // Return the Thymeleaf template for the request list
+	    }else {
+            model.addAttribute("error", "User not found.");
+            return "home";
+        }
+    } else {
+        model.addAttribute("error", "No user logged in.");
+        return "adminlogin";
+    }
 	    }
 
 	    
@@ -360,7 +384,7 @@ public class AdminController {
 	  }
 
 
-	  @GetMapping("/adminusers/download")
+	  @GetMapping("/adminusers/exceldownload")
 	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
 	        List<User1> users = user1Service.getAllUsers(); // Fetch all users from database
 
@@ -392,7 +416,64 @@ public class AdminController {
 	                .body(csvData);
 	    }
 	    
-	   
+	    @GetMapping("/adminusers/pdfdownload")
+	    public ResponseEntity<byte[]> downloadUserDataAsPdf() throws IOException {
+	        List<User1> users = user1Service.getAllUsers(); // Fetch all users from the database
+
+	        // Create a byte array output stream to hold PDF data
+	        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+	        // Initialize PDF document with A4 page size
+	        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+	        PdfDocument pdf = new PdfDocument(writer);
+	        Document document = new Document(pdf, PageSize.A4.rotate()); // Use A4 page size
+
+	        // Add a title
+	        Paragraph title = new Paragraph("Admin Users Data")
+	            .setTextAlignment(TextAlignment.CENTER)
+	            .setFontSize(18)
+	            .setBold();
+	        document.add(title);
+
+	        // Create a table with appropriate column widths
+	        Table table = new Table(new float[]{1, 2, 2, 3, 2, 2, 1, 1, 3, 2, 2});
+	        table.setWidth(UnitValue.createPercentValue(100));
+
+	        // Add table headers
+	        String[] headers = {"ID", "Name", "Mobile", "Email", "Date of Birth", "Blood Group", "Age", "Gender", "Address", "City", "State"};
+	        for (String header : headers) {
+	            table.addHeaderCell(new Cell().add(new Paragraph(header).setBold().setBackgroundColor(ColorConstants.LIGHT_GRAY)));
+	        }
+
+	        // Add user data rows
+	        for (User1 user : users) {
+	            table.addCell(new Cell().add(new Paragraph(String.valueOf(user.getId()))));
+	            table.addCell(new Cell().add(new Paragraph(user.getName())));
+	            table.addCell(new Cell().add(new Paragraph(user.getMobile())));
+	            table.addCell(new Cell().add(new Paragraph(user.getEmailid())));
+	            table.addCell(new Cell().add(new Paragraph(user.getDateofbirth().toString())));
+	            table.addCell(new Cell().add(new Paragraph(user.getBloodgroup())));
+	            table.addCell(new Cell().add(new Paragraph(String.valueOf(user.getAge()))));
+	            table.addCell(new Cell().add(new Paragraph(user.getGender())));
+	            table.addCell(new Cell().add(new Paragraph(user.getAddress())));
+	            table.addCell(new Cell().add(new Paragraph(user.getCity())));
+	            table.addCell(new Cell().add(new Paragraph(user.getState())));
+	        }
+
+	        document.add(table);
+	        document.close();
+
+	        // Prepare the PDF for download
+	        byte[] pdfData = byteArrayOutputStream.toByteArray();
+	        HttpHeaders headers1 = new HttpHeaders();
+	        headers1.add("Content-Disposition", "attachment; filename=adminusers.pdf");
+	        headers1.add("Content-Type", "application/pdf");
+
+	        return ResponseEntity.ok()
+	                .headers(headers1)
+	                .body(pdfData);
+	    }
+
 	    
 	  }
 

@@ -1,47 +1,29 @@
 package com.example.ekthacare.controller;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
-import com.example.ekthacare.entity.User1;
-import com.example.ekthacare.repo.SearchRequestRepository;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
@@ -52,14 +34,19 @@ import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.services.UserUploadResult;
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Response;
 
 @Controller
 public class DonorController {
@@ -369,39 +356,6 @@ public class DonorController {
 	        redirectAttributes.addFlashAttribute("message", "Profile updated successfully!");
 	        return "redirect:/viewprofile"; // Redirect back to the profile page
 	    }
-
-	    
-	    @GetMapping("/donorusers/download")
-	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
-	        List<User> users = userService.getAllUsers(); // Fetch all users from database
-
-	        // Generate CSV
-	        StringBuilder csvBuilder = new StringBuilder();
-	        csvBuilder.append("ID,Name,Mobile,Email,Date of Birth,Blood Group,Age,Gender,Address,City,State\n");
-	        for (User user : users) {
-	            csvBuilder.append(user.getId()).append(",")
-	                      .append(user.getDonorname()).append(",")
-	                      .append(user.getMobile()).append(",")
-	                      .append(user.getEmailid()).append(",")
-	                      .append(user.getDateofbirth()).append(",")
-	                      .append(user.getBloodgroup()).append(",")
-	                      .append(user.getAge()).append(",")
-	                      .append(user.getGender()).append(",")
-	                      .append(user.getAddress()).append(",")
-	                      .append(user.getCity()).append(",")
-	                      .append(user.getState()).append("\n");
-	        }
-
-	        byte[] csvData = csvBuilder.toString().getBytes();
-
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.add("Content-Disposition", "attachment; filename=donorusers.csv");
-	        headers.add("Content-Type", "text/csv");
-
-	        return ResponseEntity.ok()
-	                .headers(headers)
-	                .body(csvData);
-	    }
 	    
 	    
 	    // Serve the upload form
@@ -455,7 +409,101 @@ public class DonorController {
 	    }
 
 
-	    	
+	    //Download excel
+	    @GetMapping("/donorusers/exceldownload")
+	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
+	        List<User> users = userService.getAllUsers(); // Fetch all users from database
+
+	        // Generate CSV
+	        StringBuilder csvBuilder = new StringBuilder();
+	        csvBuilder.append("ID,Name,Mobile,Email,Date of Birth,Blood Group,Age,Gender,Address,City,State\n");
+	        for (User user : users) {
+	            csvBuilder.append(user.getId()).append(",")
+	                      .append(user.getDonorname()).append(",")
+	                      .append(user.getMobile()).append(",")
+	                      .append(user.getEmailid()).append(",")
+	                      .append(user.getDateofbirth()).append(",")
+	                      .append(user.getBloodgroup()).append(",")
+	                      .append(user.getAge()).append(",")
+	                      .append(user.getGender()).append(",")
+	                      .append(user.getAddress()).append(",")
+	                      .append(user.getCity()).append(",")
+	                      .append(user.getState()).append("\n");
+	        }
+
+	        byte[] csvData = csvBuilder.toString().getBytes();
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Disposition", "attachment; filename=donorusers.csv");
+	        headers.add("Content-Type", "text/csv");
+
+	        return ResponseEntity.ok()
+	                .headers(headers)
+	                .body(csvData);
+	    }
+	    
+	    //Download PDF
+	    @GetMapping("/donorusers/pdfdownload")
+	    public ResponseEntity<byte[]> downloadUserDataAsPdf() throws IOException {
+	        List<User> users = userService.getAllUsers(); // Fetch all users from database
+
+	        // Create a byte array output stream to hold PDF data
+	        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+	        // Initialize PDF document with A4 page size
+	        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+	        PdfDocument pdf = new PdfDocument(writer);
+	        Document document = new Document(pdf, PageSize.A4.rotate()); // Use A4 landscape page size
+
+	        // Add a title
+	       Paragraph title = new Paragraph("Donor Users Data")
+	            .setTextAlignment(TextAlignment.CENTER)
+	            .setFontSize(18)
+	            .setBold();
+	        document.add(title);
+
+	        // Create a table with appropriate column widths
+	       Table table = new Table(new float[]{1, 2, 2, 3, 2, 2, 1, 1, 3, 2, 2});
+	        table.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100));
+
+	        // Add table headers
+	        String[] headers = {"ID", "Name", "Mobile", "Email", "Date of Birth", "Blood Group", "Age", "Gender", "Address", "City", "State"};
+	        for (String header : headers) {
+	            // Correctly instantiate Cell using the constructor
+	            table.addHeaderCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(header).setBold().setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.LIGHT_GRAY)));
+	        }
+
+	        // Add user data rows
+	        for (User user : users) {
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(String.valueOf(user.getId()))));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getDonorname())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getMobile())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getEmailid())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getDateofbirth().toString())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getBloodgroup())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(String.valueOf(user.getAge()))));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getGender())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getAddress())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getCity())));
+	            table.addCell(new com.itextpdf.layout.element.Cell().add(new com.itextpdf.layout.element.Paragraph(user.getState())));
+	        }
+
+	        document.add(table);
+	        document.close();
+
+	        // Prepare the PDF for download
+	        byte[] pdfData = byteArrayOutputStream.toByteArray();
+	        HttpHeaders headers1 = new HttpHeaders();
+	        headers1.add("Content-Disposition", "attachment; filename=donorusers.pdf");
+	        headers1.add("Content-Type", "application/pdf");
+
+	        return ResponseEntity.ok()
+	                .headers(headers1)
+	                .body(pdfData);
+	    }
+
+
+	  	
 
 	    
 	  }
