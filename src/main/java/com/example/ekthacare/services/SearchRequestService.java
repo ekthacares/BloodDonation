@@ -5,6 +5,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.repo.SearchRequestRepository;
-
+import org.springframework.data.domain.Pageable;
 @Service
 public class SearchRequestService {
     @Autowired
@@ -32,7 +33,7 @@ public class SearchRequestService {
 
     public void saveSearchRequest(Long userId, String bloodgroup, String city, String state) {
         SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setUserId(userId);
+        searchRequest.setUserId(userId);       
         searchRequest.setBloodgroup(bloodgroup);
         searchRequest.setCity(city);
         searchRequest.setState(state);
@@ -81,7 +82,43 @@ public class SearchRequestService {
         return searchRequestPage.getContent(); // Get the content of the page
     }
 
+
     public long countAllRequests() {
         return repository.count();
+    }
+    
+    
+
+    public List<SearchRequest> findByTimestampThisWeek(int page, int pageSize) {
+        LocalDateTime startDate = LocalDateTime.now().minus(1, ChronoUnit.WEEKS);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return repository.findByTimestampThisWeek(startDate, pageable);
+    }
+
+    public long countRequestsThisWeek() {
+        LocalDateTime startDate = LocalDateTime.now().minus(1, ChronoUnit.WEEKS);
+        return repository.countRequestsThisWeek(startDate);
+    }
+
+    public List<SearchRequest> findByTimestampThisMonth(int page, int pageSize) {
+        LocalDateTime startDate = LocalDateTime.now().minus(1, ChronoUnit.MONTHS);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return repository.findByTimestampThisMonth(startDate, pageable);
+    }
+
+    public long countRequestsThisMonth() {
+        LocalDateTime startDate = LocalDateTime.now().minus(1, ChronoUnit.MONTHS);
+        return repository.countRequestsThisMonth(startDate);
+    }
+
+    public List<SearchRequest> findByTimestampLast3Months(int page, int pageSize) {
+        LocalDateTime startDate = LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return repository.findByTimestampLast3Months(startDate, pageable);
+    }
+
+    public long countRequestsLast3Months() {
+        LocalDateTime startDate = LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
+        return repository.countRequestsLast3Months(startDate);
     }
 }

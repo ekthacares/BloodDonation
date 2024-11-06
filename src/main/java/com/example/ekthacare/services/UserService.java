@@ -5,6 +5,7 @@ package com.example.ekthacare.services;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -130,7 +131,14 @@ public class UserService {
 	    log.setChangedAt(LocalDateTime.now());
 	    changeLogRepository.save(log); // Assuming you have a repository for ChangeLog
 	}
+	
 
+	public void deleteUserById(Long id) {
+        if (userRepository.existsById(id)) {  // Check if the user exists
+            userRepository.deleteById(id);   // Delete user if exists
+        }
+    }
+	
 	public List<User> getAllUsers(int page, int pageSize) {
         PageRequest pageRequest = PageRequest.of(page, pageSize); // Create a PageRequest with the specified page and size
         Page<User> pagedResult = userRepository.findAll(pageRequest); // Fetch paginated users

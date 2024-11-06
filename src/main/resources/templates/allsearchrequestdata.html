@@ -216,24 +216,29 @@
             
             <div id="profileTooltip" class="profile-tooltip"></div>
             
-            <nav>
-        <ul class="pagination" style ="float:right">
-            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/search-requests(page=${currentPage - 1})}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
-                th:classappend="${i == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{/search-requests(page=${i})}" th:text="${i + 1}">1</a>
-            </li>
-            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/search-requests(page=${currentPage + 1})}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        <nav>
+    <ul class="pagination" style="float:right">
+
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link" th:href="@{/allsearchrequestdata(page=${currentPage - 1}, filter=${filter})}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        <!-- Page Numbers: Loop through the total number of pages -->
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+            <a class="page-link" th:href="@{/allsearchrequestdata(page=${i}, filter=${filter})}" th:text="${i + 1}">1</a>
+        </li>
+
+        <!-- Next Button: Disable if on the last page -->
+        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+            <a class="page-link" th:href="@{/allsearchrequestdata(page=${currentPage + 1}, filter=${filter})}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
                 
            </div>
     

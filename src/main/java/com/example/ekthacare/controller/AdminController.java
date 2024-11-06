@@ -251,12 +251,7 @@ public class AdminController {
 
 	    
 	    @GetMapping("/viewbloodrequestdata")
-	    public String viewRequests(Model model,HttpSession session, @RequestParam(defaultValue = "0") int page) {
-	    	Long userId = (Long) session.getAttribute("userId");
-	        System.out.println("Retrieved userId from session1: " + userId);
-	        if (userId != null) {
-	            User1 user = user1Service.findById(userId);
-	            if (userId != null) {
+	    public String viewRequests(Model model, @RequestParam(defaultValue = "0") int page) {
 	        int pageSize = 10; // Define the number of requests per page
 
 	        // Fetch paginated list of blood requests
@@ -272,55 +267,48 @@ public class AdminController {
 
 	        System.out.println("bloodRequests data is " + bloodRequests);
 	        return "viewbloodrequestdata"; // Return the Thymeleaf template for the request list
-	    }else {
-            model.addAttribute("error", "User not found.");
-            return "home";
-        }
-    } else {
-        model.addAttribute("error", "No user logged in.");
-        return "adminlogin";
-    }
 	    }
 
 	    
 
 	    @GetMapping("/allsearchrequestdata")
-	    public String viewAllSearchRequests(@RequestParam(required = false) String filter, Model model, HttpSession session, @RequestParam(defaultValue = "0") int page) {
-	    	Long userId = (Long) session.getAttribute("userId");
-	        System.out.println("Retrieved userId from session1: " + userId);
-	        if (userId != null) {
-	            User1 user = user1Service.findById(userId);
-	            if (userId != null) {
-	            	
-	            	 int pageSize = 10;
-	            	 List<SearchRequest> searchRequests = searchRequestService.findAll(page, pageSize);
-	            	    long totalRequests = searchRequestService.countAllRequests();
-	            	    int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+	    public String viewAllSearchRequests(
+	            @RequestParam(required = false) String filter, 
+	            Model model, 
+	            @RequestParam(defaultValue = "0") int page) {
 
+	        int pageSize = 10;
+	        List<SearchRequest> searchRequests;
+	        long totalRequests;
+
+	        // Apply filtering based on the 'filter' parameter
 	        if ("week".equals(filter)) {
-	            searchRequests = searchRequestService.findByTimestampThisWeek();
+	            searchRequests = searchRequestService.findByTimestampThisWeek(page, pageSize);
+	            totalRequests = searchRequestService.countRequestsThisWeek();
 	        } else if ("month".equals(filter)) {
-	            searchRequests = searchRequestService.findByTimestampThisMonth();
+	            searchRequests = searchRequestService.findByTimestampThisMonth(page, pageSize);
+	            totalRequests = searchRequestService.countRequestsThisMonth();
 	        } else if ("last3months".equals(filter)) {
-	            searchRequests = searchRequestService.findByTimestampLast3Months();
+	            searchRequests = searchRequestService.findByTimestampLast3Months(page, pageSize);
+	            totalRequests = searchRequestService.countRequestsLast3Months();
 	        } else {
 	            // Default case, get all search requests
-	            searchRequests = searchRequestService.getAllSearchRequests();
+	            searchRequests = searchRequestService.findAll(page, pageSize);
+	            totalRequests = searchRequestService.countAllRequests();
 	        }
 
+	        // Calculate total pages for pagination
+	        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+
+	        // Add attributes to the model
 	        model.addAttribute("searchRequests", searchRequests);
 	        model.addAttribute("currentPage", page);
 	        model.addAttribute("totalPages", totalPages);
+	        model.addAttribute("filter", filter); // Retain the current filter for UI
+
 	        return "allsearchrequestdata";  // Name of the template
-	    }else {
-            model.addAttribute("error", "User not found.");
-            return "home";
-        }
-    } else {
-        model.addAttribute("error", "No user logged in.");
-        return "adminlogin";
-    }
-}
+	    }
+
 
 	    
 	    
@@ -332,8 +320,13 @@ public class AdminController {
 	     return "userDetails"; // Name of the Thymeleaf template to display user profile
 	       // return "fragments/userprofile :: userProfileFragment";
 	   }
-
 	  
+	  @GetMapping("/deleteUser/{id}")
+	  public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+	      userService.deleteUserById(id);
+	      redirectAttributes.addFlashAttribute("message", "User deleted successfully!");
+	      return "redirect:/alldonorsdata";
+	  }
 	   
 	  @GetMapping("/api/user")
 	  @ResponseBody
