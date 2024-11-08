@@ -3,7 +3,6 @@ package com.example.ekthacare.controller;
 import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.User;
-import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.UserService;
@@ -12,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

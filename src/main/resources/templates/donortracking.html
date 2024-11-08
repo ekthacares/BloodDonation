@@ -130,76 +130,73 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="donorhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout">Logout</a></li>
-                                                       </div>
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="donorhome">Home</a>
+        </li>
+        <li>
+            <a href="contact">Contact</a>
+        </li>
+        <li>
+            <a href="logout">Logout</a>
+        </li>
+    </ul>
+</div> <!-- Closing the navbar-collapse div -->
+
                     </div>
                 </div>
 
             </section>
 
         </header> 
-        <section class="section-content-block">
-			<div class="donortracking_container">
-			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>Track Your Requests</h2>
+        
+        <div class="contact-form-block">
+        <h2 class="contact-title"> Track Your Requests
 </h2>
     </div>
-   		 
-     	<!-- Display message if any -->
-    <div  th:if="${message}" class="message" style="text-align: center;font-weight: bold;color: red;" th:text="${message}"></div>
+<section class="section-content-block">
+    <div class="donortracking_container">
+        
+        <!-- Display message if any -->
+        <div th:if="${message}" class="message" style="text-align: center; font-weight: bold; color: red;" th:text="${message}"></div>
 
-    <!-- Display user information if available 
-    <p th:if="${user}">Logged-in User: <span th:text="${user.donorname}"></span></p>-->
-
-    <!-- Display the confirmations if available
-    <h2 th:if="${confirmations}">List of Confirmations</h2> -->
-    <div class="results" th:if="${confirmations}">          
-            <table >
+        <!-- Display the confirmations if available -->
+        <div class="results" th:if="${confirmations}">
+            <h2>List of Confirmations</h2>
+            <table>
                 <thead>
-            <tr>
-                <th>ID</th>
-                <th>Donor Accepted to Donate</th>
-                <th>Donation Confirmed At</th>
-                <th>Donation Start Time</th>
-                <th>Donation End Time</th>
-            </tr>
-        </thead>
-              <tbody>
-        <!-- Loop through confirmations and display each one -->
-        <tr th:each="confirmation : ${confirmations}">
-            <td th:text="${confirmation.id}"></td>
-            <td class="center-align">
-                <a href="#" 
-                       data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${confirmation.recipientId}" 
-                       class="view-profile1">
-                       <span th:text="${confirmation.recipientId}">User ID</span>
-                    </a>
-            </td>
-             <td th:text="${confirmation.formattedConfirmedAt}"></td>
-            <td th:text="${confirmation.formattedStartedAt}"></td>
-            <td th:text="${confirmation.formattedStoppedAt}"></td>
-        </tr>
-    </tbody>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor Accepted to Donate</th>
+                        <th>Donation Confirmed At</th>
+                        <th>Donation Start Time</th>
+                        <th>Donation End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through confirmations and display each one -->
+                    <tr th:each="confirmation : ${confirmations}">
+                        <td th:text="${confirmation.id}"></td>
+                        <td class="center-align">
+                            <a href="#" 
+                               data-toggle="modal" data-target="#userProfileModal" 
+                               th:attr="data-user-id=${confirmation.recipientId}" 
+                               class="view-profile1">
+                               <span th:text="${confirmation.recipientId}">User ID</span>
+                            </a>
+                        </td>
+                        <td th:text="${confirmation.formattedConfirmedAt}"></td>
+                        <td th:text="${confirmation.formattedStartedAt}"></td>
+                        <td th:text="${confirmation.formattedStoppedAt}"></td>
+                    </tr>
+                </tbody>
             </table>
-           
-  <div id="profileTooltip" class="profile-tooltip"></div>
+            
+            <div id="profileTooltip" class="profile-tooltip"></div>
+        </div> <!-- end .results -->
 
-        </div>
-    
-</div>
-
-                    </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
+    </div> <!-- end .donortracking_container -->
+</section><!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

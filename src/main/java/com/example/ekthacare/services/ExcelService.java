@@ -115,8 +115,4 @@ public class ExcelService {
         }
         return cell.getNumericCellValue();
     }
-
-    private boolean getCellBooleanValue(Cell cell) {
-        return cell != null && cell.getCellType() == CellType.BOOLEAN && cell.getBooleanCellValue();
-    }
 }

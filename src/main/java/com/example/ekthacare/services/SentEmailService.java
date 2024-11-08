@@ -2,10 +2,8 @@ package com.example.ekthacare.services;
 
 
 
-import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.repo.SentEmailRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -16,7 +14,7 @@ public class SentEmailService {
     
     
 
-    @Autowired
+    
     public SentEmailService(SentEmailRepository sentEmailRepository) {
         this.sentEmailRepository = sentEmailRepository;
     }

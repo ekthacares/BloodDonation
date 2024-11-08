@@ -132,27 +132,31 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="donorhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout">Logout</a></li>
-                                                       </div>
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="donorhome">Home</a>                                   
+        </li>                                
+        <li>
+            <a href="contact">Contact</a>
+        </li>
+        <li>
+            <a href="logout">Logout</a>
+        </li>
+    </ul>
+</div> <!-- Closing the navbar-collapse div -->
+
                     </div>
                 </div>
 
             </section>
 
         </header> 
-      
-			<div class="donortracking_container">
-			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>Recieved Requests</h2>
+       <div class="contact-form-block">
+        <h2 class="contact-title"> Recieved Requests
 </h2>
     </div>
+			<div class="donortracking_container">
+			
     
    		    <div  th:if="${message}" class="message" style="text-align: center;font-weight: bold;color: red;" th:text="${message}"></div>
    		
@@ -196,10 +200,6 @@
     
 </div>
 
-                    </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

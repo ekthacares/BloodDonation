@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.ChangeLog;
-import com.example.ekthacare.entity.User;
 import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.User1Repository;
 

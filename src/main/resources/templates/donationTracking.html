@@ -210,28 +210,32 @@
                             <a class="logo" href="index.html"><img alt="" src="images/logo1.png"></a>
                         </div>
 
-                        <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="donorhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout">Logout</a></li>
-                                                       </div>
+                       <div class="navbar-collapse collapse">
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="donorhome">Home</a>
+        </li>
+        <li>
+            <a href="contact">Contact</a>
+        </li>
+        <li>
+            <a href="logout">Logout</a>
+        </li>
+    </ul>
+</div> <!-- Closing the navbar-collapse div -->
+
                     </div>
                 </div>
 
             </section>
 
         </header> 
-      
-			<div class="tracking">
-			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>Donation Process</h2>
+       <div class="contact-form-block">
+        <h2 class="contact-title"> Donation Process
 </h2>
-    </div><p>&nbsp;</p>
+    </div>
+			<div class="tracking">
+			<p>&nbsp;</p>
    		<div class="tracking">
         <div class="results" th:if="${confirmation != null}">
             <div class="step" th:classappend="${confirmation.isConfirmed()} ? 'completed' : ''">
@@ -269,27 +273,29 @@
             </p>
         </div>
 
-        <form th:if="${confirmation != null && confirmation.isConfirmed() && !confirmation.isStarted()}" th:action="@{/startDonation}" method="post">
-            <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
-            <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
-            <button type="submit">Start Donation</button>
-        </form>
+        <form th:if="${confirmation != null && confirmation.isConfirmed() && !confirmation.isStarted()}" 
+      th:action="@{/startDonation}" 
+      method="post">
+     <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
+     <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
+     <button type="submit">Start Donation</button>
+</form>
 
-        <form th:if="${confirmation != null && confirmation.isStarted() && !confirmation.isCompleted()}" th:action="@{/stopDonation}" method="post">
-            <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
-            <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
-            <button type="submit">Donation Finished</button>
-        </form>
+
+        <form th:if="${confirmation != null && confirmation.isStarted() && !confirmation.isCompleted()}" 
+      th:action="@{/stopDonation}" 
+      method="post">
+    <input type="hidden" name="recipientId" th:value="${confirmation.recipientId}" />
+    <input type="hidden" name="loggedInUserId" th:value="${confirmation.loggedInUserId}" />
+    <button type="submit">Donation Finished</button>
+</form>
+
     </div>
      <p>&nbsp;</p>
     
     
 </div>
 
-                    </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

@@ -10,7 +10,6 @@ import com.example.ekthacare.entity.BloodRequest;
 import com.example.ekthacare.repo.BloodRequestRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BloodRequestService {

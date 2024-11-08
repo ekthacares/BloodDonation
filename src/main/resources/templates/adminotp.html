@@ -95,33 +95,29 @@
         </header> 
 
         <section class="section-content-block">
- 
-            <div class="container">
-    <div class="contact-form-block">
-        <h2 class="contact-title">OTP Page for Registration</h2>
-    </div>
-    <div class="col-sm-6 wow fadeInLeft">
-        <!-- Login form @ Binod Starts -->
-        <div class="login-form">
-          
-          <form action="#" th:action="@{/adminvalidateOtp}" method="post">
-                <div class="input-group">
-                    <input type="hidden" name="mobile" th:value="${mobile}"/>
-            <label for="otp"> Enter OTP</label>
-            <input type="text" id="otp" name="otp" required/><br><br><br>            
-            <input type="submit" class="btn btn-theme" value="Verify OTP">
-        </form>
-        <p th:text="${message}"></p>
-                </div>
-            </form>
+    <div class="container">
+        <div class="contact-form-block">
+            <h2 class="contact-title">OTP Page for Registration</h2>
         </div>
-    </div>
-</div>
 
-					
-					
-					
-        </section> <!--  end .section-about-us -->
+        <div class="col-sm-6 wow fadeInLeft">
+            <!-- Login form @ Binod Starts -->
+            <div class="login-form">
+                <form action="#" th:action="@{/adminvalidateOtp}" method="post">
+                    <div class="input-group">
+                        <input type="hidden" name="mobile" th:value="${mobile}"/>
+                        <label for="otp">Enter OTP</label>
+                        <input type="text" id="otp" name="otp" required/><br><br><br>            
+                        <input type="submit" class="btn btn-theme" value="Verify OTP">
+                    </div> <!-- Closing div for input-group -->
+                </form>
+            </div> <!-- Closing div for login-form -->
+        </div> <!-- Closing div for col-sm-6 -->
+    </div> <!-- Closing div for container -->
+    
+    <p th:text="${message}"></p> <!-- Moving the message outside the form, if necessary -->
+</section> <!-- Closing div for section-content-block -->
+ <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

@@ -1,27 +1,18 @@
 package com.example.ekthacare.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.BloodDonation;
@@ -29,13 +20,10 @@ import com.example.ekthacare.entity.BloodRequest;
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.entity.User1;
-import com.example.ekthacare.repo.Otp1Repository;
 import com.example.ekthacare.repo.User1Repository;
-import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.BloodRequestService;
 import com.example.ekthacare.services.EmailService;
-import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.Otp1Service;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
@@ -46,7 +34,6 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.layout.element.Cell;
@@ -62,9 +49,6 @@ public class AdminController {
 	
 	 @Autowired
 	    private User1Repository user1Repository;
-	 
-	 @Autowired
-	    private UserRepository userRepository;
 	 
 	 @Autowired
 	    private Otp1Service Otp1Service;
@@ -206,11 +190,11 @@ public class AdminController {
 	                System.out.println("Retrieved user from database1: " + user);
 	                return "adminviewprofile";
 	            } else {
-	                model.addAttribute("error", "User not found.");
+	                model.addAttribute("message", "User not found.");
 	                return "redirect:/adminlogin";
 	            }
 	        } else {
-	            model.addAttribute("error", "No user logged in.");
+	            model.addAttribute("message", "No user logged in.");
 	            return "redirect:/adminlogin";
 	        }
 	    }

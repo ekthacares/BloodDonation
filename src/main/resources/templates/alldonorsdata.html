@@ -141,28 +141,33 @@
                             <a class="logo" href="index.html"><img alt="" src="images/logo1.png"></a>
                         </div>
 
-                        <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="adminhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout1">Logout</a></li>
-                                                       </div>
+                       <div class="navbar-collapse collapse">
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="adminhome">Home</a>
+        </li>
+        <li>
+            <a href="contact">Contact</a>
+        </li>
+        <li>
+            <a href="logout1">Logout</a>
+        </li>
+    </ul>
+</div> <!-- Closing the navbar-collapse div -->
+
                     </div>
                 </div>
 
             </section>
 
         </header> 
-       
-			<div class="donortracking_container" style="padding:70px">
-			<div class="contact-form-block">
-        <h2 class="contact-title"> <h2>All Registered Donors data</h2>
+       <div class="contact-form-block">
+        <h2 class="contact-title"> All Registered Donors data
 </h2>
     </div>
+   
+			<div class="donortracking_container" style="padding:70px">
+			
    		
      <div th:if="${message}" class="alert alert-success">
     <p th:text="${message}"></p>
@@ -280,10 +285,6 @@
     
 </div>
 
-                    </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

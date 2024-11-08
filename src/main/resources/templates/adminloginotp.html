@@ -95,33 +95,28 @@
         </header> 
 
         <section class="section-content-block">
- 
-            <div class="container">
-    <div class="contact-form-block">
-        <h2 class="contact-title">OTP Page for AdminLogin</h2>
-    </div>
-    <div class="col-sm-6 wow fadeInLeft">
-        <!-- Login form @ Binod Starts -->
-        <div class="login-form">
-          
-          <form action="#" th:action="@{@{/adminvalidateOtp}}" method="post">
-                <div class="input-group">
-                    <input type="hidden" name="mobile" th:value="${mobile}"/>
-            <label for="otp"> Enter OTP</label>
-            <input type="text" id="otp" name="otp" required/><br><br><br>            
-            <input type="submit" class="btn btn-theme" value="Verify OTP">
-        </form>
-        <p th:text="${message}"></p>
-                </div>
-            </form>
+    <div class="container">
+        <div class="contact-form-block">
+            <h2 class="contact-title">OTP Page for AdminLogin</h2>
         </div>
-    </div>
-</div>
 
-					
-					
-					
-        </section> <!--  end .section-about-us -->
+        <div class="col-sm-6 wow fadeInLeft">
+            <!-- Login form @ Binod Starts -->
+            <div class="login-form">
+                <form action="#" th:action="@{/adminvalidateOtp}" method="post">
+                    <div class="input-group">
+                        <input type="hidden" name="mobile" th:value="${mobile}"/>
+                        <label for="otp">Enter OTP</label>
+                        <input type="text" id="otp" name="otp" required/><br><br><br>            
+                        <input type="submit" class="btn btn-theme" value="Verify OTP">
+                        <p th:text="${message}"></p>
+                    </div> <!-- Closing div here -->
+                </form>
+            </div> <!-- Closing the login-form div here -->
+        </div> <!-- Closing col-sm-6 here -->
+    </div> <!-- Closing container div here -->
+</section> <!-- Closing section div here -->
+ <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

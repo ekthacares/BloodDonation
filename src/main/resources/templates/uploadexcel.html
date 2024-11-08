@@ -132,14 +132,11 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="donorhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout">Logout</a></li>
+                             <ul class="nav navbar-nav navbar-right">
+   						 <li><a href="adminhome">Home</a></li>                                
+   						 <li><a href="contact.html">Contact</a></li>
+    					<li><a href="logout1">Logout</a></li>
+						</ul> 
                                                        </div>
                     </div>
                 </div>
@@ -148,19 +145,23 @@
 
         </header> 
       
-			<div class="donortracking_container">
-			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>Upload Excel file
+       <div class="contact-form-block">
+        <h2 class="contact-title"> Upload Excel file
 </h2>
     </div>
     
   
      
-    	      <div class= "upload">
+    	     
+    	     
+			<div class="donortracking_container">
+			 <div class= "upload">
    		<form action="#" th:action="@{/upload}" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xlsx" required />
         <button type="submit1">Upload</button> 
     </form>
+   
+    
    		</div>
     		   <div  th:if="${message != null}" class="message" style="text-align: center;font-weight: bold;color: red;" th:text="${message}"></div>
    		
@@ -205,10 +206,7 @@
     </div>
 
                     </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
-
+        
         <!-- START FOOTER  -->
 
         <footer>            

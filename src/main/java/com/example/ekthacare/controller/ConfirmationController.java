@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,11 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.ekthacare.entity.Confirmation;
-import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.ConfirmationService;
-import com.example.ekthacare.services.SentEmailService;
 import com.example.ekthacare.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -28,8 +25,6 @@ public class ConfirmationController {
 
     @Autowired
     private ConfirmationService confirmationService;
-    
-    private final SentEmailService sentEmailService = null;
     
     @Autowired
     private BloodDonationService bloodDonationService;
@@ -99,7 +94,7 @@ public class ConfirmationController {
             @RequestParam Long loggedInUserId, 
             Model model) {
 
-        boolean isStarted = confirmationService.startDonation(recipientId, loggedInUserId);
+        confirmationService.startDonation(recipientId, loggedInUserId);
 
         model.addAttribute("confirmation", confirmationService.getConfirmation(recipientId, loggedInUserId));
         return "donationTracking";  // Direct to the tracking page after starting donation
@@ -111,7 +106,7 @@ public class ConfirmationController {
             @RequestParam Long loggedInUserId, 
             Model model) {
 
-        boolean isStopped = confirmationService.stopDonation(recipientId, loggedInUserId);
+        confirmationService.stopDonation(recipientId, loggedInUserId);
 
         model.addAttribute("confirmation", confirmationService.getConfirmation(recipientId, loggedInUserId));
         return "donationTracking";  // Direct to the tracking page after stopping donation

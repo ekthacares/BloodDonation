@@ -141,104 +141,98 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="adminhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout1">Logout</a></li>
-                                                       </div>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="adminhome">Home</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="logout1">Logout</a></li>
+    </ul> <!-- This was missing -->
+</div>
+
                     </div>
                 </div>
 
             </section>
 
         </header> 
-   
-			<div class="donortracking_container" style="padding:70px">
-			<div class="contact-form-block">
-        <h2 class="contact-title"> <h2>All Admin Users data</h2>
+        
+        
+        <div class="contact-form-block">
+        <h2 class="contact-title"> All Admin Users data
 </h2>
     </div>
-   		
-     
-    <div class="results"> 
-    <p>Download data as: 
-   <a th:href="@{adminusers/exceldownload}" class="download-btn">
-      <i class="fas fa-file-excel"></i> Excel
-   </a> 
-   |
-   <a th:href="@{adminusers/pdfdownload}" class="download-btn">
-      <i class="fas fa-file-pdf"></i> PDF
-   </a>
-</p>
+  <section class="section-content-block">
+    <div class="donortracking_container" style="padding:70px">
+        <div class="results">
+            <p>Download data as:
+                <a th:href="@{adminusers/exceldownload}" class="download-btn">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a> 
+                | 
+                <a th:href="@{adminusers/pdfdownload}" class="download-btn">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </p>
 
-
-   
-            <table >
-               <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Mobile</th>
-                <th>Email</th>
-                <th>Date of Birth</th>
-                <th>Blood Group</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>State</th>
-            </tr>
-        </thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Date of Birth</th>
+                        <th>Blood Group</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                    </tr>
+                </thead>
                 <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.id}"></td>
-                <td th:text="${user.name}"></td>
-                <td th:text="${user.mobile}"></td>
-                <td th:text="${user.emailid}"></td>
-                <td th:text="${user.dateofbirth}"></td>
-                <td th:text="${user.bloodgroup}"></td>
-                <td th:text="${user.age}"></td>
-                <td th:text="${user.gender}"></td>
-                <td th:text="${user.address}"></td>
-                <td th:text="${user.city}"></td>
-                <td th:text="${user.state}"></td>
-            </tr>
-        </tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.name}"></td>
+                        <td th:text="${user.mobile}"></td>
+                        <td th:text="${user.emailid}"></td>
+                        <td th:text="${user.dateofbirth}"></td>
+                        <td th:text="${user.bloodgroup}"></td>
+                        <td th:text="${user.age}"></td>
+                        <td th:text="${user.gender}"></td>
+                        <td th:text="${user.address}"></td>
+                        <td th:text="${user.city}"></td>
+                        <td th:text="${user.state}"></td>
+                    </tr>
+                </tbody>
             </table>
-          <nav>
-    <ul class="pagination" style="float:right">
-        <!-- Previous Button: Disable if on the first page -->
-        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{/alladmindata(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
 
-        <!-- Page Numbers: Loop through the total number of pages -->
-        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{/alladmindata(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
-        </li>
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination" style="float:right">
+                    <!-- Previous Button: Disable if on the first page -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/alladmindata(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
 
-        <!-- Next Button: Disable if on the last page -->
-        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/alladmindata(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-    </ul>
-</nav>
-                 </div>
-    
-</div>
+                    <!-- Page Numbers: Loop through the total number of pages -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/alladmindata(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
+                    </li>
 
-                    </div> <!--  end .row  -->
-            </div>
+                    <!-- Next Button: Disable if on the last page -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/alladmindata(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
 
-        </section> <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 

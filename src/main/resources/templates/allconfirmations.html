@@ -129,14 +129,11 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                
-                                <li>
-                                    <a href="adminhome">Home</a>                                   
-                                </li>                                
-                              
-                                <li><a href="contact">Contact</a></li>
-                                <li><a href="logout1">Logout</a></li>
+                             <ul class="nav navbar-nav navbar-right">
+   						 <li><a href="adminhome">Home</a></li>                                
+   						 <li><a href="contact.html">Contact</a></li>
+    					<li><a href="logout1">Logout</a></li>
+						</ul> 
                                                        </div>
                     </div>
                 </div>
@@ -144,90 +141,88 @@
             </section>
 
         </header> 
-			<div class="donortracking_container" style="padding:70px">
-			 <div class="contact-form-block">
-        <h2 class="contact-title"> <h2>List of Confirmations</h2>
+        
+        
+         <div class="contact-form-block">
+        <h2 class="contact-title"> List of Confirmations
 </h2>
     </div>
-   		 
-     	<!-- Display message if any -->
-    <div  th:if="${message}" class="message" style="text-align: center;font-weight: bold;color: red;" th:text="${message}"></div>
+ <section class="section-content-block">
+    <div class="donortracking_container" style="padding:70px">
 
-    <!-- Display user information if available 
-    <p th:if="${user}">Logged-in User: <span th:text="${user.donorname}"></span></p>-->
+        <!-- Display message if any -->
+        <div th:if="${message}" class="message" style="text-align: center; font-weight: bold; color: red;" th:text="${message}"></div>
 
-    <!-- Display the confirmations if available
-    <h2 th:if="${confirmations}">List of Confirmations</h2> -->
-    <div class="results" th:if="${confirmations}">          
-            <table >
-              <thead>
-        <tr>
-            <th>ID</th>
-            <th>Donor Accepted to Donate</th>
-            <th>User Requested for Blood</th>
-            <th>Confirmed At</th>
-            <th>Started At</th>
-            <th>Stopped At</th>
-        </tr>
-    </thead>
-             <tbody>
-        <!-- Loop through confirmations and display each one -->
-        <tr th:each="confirmation : ${confirmations}">
-            <td th:text="${confirmation.id}"></td>
-            <td class="center-align">
-			<a href="#" 
-                       data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${confirmation.recipientId}" 
-                       class="view-profile1">
-                       <span th:text="${confirmation.recipientId}">User ID</span>
-                    </a>            </td>
-            <td class="center-align">
-                <a href="#" 
-                       data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${confirmation.loggedInUserId}" 
-                       class="view-profile1">
-                       <span th:text="${confirmation.loggedInUserId}">User ID</span>
-                    </a>
-            </td>
-            <td th:text="${confirmation.formattedConfirmedAt}"></td>
-            <td th:text="${confirmation.formattedStartedAt}"></td>
-            <td th:text="${confirmation.formattedStoppedAt}"></td>
-        </tr>
-    </tbody>
+        <!-- Display confirmations if available -->
+        <div class="results" th:if="${confirmations}">
+            <h2>List of Confirmations</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor Accepted to Donate</th>
+                        <th>User Requested for Blood</th>
+                        <th>Confirmed At</th>
+                        <th>Started At</th>
+                        <th>Stopped At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through confirmations and display each one -->
+                    <tr th:each="confirmation : ${confirmations}">
+                        <td th:text="${confirmation.id}"></td>
+                        <td class="center-align">
+                            <a href="#" 
+                               data-toggle="modal" 
+                               data-target="#userProfileModal" 
+                               th:attr="data-user-id=${confirmation.recipientId}" 
+                               class="view-profile1">
+                               <span th:text="${confirmation.recipientId}">User ID</span>
+                            </a>
+                        </td>
+                        <td class="center-align">
+                            <a href="#" 
+                               data-toggle="modal" 
+                               data-target="#userProfileModal" 
+                               th:attr="data-user-id=${confirmation.loggedInUserId}" 
+                               class="view-profile1">
+                               <span th:text="${confirmation.loggedInUserId}">User ID</span>
+                            </a>
+                        </td>
+                        <td th:text="${confirmation.formattedConfirmedAt}"></td>
+                        <td th:text="${confirmation.formattedStartedAt}"></td>
+                        <td th:text="${confirmation.formattedStoppedAt}"></td>
+                    </tr>
+                </tbody>
             </table>
-             <div id="profileTooltip" class="profile-tooltip"></div>
+                         <div id="profileTooltip" class="profile-tooltip"></div>
             
-           <nav>
-    <ul class="pagination" style="float:right">
-        <!-- Previous Button: Disable if on the first page -->
-        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{/confirmations(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
+            <nav>
+                <ul class="pagination" style="float:right">
+                    <!-- Previous Button: Disable if on the first page -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/confirmations(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
 
-        <!-- Page Numbers: Loop through the total number of pages -->
-        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{/confirmations(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
-        </li>
+                    <!-- Page Numbers: Loop through the total number of pages -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/confirmations(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
+                    </li>
 
-        <!-- Next Button: Disable if on the last page -->
-        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/confirmations(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-    </ul>
-</nav>
-   
+                    <!-- Next Button: Disable if on the last page -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/confirmations(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    
-</div>
 
-                    </div> <!--  end .row  -->
-            </div>
-
-        </section> <!--  end .section-about-us -->
+    </div>
+</section>
 
         <!-- START FOOTER  -->
 

@@ -5,7 +5,6 @@ package com.example.ekthacare.services;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.ChangeLog;
 import com.example.ekthacare.entity.User;
-import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.ChangeLogRepository;
 import com.example.ekthacare.repo.UserRepository;
 
