@@ -94,6 +94,10 @@ public class User1Service {
         return user1Repository.count();
     }
 	
-	
+    public void deleteUserById(Long id) {
+        if (user1Repository.existsById(id)) {  // Check if the user exists
+            user1Repository.deleteById(id);   // Delete user if exists
+        }
+    }
 }
 

@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 import com.example.ekthacare.entity.Otp;
 import com.example.ekthacare.entity.SuperadminOtp;
 
-public interface OtpRepository extends CrudRepository<Otp, Long> {
-	Otp findByMobile(String mobile);
+public interface SuperOtpRepository extends CrudRepository<SuperadminOtp, Long> {
+	SuperadminOtp findByMobile(String mobile);
 }

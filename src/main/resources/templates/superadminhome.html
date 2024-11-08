@@ -4,10 +4,10 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Donor's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
+        <title>Admin's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta name="description" content="Ekthacares – A Drop of Hope, A Lifeline for Lives">
-        <meta name="author" content="xenioushk">
+        <meta name="author" content="">
         <link rel="shortcut icon" href="images/favicon.png" />
 
         <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -22,69 +22,7 @@
         <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" >
         <link href="css/venobox.css" rel="stylesheet" type="text/css" >
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        
-        <style>
-	.results {
-            margin-top: 20px;
-        }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            text-align: left;
-        }
-
-        th {
-            background-color: #ff0000;
-            color: white;
-        }
-
-        td {
-            background-color: white;
-        }
-        
-    a {
-    text-decoration: underline; /* Adds an underline */
-    color: #5d0a0c;
-    font-size: 15px;
-    font-weight: bold;
-    
-}
-
-
-		a:hover {
-   			 color: #ff0000; /* Optional hover effect */
-		}
-		
-		
-		.download-btn i {
-    margin-right: 5px;
-    font-size: 1.2em; /* Adjust icon size */
-}
-
-.download-btn:first-of-type i {
-    color: #217346; /* Excel green */
-}
-
-.download-btn:last-of-type i {
-    color: #D9534F; /* PDF red */
-}
-
-.download-btn {
-    text-decoration: none;
-    color: inherit;
-    margin: 0 5px;
-}
-
-
-	</style>
     <body> 
 
         <div id="preloader">
@@ -141,97 +79,97 @@
                         </div>
 
                         <div class="navbar-collapse collapse">
-    <ul class="nav navbar-nav navbar-right">
-        <li><a href="adminhome">Home</a></li>
-        <li><a href="contact">Contact</a></li>
-        <li><a href="logout1">Logout</a></li>
-    </ul> <!-- This was missing -->
-</div>
+                            <ul class="nav navbar-nav navbar-right">
+                                
+                                <li>
+                                    <a href="superadminhome">Home</a>
+                                    <!--<ul class="drop-down">
+                                        <li><a href="index.html" title="Home Layout 01">Home 01</a></li>
+                                        <li><a href="home-2.html" title="Home Layout 02">Home 02</a></li>
+                                    </ul>-->
+                                </li>
 
+                                
+                                <li><a href="about-us" title="About Us">About Us</a></li>                              
+
+                                <li><a href="contact">Contact</a></li>
+                                
+                                  <li>
+          						  <a href="adminviewprofile"><i class="fa fa-user"></i> Profile</a>
+        							</li>
+                                <li><a href="superadminlogout">Logout</a></li>
+                                <li>&nbsp;</li>
+                               
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
             </section>
 
-        </header> 
+        </header> <!-- end main-header  -->
+
+      
         
-        
-        <div class="contact-form-block">
-        <h2 class="contact-title"> All Admin Users data
-</h2>
-    </div>
-  
-    <div class="donortracking_container" style="padding:70px">
-        <div class="results">
-            <p>Download data as:
-                <a th:href="@{adminusers/exceldownload}" class="download-btn">
-                    <i class="fas fa-file-excel"></i> Excel
-                </a> 
-                | 
-                <a th:href="@{adminusers/pdfdownload}" class="download-btn">
-                    <i class="fas fa-file-pdf"></i> PDF
-                </a>
-            </p>
+        <!--  FEATURED ABOUT US SECTION-->  
+<section class="section-content-block">      
+    <h2>Welcome, Admin!<span th:text="${user.name}"></span></h2>
+    
+    <div class="form_container">
+        <div class="content-grid">
+            <!-- Column 1: Profile Link Section -->
+            <!-- <div class="profile">
+                <a href="viewprofile" class="btn">Profile</a>
+            </div> -->
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th>Date of Birth</th>
-                        <th>Blood Group</th>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Address</th>
-                        <th>City</th>
-                        <th>State</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="user : ${users}">
-                        <td th:text="${user.id}"></td>
-                        <td th:text="${user.name}"></td>
-                        <td th:text="${user.mobile}"></td>
-                        <td th:text="${user.emailid}"></td>
-                        <td th:text="${user.dateofbirth}"></td>
-                        <td th:text="${user.bloodgroup}"></td>
-                        <td th:text="${user.age}"></td>
-                        <td th:text="${user.gender}"></td>
-                        <td th:text="${user.address}"></td>
-                        <td th:text="${user.city}"></td>
-                        <td th:text="${user.state}"></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            <nav>
-                <ul class="pagination" style="float:right">
-                    <!-- Previous Button: Disable if on the first page -->
-                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/alladmindata(page=${currentPage - 1}, size=${pageSize})}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-
-                    <!-- Page Numbers: Loop through the total number of pages -->
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{/alladmindata(page=${i}, size=${pageSize})}" th:text="${i + 1}">1</a>
-                    </li>
-
-                    <!-- Next Button: Disable if on the last page -->
-                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/alladmindata(page=${currentPage + 1}, size=${pageSize})}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
+            <!-- Column 2: Blood Services Section -->
+            <!-- <div class="blood-services">
+                <h2>Blood Services</h2>
+                <ul>
+                    <li><a href="searchforblood" class="btn">Quick Search</a></li>
+                    <li><a href="requestforblood" class="btn">Request for Blood</a></li>
                 </ul>
-            </nav>
+            </div> 
+            <div class="blood-services">                
+                <a href="searchforblood" class="btn">Quick Search</a>
+            </div>
+            <div class="blood-services">                
+                <a href="requestforblood" class="btn">Request for Blood</a>
+            </div> -->
+
+            <!-- Column 3: Donation Details -->
+            <div class="donate-blood">
+                <a href="superadminregister" class="card">Create New Admin</a>
+            </div>
+            <!-- Column 4: Request Received -->
+            <div class="email-request">
+                <a href="alladminusers" class="card">All AdminUsers Data</a>
+            </div>
+            <!-- Column 5: Track Your Request -->
+            <div class="tracking">
+                <a href="alldonorsusers" class="card">All Donors Data</a>
+            </div>
+           <!--  <div class="tracking">
+                <a href="allconfirmations" class="card">Tracking Donors</a>
+            </div>
+            <div class="donate-blood">
+                <a href="totaldonationlist" class="card">View Donation Data</a>
+            </div>   -->  
+            <br> 
+            <br> 
+            <br>     
+            <!-- <div class="donate-blood">
+                <a href="viewbloodrequestdata" class="card">View BloodRequests Data</a>
+            </div>
+            <div class="donate-blood">
+                <a href="allsearchrequestdata" class="card">View SearchRequests Data</a>
+            </div>
+            <div class="donate-blood">
+                <a href="uploadexcel" class="card">ExcelUpload Users Data</a>
+            </div> -->
         </div>
     </div>
-
+</section> <!-- end .section-content-block -->
 
 
         <!-- START FOOTER  -->
@@ -435,7 +373,9 @@
 
         </footer>
 
-      
+        <!-- END FOOTER  -->
+
+        <!-- Back To Top Button  -->
 
         <a id="backTop">Back To Top</a>
 
@@ -450,10 +390,6 @@
         <script src="js/jquery.counterup.min.js"></script>
         <script src="js/venobox.min.js"></script>
         <script src="js/custom-scripts.js"></script>
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-   
     </body>
 
 </html>

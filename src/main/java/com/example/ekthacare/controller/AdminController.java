@@ -209,7 +209,7 @@ public class AdminController {
 	    public String getAllUsers(Model model, HttpSession session, @RequestParam(defaultValue = "0") int page) {
 	        Long userId = (Long) session.getAttribute("userId");
 	        if (userId != null) {
-	            User1 user = user1Service.findById(userId);
+	            User1 user = user1Service.findById(userId);	            
 	            if (user != null) {
 	                int pageSize = 10;
 	                List<User1> users = user1Service.findAll(page, pageSize);

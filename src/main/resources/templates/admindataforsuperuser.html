@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Donor's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
+        <title>SuperAdmin's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta name="description" content="Ekthacares – A Drop of Hope, A Lifeline for Lives">
         <meta name="author" content="xenioushk">
@@ -142,9 +142,9 @@
 
                         <div class="navbar-collapse collapse">
     <ul class="nav navbar-nav navbar-right">
-        <li><a href="adminhome">Home</a></li>
+        <li><a href="superadminhome">Home</a></li>
         <li><a href="contact">Contact</a></li>
-        <li><a href="logout1">Logout</a></li>
+        <li><a href="superadminlogout">Logout</a></li>
     </ul> <!-- This was missing -->
 </div>
 
@@ -162,6 +162,10 @@
     </div>
   
     <div class="donortracking_container" style="padding:70px">
+    
+     <div th:if="${message}" class="alert alert-success">
+    <p th:text="${message}"></p>
+</div>
         <div class="results">
             <p>Download data as:
                 <a th:href="@{adminusers/exceldownload}" class="download-btn">
@@ -187,6 +191,7 @@
                         <th>Address</th>
                         <th>City</th>
                         <th>State</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -202,6 +207,10 @@
                         <td th:text="${user.address}"></td>
                         <td th:text="${user.city}"></td>
                         <td th:text="${user.state}"></td>
+                       <td> <a th:href="@{/deleteadminuser/{id}(id=${user.id})}" 
+   onclick="return confirm('Are you sure you want to delete this user?');">
+   Delete
+</a> </td>
                     </tr>
                 </tbody>
             </table>
