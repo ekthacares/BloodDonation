@@ -4,9 +4,9 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Donor's Account Page - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
+        <title>Login - Ekthacares – A Drop of Hope, A Lifeline for Lives</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <meta name="description" content="Ekthacares – A Drop of Hope, A Lifeline for Lives">
+        <meta name="description" content="Reddrop Buddies - Blood Donation Campaign & Multi-Concept Activism Template">
         <meta name="author" content="xenioushk">
         <link rel="shortcut icon" href="images/favicon.png" />
 
@@ -22,32 +22,7 @@
         <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" >
         <link href="css/venobox.css" rel="stylesheet" type="text/css" >
         <link rel="stylesheet" href="css/styles.css" />
-        <style>
-	.results {
-            margin-top: 20px;
-        }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            text-align: left;
-        }
-
-        th {
-            background-color: #333333;
-            color: white;
-        }
-
-        td {
-            background-color: white;
-        }
-	</style>
     <body> 
 
         <div id="preloader">
@@ -103,112 +78,48 @@
                             <a class="logo" href="index.html"><img alt="" src="images/logo1.png"></a>
                         </div>
 
-                       <div class="navbar-collapse collapse">
-    <ul class="nav navbar-nav navbar-right">
-        <li>
-            <a href="donorhome">Home</a>                                   
-        </li>                                
-        <li>
-            <a href="contact">Contact</a>
-        </li>
-        <li>
-            <a href="logout">Logout</a>
-        </li>
-    </ul>
-</div> <!-- Closing the navbar-collapse div -->
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                                
+                                <li>
+                                    <a href="donorlogin">Home</a>
+                                    </li>
 
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
             </section>
 
-        </header>
+        </header> 
+
+   <section class="section-content-block">
+    <div class="container">
         <div class="contact-form-block">
-        <h2 class="contact-title"> Search for blood
-</h2>
-    </div> 
-    <section class="section-content-block">
-    <div class="registration_container">
-        <form th:action="@{/searchforblood}" method="get">
-            <!-- Blood Group -->
-            <div class="form-group">
-                <label for="bloodgroup">Blood Group:</label>
-                <select id="bloodgroup" name="bloodgroup" required>
-                    <option value="" disabled selected>Select Blood Group</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>  
-            </div>
-			
-			
-			<!-- hospital -->
-            <div class="form-group">
-              <label for="hospital">Hospital/Blood Bank:</label>
-           	  <input type="text" id="hospital" name="hospital" placeholder="Enter Hospital/Blood Bank Name" required> 
-            </div>
-			
-            <!-- City -->
-            <div class="form-group">
-                <label for="city">City:</label>
-                <select id="city" name="city" required>
-                    <option value="" disabled selected>Select City</option>
-                    <option th:each="city : ${cities}" th:text="${city}" th:value="${city}"></option>
-                </select>
-            </div>
-			
-            <!-- State -->
-            <div class="form-group">
-                <label for="state">State:</label>
-                <select id="state" name="state" required>
-                    <option value="" disabled selected>Select State</option>
-                    <option th:each="state : ${states}" th:text="${state}" th:value="${state}"></option>
-                </select>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="form-group">
-                <button type="submit" class="btn">Search</button>
-            </div>
-        </form>
-
-        <!-- Results Display -->
-        <div class="results" th:if="${results != null and #lists.size(results) > 0}">
-            <h2 th:text="'Number of results: ' + ${#lists.size(results)}"></h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Donor Name</th>
-                        <th>Blood Group</th>
-                        <th>City</th>
-                        <th>State</th>
-                        <th>Mobile</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="result : ${results}">
-                        <td th:text="${result.donorname}"></td>
-                        <td th:text="${result.bloodgroup}"></td>
-                        <td th:text="${result.city}"></td>
-                        <td th:text="${result.state}"></td>
-                        <td th:text="${result.mobile}"></td>
-                    </tr>
-                </tbody>
-            </table>
+            <h2 class="contact-title">OTP Page for Donor Registration</h2>
         </div>
-        
-        <!-- No results message -->
-        <div class="no-results" th:if="${results == null or #lists.size(results) == 0}">
-            <p>No results found for the selected criteria.</p>
+
+        <div class="col-sm-6 wow fadeInLeft">
+            <!-- OTP Verification Form Starts -->
+            <div class="login-form">
+                <form action="#" th:action="@{/validatedonorregisterOtp}" method="post">
+                    <div class="input-group">
+                        <input type="hidden" name="mobile" th:value="${mobile}" />
+                        <label for="otp">Enter OTP</label>
+                        <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" required /><br><br>
+                        
+                        <input type="submit" class="btn btn-theme" value="Verify OTP" />
+                    </div>
+                </form>
+
+                <!-- Display message if present -->
+                <p th:text="${message}" style="color: red; font-weight: bold;"></p>
+            </div>
         </div>
     </div>
 </section>
-<!--  end .section-about-us -->
+ <!--  end .section-about-us -->
 
         <!-- START FOOTER  -->
 
@@ -400,7 +311,7 @@
                     <div class="row clearfix">
                         
                         <div class="col-md-12 col-sm-12 text-center">
-                            <p class="copyright-text"> Powered by ektha.com, Copyright 2024 - ekthacares. All Rights Reserved. </p>
+                            <p class="copyright-text"> Copyright 2018 - Blood Buddies by BlueWindLab. All Rights Reserved. </p>
                         </div>  <!-- end .col-sm-6  -->
 
                     </div> <!-- end .row  -->                                    
@@ -411,7 +322,9 @@
 
         </footer>
 
-      
+        <!-- END FOOTER  -->
+
+        <!-- Back To Top Button  -->
 
         <a id="backTop">Back To Top</a>
 

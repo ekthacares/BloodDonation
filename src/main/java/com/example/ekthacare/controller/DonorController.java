@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
@@ -31,6 +32,7 @@ import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
+import com.example.ekthacare.services.User1Service;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.services.UserUploadResult;
 import com.itextpdf.io.source.ByteArrayOutputStream;
@@ -78,6 +80,8 @@ public class DonorController {
 	    @Autowired
 	    private ExcelService excelService;
 	  
+	    @Autowired
+	    private User1Service user1Service;
 	    
 	 @GetMapping("/donorlogin")
 	    public String showDonorHomePage(Model model) {
@@ -117,8 +121,58 @@ public class DonorController {
 	        return "otp"; // Redirect to OTP verification page
 	    }
 
+	 @GetMapping("/donorregister")
+	    public String showDonorRegistrationForm(Model model) {
+	        model.addAttribute("user", new User());
+	        return "donorregister"; // This will render register.html
+	    }
 	   
-	   
+	 @PostMapping("/donorregister")
+	    public String registerDonorByAdmin(@ModelAttribute User user, Model model) {
+		// Check if the mobile number already exists
+		    if (userRepository.existsByMobile(user.getMobile())) {
+		        model.addAttribute("message", "Mobile number already exists. Please use a different number.");
+		        return "register"; // Return to registration page with an error message
+		    }
+		 // Set isVerified to false
+	        user.setVerified(false);
+	        // Save donor information to the database
+	        userRepository.save(user);
+
+	        // Generate and send OTP to the user's mobile number
+	        String otp = otpService.generateOtp(user.getMobile());
+	       
+	        emailService.sendOtp(user.getEmailid(), otp);
+	        String message = "User Admin login OTP is " + otp + " - SMSCNT";
+	         smsService.sendJsonSms(user.getMobile(), message);
+
+	        // Store user in session for later use
+	        model.addAttribute("mobile", user.getMobile());
+	        model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+
+	        return "donorresgisterotp"; // Redirect to OTP verification page
+	    }
+	 
+	 @PostMapping("/validatedonorregisterOtp")
+	 public String validatedonorregisterOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
+	     if (otpService.validateOtp(mobile, otp)) {
+	         // Skip the user lookup and directly set session attributes if OTP is valid
+	         session.setAttribute("mobile", mobile);
+	         System.out.println("Mobile set in session: " + mobile); // Debug statement
+	         
+	         // Redirect to admin home after successful OTP validation
+	         return "redirect:/adminhome";
+	     } else {
+	         // OTP is invalid, return the error message and remain on the same page
+	         model.addAttribute("message", "Invalid OTP");
+	         model.addAttribute("mobile", mobile);
+	         return "donorresgisterotp";
+	     }
+	 }
+
+	 
+	 
+	 
 	 @PostMapping("/login")
 	    public String login(@RequestParam String mobile, Model model) {
 	        User user = userRepository.findByMobile(mobile);
@@ -236,99 +290,119 @@ public class DonorController {
 	    	    
 	    @GetMapping("/searchforblood")
 	    public String searchForBlood(
-	    	
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
 	            @RequestParam(value = "city", required = false) String city,
 	            @RequestParam(value = "state", required = false) String state,
+	            @RequestParam(value = "hospital", required = false) String hospitalName,
 	            Model model, HttpSession session) {
 
 	        // Retrieve userId from session
 	        Long userId = (Long) session.getAttribute("userId");
 	        System.out.println("Retrieved userId from session: " + userId);
 
-	        User loggedInUser = null;
 	        if (userId != null) {
-	            loggedInUser = userService.findById(userId);
+	            User loggedInUser = userService.findById(userId);
 	            if (loggedInUser != null) {
 	                System.out.println("User Details: " + loggedInUser);
-	                model.addAttribute("user", loggedInUser);	            
+	                model.addAttribute("user", loggedInUser);
 
-	        // Perform the search
-	        List<User> results = List.of();
-	        if (bloodgroup != null && city != null) {
-	            results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
+	                // Initialize results list
+	                List<User> results = new ArrayList<>();
 
-	            // Get all recipient IDs
-	            List<Long> recipientIds = results.stream()
-	                    .map(User::getId)
-	                    .collect(Collectors.toList());
+	                // Perform search only if bloodgroup and city are provided
+	                if (bloodgroup != null || city != null || state != null) {
+	                    // Ensure that we do not search with incomplete parameters
+	                    System.out.println("Searching for bloodgroup: " + bloodgroup + ", city: " + city + ", state: " + state);
+	                    results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
 
-	            // Fetch last donation dates in one go
-	            Map<Long, LocalDateTime> lastDonationDates = bloodDonationService.getLastDonationDatesByRecipientIds(recipientIds);
+	                    System.out.println("Initial search results: " + results);
 
-	            // Filter users based on last donation dates
-	            results = results.stream()
-	                    .filter(user -> {
-	                        LocalDateTime lastDonationDateTime = lastDonationDates.get(user.getId());
-	                        // Keep only those with no last donation date or where the date part is null
-	                        return lastDonationDateTime == null; // Adjust this logic as needed
-	                    })
-	                    .collect(Collectors.toList());
+	                    if (!results.isEmpty()) {
+	                        // Get all recipient IDs
+	                        List<Long> recipientIds = results.stream()
+	                                .map(User::getId)
+	                                .collect(Collectors.toList());
+	                        System.out.println("Recipient IDs: " + recipientIds);
 
-	            // Save the search request
-	            if (userId != null) {
-	                searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
-	            }
+	                        // Fetch last donation dates
+	                        Map<Long, LocalDateTime> lastDonationDates = bloodDonationService.getLastDonationDatesByRecipientIds(recipientIds);
+	                        System.out.println("Last donation dates: " + lastDonationDates);
 
-	            // Send an email to each user in the search results
-	            if (loggedInUser != null) {
-	                for (User user : results) {
-	                    sendEmailToUser(user, loggedInUser);
+	                        // Filter results based on the last donation date (null means no donation date)
+	                        results = results.stream()
+	                                .filter(user -> lastDonationDates.get(user.getId()) == null)
+	                                .collect(Collectors.toList());
+
+	                        System.out.println("Filtered results (no donation date): " + results);
+	                    } else {
+	                        System.out.println("No results found based on the provided parameters.");
+	                    }
+
+	                    // Save the search request
+	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
+
+	                    // Send an email to each user in the search results
+	                    if (loggedInUser != null) {
+	                        for (User user : results) {
+	                            try {
+	                                sendEmailToUser(user, loggedInUser,bloodgroup, hospitalName);
+	                            } catch (Exception e) {
+	                                System.out.println("Error sending email to user: " + user.getId());
+	                                e.printStackTrace();
+	                            }
+	                        }
+	                    }
+	                } else {
+	                    System.out.println("No search parameters provided.");
 	                }
+
+	                // Add results and other necessary model attributes
+	                model.addAttribute("results", results);
+	                model.addAttribute("cities", userService.getAllCities());
+	                model.addAttribute("states", userService.getAllStates());
+
+	                return "searchforblood";
+	            } else {
+	                model.addAttribute("error", "User not found.");
+	                return "home"; // or any error page you prefer
 	            }
+	        } else {
+	            model.addAttribute("error", "No user logged in.");
+	            return "donorlogin"; // Or redirect to login page
 	        }
-	        model.addAttribute("results", results);
-
-	        // Add cities and states to model
-	        model.addAttribute("cities", userService.getAllCities());
-	        model.addAttribute("states", userService.getAllStates());
-
-	        return "searchforblood";
-	    } else {
-            model.addAttribute("error", "User not found.");
-            return "home";
-        }
-    } else {
-        model.addAttribute("error", "No user logged in.");
-        return "donorlogin";
-    }
-}
+	    }
 
 	    
 	    
 	    public DonorController(SentEmailRepository sentEmailRepository) {
 	        this.sentEmailRepository = sentEmailRepository;
 	    }
-	    private void sendEmailToUser(User user, User loggedInUser) {
-	       
+	  
+	    private void sendEmailToUser(User user, User loggedInUser, String bloodgroup, String hospitalName) {
 	        String subject = "Blood Search Alert";
-	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId());  // Generate the confirmation URL
-	        
+	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId());
+
+	        String locationInfo = (hospitalName != null && !hospitalName.isEmpty()) ? 
+	                "The blood is needed at " + hospitalName : 
+	                "The blood is urgently needed.";
+
 	        String message = String.format(
-		            "Dear %s,\n\nUser %s is searching for blood group %s in %s, %s. Please contact them if you can help.\n\n" +
-		            "Contact Information:\nName: %s\nMobile: %s\nEmail: %s\n\n" +
-		            "If you are willing to donate, please confirm by clicking the following link:\n%s\n\nThank you.",
-	            user.getDonorname(), loggedInUser.getDonorname(), loggedInUser.getBloodgroup(), 
-	            loggedInUser.getCity(), loggedInUser.getState(), loggedInUser.getDonorname(), 
-	            loggedInUser.getMobile(), loggedInUser.getEmailid(), confirmationUrl
+	            "Dear %s,\n\nUser %s is searching for blood group %s in %s, %s. %s\n\n" +
+	            "Contact Information:\nName: %s\nMobile: %s\nEmail: %s\n\n" +
+	            "If you are willing to donate, please confirm by clicking the following link:\n%s\n\nThank you.",
+	            user.getDonorname(), loggedInUser.getDonorname(), bloodgroup, // Use the searched blood group
+	            loggedInUser.getCity(), loggedInUser.getState(), locationInfo,
+	            loggedInUser.getDonorname(), loggedInUser.getMobile(), loggedInUser.getEmailid(),
+	            confirmationUrl
 	        );
 
+	        System.out.println("Generated Email Message:\n" + message);
 	        emailService.sendEmail(user.getEmailid(), subject, message);
-	     // Save the email information into the database
+
 	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId());
 	        sentEmailRepository.save(sentEmail);
-	        
 	    }
+
 	    
 	   // private String generateConfirmationUrl(Long recipientId, Long loggedInUserId) {
 	  //      return "http://localhost:8082/confirmRequest?recipientId=" + recipientId + "&loggedInUserId=" + loggedInUserId;
@@ -355,21 +429,22 @@ public class DonorController {
 	        return "redirect:/viewprofile"; // Redirect back to the profile page
 	    }
 	    
-	    
-	    // Serve the upload form
-	    @GetMapping("/uploadexcel")
-	    public String showUploadForm() {
-	        return "uploadexcel";
+	    	 
+	    @GetMapping("/upload")
+	    public String showUploadPage(Model model) {
+	        // Clear the model to ensure no previous data is displayed
+	        model.addAttribute("message", model.containsAttribute("message") ? model.getAttribute("message") : null);
+	        model.addAttribute("duplicateMessage", model.containsAttribute("duplicateMessage") ? model.getAttribute("duplicateMessage") : null);
+	        model.addAttribute("users", model.containsAttribute("users") ? model.getAttribute("users") : new ArrayList<>()); // Clear user list
+	        return "upload"; // Return the upload page
 	    }
-	    
-	    
-	 
-	 // Handle file upload
+
+	    // Handle file upload for both Excel and CSV
 	    @PostMapping("/upload")
-	    public String uploadExcelFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+	    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("fileType") String fileType, RedirectAttributes redirectAttributes) {
 	        try {
-	            UserUploadResult result = excelService.parseExcelFile(file);
-	            excelService.saveUsersFromFile(file); // Save valid users
+	            UserUploadResult result = excelService.parseFile(file, fileType);
+	            excelService.saveUsersFromFile(file, fileType); // Save valid users
 
 	            // Prepare messages
 	            StringBuilder duplicateMessage = new StringBuilder();
@@ -386,26 +461,13 @@ public class DonorController {
 
 	            // Store valid users in the redirect attributes for display
 	            redirectAttributes.addFlashAttribute("users", result.getValidUsers());
-	            
 	        } catch (IOException e) {
 	            redirectAttributes.addFlashAttribute("message", "Failed to upload file: " + e.getMessage());
 	        }
-	        
+
 	        // Redirect to the GET method to refresh the page
 	        return "redirect:/upload"; // Redirect to the upload page
 	    }
-
-	    // Add a GET method to handle the upload page
-	    @GetMapping("/upload")
-	    public String showUploadPage(Model model) {
-	        // Clear the model to ensure no previous data is displayed
-	        model.addAttribute("message", model.containsAttribute("message") ? model.getAttribute("message") : null);
-	        model.addAttribute("duplicateMessage", model.containsAttribute("duplicateMessage") ? model.getAttribute("duplicateMessage") : null);
-	        model.addAttribute("users", model.containsAttribute("users") ? model.getAttribute("users") : new ArrayList<>()); // Clear user list
-
-	        return "uploadexcel"; // Return the upload page
-	    }
-
 
 	    //Download excel
 	    @GetMapping("/donorusers/exceldownload")

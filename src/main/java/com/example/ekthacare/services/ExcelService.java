@@ -1,13 +1,18 @@
 package com.example.ekthacare.services;
 
 import com.example.ekthacare.entity.User;
+import com.opencsv.CSVReader;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,12 +21,23 @@ import java.util.List;
 public class ExcelService {
 
     private final UserService userService;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public ExcelService(UserService userService) {
         this.userService = userService;
     }
 
-    public UserUploadResult parseExcelFile(MultipartFile file) throws IOException {
+    // Method to parse both Excel and CSV files
+    public UserUploadResult parseFile(MultipartFile file, String fileType) throws IOException {
+        if ("csv".equalsIgnoreCase(fileType)) {
+            return parseCsvFile(file);
+        } else {
+            return parseExcelFile(file);
+        }
+    }
+
+    // Parse Excel file
+    private UserUploadResult parseExcelFile(MultipartFile file) throws IOException {
         List<User> validUsers = new ArrayList<>();
         List<User> duplicateUsers = new ArrayList<>();
 
@@ -43,7 +59,7 @@ public class ExcelService {
 
                 Cell dateCell = currentRow.getCell(3);
                 if (dateCell != null && DateUtil.isCellDateFormatted(dateCell)) {
-                    LocalDate date = dateCell.getLocalDateTimeCellValue() != null ?
+                    LocalDate date = dateCell.getLocalDateTimeCellValue() != null ? 
                                      dateCell.getLocalDateTimeCellValue().toLocalDate() : null;
                     user.setDateofbirth(date);
                 } else {
@@ -68,26 +84,86 @@ public class ExcelService {
                     if (userService.findByMobile(user.getMobile()) == null) {
                         validUsers.add(user);
                     } else {
-                        duplicateUsers.add(user); // Add to duplicate list
+                        duplicateUsers.add(user);
                     }
                 }
             }
         }
+
         return new UserUploadResult(validUsers, duplicateUsers);
     }
 
-    public void saveUsersFromFile(MultipartFile file) throws IOException {
-        UserUploadResult result = parseExcelFile(file);
-        userService.saveUsers(result.getValidUsers()); // Save only valid users
-        // Handle duplicates if necessary
+    // Parse CSV file with date handling for "dd-MM-yyyy"
+    private UserUploadResult parseCsvFile(MultipartFile file) throws IOException {
+        List<User> validUsers = new ArrayList<>();
+        List<User> duplicateUsers = new ArrayList<>();
+
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            boolean isFirstLine = true;
+
+            while ((nextLine = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // Skip the header row
+                }
+
+                User user = new User();
+                user.setDonorname(nextLine[0]);
+                user.setMobile(nextLine[1]);
+                user.setEmailid(nextLine[2]);
+
+                // Parse Date of Birth with custom formatter
+                try {
+                    if (nextLine[3] != null && !nextLine[3].isEmpty()) {
+                        user.setDateofbirth(LocalDate.parse(nextLine[3], DATE_FORMATTER));
+                    }
+                } catch (DateTimeParseException e) {
+                    throw new IOException("Error parsing date: " + nextLine[3] + ". Expected format: dd-MM-yyyy", e);
+                }
+
+                user.setBloodgroup(nextLine[4]);
+
+                // Parse Age
+                try {
+                    int age = Integer.parseInt(nextLine[5]);
+                    user.setAge(age);
+                } catch (NumberFormatException e) {
+                    user.setAge(null);
+                }
+
+                user.setGender(nextLine[6]);
+                user.setAddress(nextLine[7]);
+                user.setCity(nextLine[8]);
+                user.setState(nextLine[9]);
+
+                if (isUserValid(user)) {
+                    if (userService.findByMobile(user.getMobile()) == null) {
+                        validUsers.add(user);
+                    } else {
+                        duplicateUsers.add(user);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new IOException("Error reading CSV file: " + e.getMessage(), e);
+        }
+
+        return new UserUploadResult(validUsers, duplicateUsers);
+    }
+
+    // Save users after file parsing
+    public void saveUsersFromFile(MultipartFile file, String fileType) throws IOException {
+        UserUploadResult result = parseFile(file, fileType);
+        userService.saveUsers(result.getValidUsers());
     }
 
     private boolean isUserValid(User user) {
         return user.getDonorname() != null && !user.getDonorname().isEmpty() &&
                user.getMobile() != null && !user.getMobile().isEmpty() &&
                user.getEmailid() != null && !user.getEmailid().isEmpty() &&
-               user.getDateofbirth() != null && // Ensure date of birth is set
-               user.getAge() != null && user.getAge() > 0 && // Check if age is set and positive
+               user.getDateofbirth() != null &&
+               user.getAge() != null && user.getAge() > 0 &&
                user.getBloodgroup() != null && !user.getBloodgroup().isEmpty() &&
                user.getGender() != null && !user.getGender().isEmpty() &&
                user.getAddress() != null && !user.getAddress().isEmpty() &&
