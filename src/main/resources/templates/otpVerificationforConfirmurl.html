@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+</head>
+<body>
+    <h2>OTP Verification</h2>
+
+    <!-- Form for OTP verification -->
+    <form action="/verifyOtp" method="post">
+        <!-- Hidden fields to pass recipientId and loggedInUserId -->
+          <input type="hidden" name="recipientId" th:value="${recipientId}">
+        <input type="hidden" name="loggedInUserId" th:value="${loggedInUserId}">
+        
+        <label for="otp">Enter OTP:</label>
+        <input type="text" id="otp" name="otp" required>
+        
+        <button type="submit">Verify OTP</button>
+    </form>
+
+    <!-- Display error message if exists -->
+    <p th:if="${error}" th:text="${error}"></p>
+
+    <!-- Optionally, display any other message -->
+    <p th:if="${message}" th:text="${message}"></p>
+</body>
+</html>

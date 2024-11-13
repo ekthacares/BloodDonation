@@ -6,9 +6,7 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.ekthacare.entity.Otp;
 import com.example.ekthacare.entity.SuperadminOtp;
-import com.example.ekthacare.repo.OtpRepository;
 import com.example.ekthacare.repo.SuperOtpRepository;
 
 @Service

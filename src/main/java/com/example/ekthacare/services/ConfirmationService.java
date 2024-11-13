@@ -114,13 +114,27 @@ public class ConfirmationService {
     }
     
     public Confirmation createNewConfirmation(Long recipientId, Long loggedInUserId) {
+        // Check if a confirmation already exists for the given recipientId and loggedInUserId
+        Confirmation existingConfirmation = confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
+
+        // If an existing confirmed confirmation exists, don't create a new one
+        if (existingConfirmation != null && existingConfirmation.isConfirmed()) {
+            // Optionally, throw an exception or return the existing confirmation
+            System.out.println("Confirmation already exists and is confirmed for recipientId: " + recipientId + " and loggedInUserId: " + loggedInUserId);
+            return existingConfirmation;
+        }
+
+        // If no existing confirmed confirmation, create a new one
         Confirmation confirmation = new Confirmation();
         confirmation.setRecipientId(recipientId);
         confirmation.setLoggedInUserId(loggedInUserId);
-        confirmation.setConfirmedAt(LocalDateTime.now());
+        confirmation.setConfirmedAt(LocalDateTime.now());  // Set confirmation time
         confirmationRepository.save(confirmation);
+
+        System.out.println("New confirmation created for recipientId: " + recipientId + " and loggedInUserId: " + loggedInUserId);
         return confirmation;
     }
+
 
 	
 

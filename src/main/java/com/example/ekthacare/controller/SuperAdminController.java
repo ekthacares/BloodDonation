@@ -15,12 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.ekthacare.entity.Superadmin;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.entity.User1;
-import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.SuperAdminRepository;
 import com.example.ekthacare.repo.User1Repository;
 import com.example.ekthacare.services.EmailService;
-import com.example.ekthacare.services.Otp1Service;
-import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SmsService;
 import com.example.ekthacare.services.SuperAdminService;
 import com.example.ekthacare.services.SuperadminOtpService;
@@ -42,9 +39,6 @@ public class SuperAdminController {
     private SuperadminOtpService superadminotpService;
 	
 	 @Autowired
-	    private Otp1Service otp1Service;
-
-	    @Autowired
 	    private EmailService emailService;
 	
 	    @Autowired

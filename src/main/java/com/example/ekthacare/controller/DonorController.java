@@ -23,7 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
-import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
@@ -32,7 +31,6 @@ import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
-import com.example.ekthacare.services.User1Service;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.services.UserUploadResult;
 import com.itextpdf.io.source.ByteArrayOutputStream;
@@ -80,15 +78,9 @@ public class DonorController {
 	    @Autowired
 	    private ExcelService excelService;
 	  
-	    @Autowired
-	    private User1Service user1Service;
 	    
-	 @GetMapping("/donorlogin")
-	    public String showDonorHomePage(Model model) {
-	        // Add any necessary attributes to the model
-	        return "donorlogin";
-	    }
-	 
+		/* =======================New user/registration from Donorside============================= */
+	    
 	 @GetMapping("/register")
 	    public String showRegistrationForm(Model model) {
 	        model.addAttribute("user", new User());
@@ -121,12 +113,14 @@ public class DonorController {
 	        return "otp"; // Redirect to OTP verification page
 	    }
 
+	 
+	 /* =========================Donor registration from Admin============================================ */
+	 
 	 @GetMapping("/donorregister")
 	    public String showDonorRegistrationForm(Model model) {
 	        model.addAttribute("user", new User());
 	        return "donorregister"; // This will render register.html
-	    }
-	   
+	    }	   
 	 @PostMapping("/donorregister")
 	    public String registerDonorByAdmin(@ModelAttribute User user, Model model) {
 		// Check if the mobile number already exists
@@ -170,9 +164,15 @@ public class DonorController {
 	     }
 	 }
 
-	 
-	 
-	 
+		
+	 /* ============================Login process from donorside====================================== */
+		 
+	 @GetMapping("/donorlogin")
+	    public String showDonorHomePage(Model model) {
+	        // Add any necessary attributes to the model
+	        return "donorlogin";
+	    }  
+	
 	 @PostMapping("/login")
 	    public String login(@RequestParam String mobile, Model model) {
 	        User user = userRepository.findByMobile(mobile);
@@ -193,11 +193,7 @@ public class DonorController {
 	        model.addAttribute("mobile", mobile);
 	        return "otp";
 	    } 
-
-
-
-     
-	   
+   	   
 	 @PostMapping("/validateOtp")
 	 public String validateOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
 	     if (otpService.validateOtp(mobile, otp)) {
@@ -219,7 +215,7 @@ public class DonorController {
 	     }
 	 }
 
-
+	 /* ============================Donorhome====================================== */
 	 @GetMapping("/donorhome")
 	 public String showDonorHome(HttpSession session, Model model) {
 	     Long userId = (Long) session.getAttribute("userId");
@@ -238,7 +234,7 @@ public class DonorController {
 	     return "redirect:/logout";
 	 }
 
-	    
+	 /* ============================View Profile process ====================================== */   
 	    @GetMapping("/viewprofile")
 	    public String viewProfile(Model model, HttpSession session) {
 	        Long userId = (Long) session.getAttribute("userId");
@@ -258,6 +254,8 @@ public class DonorController {
 	            return "donorlogin";
 	        }
 	    }
+	   
+	    /* ============================Logout Profile process ====================================== */  
 	    
 	    @GetMapping("/logout")
 	    public String logout(HttpSession session) {
@@ -267,7 +265,7 @@ public class DonorController {
 	    }
 	
 	  
-	    
+	    /* ============================All Donor data for Admin ====================================== */   
 	    @GetMapping("/alldonorsdata")
 	    public String getAllUsers(Model model, @RequestParam(defaultValue = "0") int page) {
 	        int pageSize = 10; // Define the number of users per page
@@ -287,7 +285,7 @@ public class DonorController {
 	    }
 	    
 	    
-	    	    
+	    /* ============================Search for Blood process ====================================== */   	    
 	    @GetMapping("/searchforblood")
 	    public String searchForBlood(
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
@@ -420,7 +418,7 @@ public class DonorController {
 	    }
 	   
 
-		
+	    /* ============================Edit Profile process ====================================== */   
 	    @PostMapping("/updateProfile")
 	    public String updateProfile(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
 	        // Save change logs here if necessary
@@ -429,7 +427,7 @@ public class DonorController {
 	        return "redirect:/viewprofile"; // Redirect back to the profile page
 	    }
 	    
-	    	 
+ /* ============================================Upload CSV/Excel  process ====================================== */   	 
 	    @GetMapping("/upload")
 	    public String showUploadPage(Model model) {
 	        // Clear the model to ensure no previous data is displayed
@@ -469,7 +467,8 @@ public class DonorController {
 	        return "redirect:/upload"; // Redirect to the upload page
 	    }
 
-	    //Download excel
+/* ============================================Download Excel &PDF process ====================================== */   	 
+	    	    //Download excel
 	    @GetMapping("/donorusers/exceldownload")
 	    public ResponseEntity<byte[]> downloadUserData() throws IOException {
 	        List<User> users = userService.getAllUsers(); // Fetch all users from database

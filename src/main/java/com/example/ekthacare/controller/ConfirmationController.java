@@ -16,6 +16,8 @@ import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.ConfirmationService;
+import com.example.ekthacare.services.EmailService;
+import com.example.ekthacare.services.OtpVerificationService;
 import com.example.ekthacare.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -27,8 +29,10 @@ public class ConfirmationController {
     private ConfirmationService confirmationService;
     
     @Autowired
-    private BloodDonationService bloodDonationService;
-
+    private OtpVerificationService otpVerificationService;
+    
+    @Autowired
+    private EmailService emailService;
     
     @Autowired
     private UserService userService;
@@ -38,54 +42,75 @@ public class ConfirmationController {
             @RequestParam String token, 
             Model model) {
 
-        // Decode the token to retrieve recipientId and loggedInUserId
-        String decodedData = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8);
-        String[] parts = decodedData.split(":");
+        try {
+            // Decode the token to retrieve recipientId and loggedInUserId
+            String decodedData = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8);
+            String[] parts = decodedData.split(":");
 
-        if (parts.length != 2) {
-            model.addAttribute("message", "Invalid confirmation link.");
-            System.out.println("Invalid token received: " + token);
-            return "errorPage";
-        }
-
-        Long recipientId = Long.parseLong(parts[0]);
-        Long loggedInUserId = Long.parseLong(parts[1]);
-
-        System.out.println("Recipient ID: " + recipientId + ", Logged-In User ID: " + loggedInUserId);
-
-        // Retrieve any existing confirmation for the recipient
-        Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientId(recipientId);
-
-        if (existingConfirmation != null) {
-            // If another user has an existing confirmation, show message and do not allow new confirmation
-            if (!existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
-                model.addAttribute("message", "You have already donated to the Register UserID : " + existingConfirmation.getLoggedInUserId()  + " .");
-                System.out.println("donation found for recipient ID: " + recipientId + 
-                                   " by another user. Current User ID: " + loggedInUserId + " cannot confirm.");
-                return "donationTracking";
+            if (parts.length != 2) {
+                model.addAttribute("message", "Invalid confirmation link.");
+                System.out.println("Invalid token received: " + token);
+                return "errorPage";
             }
-            
-            // If the existing confirmation belongs to the logged-in user and is completed, show a completed message
-            if (existingConfirmation.isCompleted()) {
-                model.addAttribute("confirmation", existingConfirmation);
-              //  model.addAttribute("message", "A completed donation process already exists for this recipient.");
-                System.out.println("Completed confirmation found for recipient ID: " + recipientId);
-                return "donationTracking";
+
+            Long recipientId = Long.parseLong(parts[0]);
+            Long loggedInUserId = Long.parseLong(parts[1]);
+
+            System.out.println("Recipient ID: " + recipientId + ", Logged-In User ID: " + loggedInUserId);
+
+            // Retrieve any existing confirmation for the recipient
+            Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientId(recipientId);
+
+            if (existingConfirmation != null) {
+                // If another user has an existing confirmation, do not allow new confirmation
+                if (!existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
+                    model.addAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getLoggedInUserId());
+                    System.out.println("Donation found for recipient ID: " + recipientId + 
+                                       " by another user. Current User ID: " + loggedInUserId + " cannot confirm.");
+                    return "donationTracking";
+                }
+
+                // If the existing confirmation belongs to the logged-in user and is completed, show completed message
+                if (existingConfirmation.isCompleted()) {
+                    model.addAttribute("confirmation", existingConfirmation);
+                    System.out.println("Completed confirmation found for recipient ID: " + recipientId);
+                    return "donationTracking";
+                }
             }
+
+            // No existing completed confirmation, proceed with generating OTP for this user
+            String otp = otpVerificationService.generateAndSaveOtp(recipientId, loggedInUserId);
+
+            // Find the recipient user based on recipientId
+            User recipient = userService.findById(recipientId);
+            if (recipient != null) {
+                // Send OTP to recipient's email
+                String otpMessage = "Your OTP for confirming the blood donation request is: " + otp;
+                try {
+                    emailService.sendEmail(recipient.getEmailid(), "Blood Donation OTP", otpMessage);
+                    System.out.println("OTP sent to recipient: " + recipient.getEmailid());
+                } catch (Exception e) {
+                    System.out.println("Error sending OTP to recipient: " + recipient.getEmailid());
+                    model.addAttribute("message", "Failed to send OTP. Please try again later.");
+                    return "errorPage";  // Handle error in sending OTP
+                }
+            } else {
+                model.addAttribute("message", "Recipient not found.");
+                return "errorPage";  // If the recipient does not exist, show error page
+            }
+
+            // Add recipient and logged-in user info to model for the OTP verification page
+            model.addAttribute("recipientId", recipientId);
+            model.addAttribute("loggedInUserId", loggedInUserId);
+
+            System.out.println("OTP generated and sent for recipient ID: " + recipientId + " by user ID: " + loggedInUserId);
+            return "otpVerificationforConfirmurl";  // Redirect to OTP input page for user to enter OTP
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", "An error occurred while processing the confirmation request.");
+            return "errorPage";  // Handle generic errors
         }
-
-        // No existing conflicting confirmation, proceed with creating a new confirmation for this user
-        Confirmation newConfirmation = confirmationService.createNewConfirmation(recipientId, loggedInUserId);
-        model.addAttribute("confirmation", newConfirmation);
-        System.out.println("New confirmation created for recipient ID: " + recipientId + " by user ID: " + loggedInUserId);
-        	
-        bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now());
-        System.out.println("Updated last donation date for user ID: " + loggedInUserId + " for recipient ID: " + recipientId);
-
-        return "donationTracking";
     }
-
-
 
 
     @PostMapping("/startDonation")
@@ -99,6 +124,8 @@ public class ConfirmationController {
         model.addAttribute("confirmation", confirmationService.getConfirmation(recipientId, loggedInUserId));
         return "donationTracking";  // Direct to the tracking page after starting donation
     }
+    
+    
 
     @PostMapping("/stopDonation")
     public String stopDonation(

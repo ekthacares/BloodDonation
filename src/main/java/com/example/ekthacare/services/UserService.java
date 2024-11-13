@@ -168,4 +168,7 @@ public class UserService {
     public boolean userExists(String mobile) {
         return userRepository.findByMobile(mobile).isPresent(); // Check if a user with the mobile number exists
     }
+
+	
+	
 }
