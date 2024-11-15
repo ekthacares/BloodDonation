@@ -76,7 +76,15 @@ public class BloodDonationService {
                     result -> (LocalDateTime) result[1]     // last donation date (as LocalDateTime)
                 ));
     }
-
+    
+    public Map<Long, LocalDateTime> getLastDonationDatesByuserIds(List<Long> userIds) {
+        List<Object[]> results = bloodDonationRepository.findLastDonationDatesByuserIds(userIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                    result -> (Long) result[0],              // recipientId
+                    result -> (LocalDateTime) result[1]     // last donation date (as LocalDateTime)
+                ));
+    }
     public BloodDonation findDonationsByUserId(Long userId) {
         return bloodDonationRepository.findByUserId(userId);
     }

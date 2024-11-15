@@ -388,9 +388,13 @@ public class DonorController {
 	                                .map(User::getId)
 	                                .collect(Collectors.toList());
 	                        System.out.println("Recipient IDs: " + recipientIds);
-
+	                        
+	                        List<Long> userIds = results.stream()
+	                                .map(User::getId)
+	                                .collect(Collectors.toList());
+	                        System.out.println("user IDs: " + userIds);
 	                        // Fetch last donation dates
-	                        Map<Long, LocalDateTime> lastDonationDates = bloodDonationService.getLastDonationDatesByRecipientIds(recipientIds);
+	                        Map<Long, LocalDateTime> lastDonationDates = bloodDonationService.getLastDonationDatesByuserIds(userIds);
 	                        System.out.println("Last donation dates: " + lastDonationDates);
 
 	                        // Filter results based on the last donation date (null means no donation date)
