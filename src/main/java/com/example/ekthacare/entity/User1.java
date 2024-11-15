@@ -178,6 +178,11 @@ public class User1 {
 				+ address + ", city=" + city + ", state=" + state + ", isverified=" + isverified + "]";
 	}
 
+	public boolean isPresent() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	
 
 	

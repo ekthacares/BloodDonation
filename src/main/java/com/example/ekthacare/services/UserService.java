@@ -19,6 +19,7 @@ import com.example.ekthacare.entity.User;
 import com.example.ekthacare.repo.ChangeLogRepository;
 import com.example.ekthacare.repo.UserRepository;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,6 +169,22 @@ public class UserService {
     public boolean userExists(String mobile) {
         return userRepository.findByMobile(mobile).isPresent(); // Check if a user with the mobile number exists
     }
+
+	public Long getLoggedInDonorId(HttpSession session) {
+    // Example: Get the currently logged-in user from the database using the session
+    // You can replace this logic with your session management or token-based authentication logic.
+    
+    // Assuming you have a userSession repository or some method to retrieve the logged-in user:
+    Long loggedInUserId = (Long) session.getAttribute("userId"); // Retrieve the userId from session
+    if (loggedInUserId != null) {
+        return loggedInUserId;
+    } else {
+        return null; // No logged-in user, returning null for anonymous users
+    }
+    
+    
+
+}
 
 	
 	

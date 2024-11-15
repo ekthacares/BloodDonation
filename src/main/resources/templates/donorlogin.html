@@ -179,6 +179,8 @@
     <div class="contact-form-block">
         <h2 class="contact-title">Welcome to the DONOR's Login Page</h2>
     </div>
+    <!-- Display message if any -->
+        <div th:if="${message}" class="message" style="text-align: center; font-weight: bold; color: red;" th:text="${message}"></div>
 
     <section class="section-content-block">
         <div class="col-sm-6 wow fadeInLeft">

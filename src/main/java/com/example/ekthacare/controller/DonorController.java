@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.entity.User1;
 import com.example.ekthacare.repo.SentEmailRepository;
+import com.example.ekthacare.repo.User1Repository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.EmailService;
@@ -31,6 +35,7 @@ import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
+import com.example.ekthacare.services.User1Service;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.services.UserUploadResult;
 import com.itextpdf.io.source.ByteArrayOutputStream;
@@ -51,6 +56,9 @@ public class DonorController {
 	 @Autowired
 	    private UserRepository userRepository;
 	 
+	 @Autowired
+	    private User1Repository user1Repository;
+	 
 	  @Autowired
 	    private OtpService otpService;
 
@@ -59,6 +67,9 @@ public class DonorController {
 	    
 	    @Autowired
 	    private UserService userService;
+	    
+	    @Autowired
+	    private User1Service user1Service;
 	    
 	    @Autowired
 	    private SearchRequestService searchRequestRepository;
@@ -120,32 +131,60 @@ public class DonorController {
 	    public String showDonorRegistrationForm(Model model) {
 	        model.addAttribute("user", new User());
 	        return "donorregister"; // This will render register.html
-	    }	   
+	    }	 
+	 
 	 @PostMapping("/donorregister")
-	    public String registerDonorByAdmin(@ModelAttribute User user, Model model) {
-		// Check if the mobile number already exists
-		    if (userRepository.existsByMobile(user.getMobile())) {
-		        model.addAttribute("message", "Mobile number already exists. Please use a different number.");
-		        return "register"; // Return to registration page with an error message
-		    }
-		 // Set isVerified to false
-	        user.setVerified(false);
-	        // Save donor information to the database
-	        userRepository.save(user);
+	 public String registerDonorByAdmin(@ModelAttribute User user, Model model, HttpSession session) {
+	     // Check if the mobile number already exists
+	     if (userRepository.existsByMobile(user.getMobile())) {
+	         model.addAttribute("message", "Mobile number already exists. Please use a different number.");
+	         return "register"; // Return to registration page with an error message
+	     }
+	     
+	     // Retrieve the admin userId from the session
+	     Long userId = (Long) session.getAttribute("userId");
 
-	        // Generate and send OTP to the user's mobile number
-	        String otp = otpService.generateOtp(user.getMobile());
-	       
-	        emailService.sendOtp(user.getEmailid(), otp);
-	        String message = "User Admin login OTP is " + otp + " - SMSCNT";
-	         smsService.sendJsonSms(user.getMobile(), message);
+	     // Print the userId to verify
+	     System.out.println("Admin userId from session: " + userId);
+	     
+	     // Ensure userId exists in the session
+	     if (userId == null) {
+	         model.addAttribute("message", "Admin session expired. Please log in again.");
+	         return "adminlogin"; // Redirect to admin login if session is invalid
+	     }
+	     
+	     // Set isVerified to false
+	     user.setVerified(false);
+	     
+	     // Set createBy column in the User entity to the admin's userId (userId from session)
+	     user.setCreatedBy(userId);  // Set the admin's userId as the creator of the donor
+	     
+	     // Set createdByType to "admin" since an admin is creating this donor
+	     user.setCreatedByType("Admin");
+	     
+	  // Set the createdAt field to the current time
+	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
 
-	        // Store user in session for later use
-	        model.addAttribute("mobile", user.getMobile());
-	        model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+	     // Save donor information to the database
+	     userRepository.save(user);
 
-	        return "donorresgisterotp"; // Redirect to OTP verification page
-	    }
+	     // Generate and send OTP to the user's mobile number
+	     String otp = otpService.generateOtp(user.getMobile());
+	     emailService.sendOtp(user.getEmailid(), otp);
+	     String message = "User Admin login OTP is " + otp + " - SMSCNT";
+	     smsService.sendJsonSms(user.getMobile(), message);
+
+	     // Set message for OTP verification
+	     model.addAttribute("mobile", user.getMobile());
+	     model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+
+	     // Proceed to the OTP verification page
+	     return "donorresgisterotp"; // Redirect to OTP verification page
+	 }
+
+
+
+
 	 
 	 @PostMapping("/validatedonorregisterOtp")
 	 public String validatedonorregisterOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
@@ -174,46 +213,74 @@ public class DonorController {
 	    }  
 	
 	 @PostMapping("/login")
-	    public String login(@RequestParam String mobile, Model model) {
-	        User user = userRepository.findByMobile(mobile);
-	        if (user == null) {
-	            model.addAttribute("message", "User not found");
-	            return "loginerror";
-	        }
+	 public String login(@RequestParam String mobile, Model model) {
+	     // Find user by mobile number
+	     User user = userRepository.findByMobile(mobile);
+	     
+	     // If user does not exist, return an error message
+	     if (user == null) {
+	         model.addAttribute("message", "User not found");
+	         return "donorlogin";
+	     }
+	     
+	     // Check if user is deleted
+	     if (user.isDeleted()) {  // Assuming isDeleted is a boolean flag
+	         model.addAttribute("message", "Your account has been deleted. Please contact support.");
+	         return "donorlogin";
+	     }
 
-	        // Generate OTP
-	        String otp = otpService.generateOtp(mobile);
+	     // Generate OTP
+	     String otp = otpService.generateOtp(mobile);
 
-	        // Send OTP via email
-	        emailService.sendOtp(user.getEmailid(), otp);
-	        
-	        // Send OTP via SMS using SMSCountry API
-	         String message = "User Admin login OTP is " + otp + " - SMSCNT";
-	         smsService.sendJsonSms(mobile, message);
-	        model.addAttribute("mobile", mobile);
-	        return "otp";
-	    } 
+	     // Send OTP via email
+	     emailService.sendOtp(user.getEmailid(), otp);
+	     
+	     // Send OTP via SMS using SMSCountry API
+	     String message = "User Admin login OTP is " + otp + " - SMSCNT";
+	     smsService.sendJsonSms(mobile, message);
+
+	     // Add mobile number to model and redirect to OTP input page
+	     model.addAttribute("mobile", mobile);
+	     return "otp";
+	 }
+
    	   
 	 @PostMapping("/validateOtp")
 	 public String validateOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
 	     if (otpService.validateOtp(mobile, otp)) {
 	         User user = userService.findByMobile(mobile);
 	         if (user != null) {
+	             // Assuming you want to set `createdBy` after OTP validation
+	             user.setCreatedBy(user.getId());  // Set the `createdBy` field to the current user's ID (or other relevant field)
+	             
+	             // Set createdByType to "donor" since it is creating this donorregistration
+	    	     user.setCreatedByType("Self");
+	    	     
+	    	  // Set the createdAt field to the current time
+	    	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
+
+	             // Save the user with updated `createdBy`
+	             userService.save(user); // Assuming save method persists the user entity
+	             
+	             // Set session attributes
 	             session.setAttribute("userId", user.getId());
 	             System.out.println("User ID set in session: " + user.getId()); // Debug statement
 	             session.setAttribute("userName", user.getDonorname());
 	             System.out.println("userName set in session: " + user.getDonorname());
+
+	             // Redirect to the donor home page after successful OTP validation and update
 	             return "redirect:/donorhome";
 	         } else {
 	             model.addAttribute("message", "User not found");
-	             return "otp";
+	             return "otp"; // Return to OTP page if user is not found
 	         }
 	     } else {
 	         model.addAttribute("message", "Invalid OTP");
 	         model.addAttribute("mobile", mobile);
-	         return "otp";
+	         return "otp"; // Return to OTP page if OTP is invalid
 	     }
 	 }
+
 
 	 /* ============================Donorhome====================================== */
 	 @GetMapping("/donorhome")

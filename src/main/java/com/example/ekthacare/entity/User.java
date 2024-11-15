@@ -1,6 +1,8 @@
 package com.example.ekthacare.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -49,33 +51,63 @@ public class User {
     @Column(name = "isverified")
     private boolean isverified;
     
+    // New fields for tracking creation, update, and deletion
+    @Column(name = "created_by")
+    private Long createdBy;  // Changed from String to Long
     
+    private String createdByType; // The type of the creator ("admin" or "donor")
+
+    @Column(name = "updated_by")
+    private Long updatedBy;  // Changed from String to Long
+
+    @Column(name = "deleted_by")
+    private Long deletedBy;  // Changed from String to Long
+    
+    private String deletedByType; // The type of the creator ("admin" or "donor")
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    private boolean isDeleted = false;
     // No-argument constructor for JPA
     public User() {
     }
 
     public User(Long id, String donorname, String mobile, String emailid, LocalDate dateofbirth,
-                 String bloodgroup, Integer age, String gender, String address, String city, String state,
-                 boolean isverified) {
-        this.id = id;
-        this.donorname = donorname;
-        this.mobile = mobile;
-        this.emailid = emailid;
-        this.dateofbirth = dateofbirth;
-        this.bloodgroup = bloodgroup;
-        this.age = age;
-        this.gender = gender;
-        this.address = address;
-        this.city = city;
-        this.state = state;
-        this.isverified = isverified;
-    }
+            String bloodgroup, Integer age, String gender, String address, String city, String state,
+            boolean isverified, Long createdBy, Long updatedBy, Long deletedBy,
+            LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+    this.id = id;
+    this.donorname = donorname;
+    this.mobile = mobile;
+    this.emailid = emailid;
+    this.dateofbirth = dateofbirth;
+    this.bloodgroup = bloodgroup;
+    this.age = age;
+    this.gender = gender;
+    this.address = address;
+    this.city = city;
+    this.state = state;
+    this.isverified = isverified;
+    this.createdBy = createdBy;
+    this.updatedBy = updatedBy;
+    this.deletedBy = deletedBy;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.deletedAt = deletedAt;
+}
 
     // Getters and setters...
 
     @Override
     public String toString() {
-        return "Donor{" +
+        return "User{" +
                 "id=" + id +
                 ", donorname='" + donorname + '\'' +
                 ", mobile='" + mobile + '\'' +
@@ -88,6 +120,12 @@ public class User {
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", isverified=" + isverified +
+                ", createdBy='" + createdBy + '\'' +
+                ", updatedBy='" + updatedBy + '\'' +
+                ", deletedBy='" + deletedBy + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", deletedAt=" + deletedAt +
                 '}';
     }
     
@@ -194,9 +232,75 @@ public class User {
 	}
 
 	
-	
+	public Long getCreatedBy() {
+        return createdBy;
+    }
 
-	
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
 
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public Long getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(Long deletedBy) {
+        this.deletedBy = deletedBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+    
+    public String getCreatedByType() {
+        return createdByType;
+    }
+
+    public void setCreatedByType(String createdByType) {
+        this.createdByType = createdByType;
+    }
 	
+    public String getDeletedByType() {
+        return deletedByType;
+    }
+
+    public void setDeletedByType(String deletedByType) {
+        this.deletedByType = deletedByType;
+    }
 }
