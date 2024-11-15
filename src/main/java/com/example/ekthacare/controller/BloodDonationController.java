@@ -34,26 +34,30 @@ public class BloodDonationController {
 
     @GetMapping("/mydonations")
     public String getDonations(HttpSession session, Model model) {
-    	Long userId = (Long) session.getAttribute("userId");
+        // Retrieve the logged-in user's ID from the session
+        Long userId = (Long) session.getAttribute("userId");
         System.out.println("Retrieved userId from session: " + userId);
-      
-        
-        User loggedInUserId = null;
-        if (userId != null) {
-        	loggedInUserId = userService.findById(userId);
-        	  System.out.println("Retrieved loggedInUserId from session: " + loggedInUserId); // Debug statement
-            if (loggedInUserId != null) {          
-               // Fetch the donations for the logged-in user
-            	 List<BloodDonation> donations = bloodDonationService.getDonationsByRecipientId(userId);
-                 model.addAttribute("donations", donations);
-                 return "mydonations"; // The name of your Thymeleaf template
-            }
-        // Redirect to login if loggedInUserId is not found
-        return "mydonations";
-    }
-		return "redirect:/donorhome";
 
+        if (userId != null) {
+            // Retrieve the logged-in user's details
+            User loggedInUser = userService.findById(userId);
+            System.out.println("Retrieved loggedInUser from session: " + loggedInUser); // Debug statement
+
+            if (loggedInUser != null) {
+                // Fetch donations by userId (donor)
+                BloodDonation donations = bloodDonationService.findDonationsByUserId(userId);
+                model.addAttribute("donations", donations);
+
+                // Return the view name
+                return "mydonations"; // The name of your Thymeleaf template
+            }
+        }
+
+        // Redirect to donor home if no valid user or donations found
+        return "redirect:/donorhome";
     }
+
+
     
     
     @GetMapping("/totaldonationlist")

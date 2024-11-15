@@ -20,40 +20,53 @@ public class BloodDonationService {
         this.bloodDonationRepository = bloodDonationRepository;
     }
 
-    // Updated method to include recipientId
-    public void updateLastDonationDate(Long userId, Long recipientId, LocalDateTime lastDonationDate) {
+    // Updated method to include hospitalName
+    public void updateLastDonationDate(Long userId, Long recipientId, LocalDateTime lastDonationDate, String hospitalName) {
         // Retrieve the user's blood donation record
-        BloodDonation bloodDonation = bloodDonationRepository.findByUserId(userId);
-        
-        // If a record exists, update the last donation date
-        if (bloodDonation != null) {
-            bloodDonation.setLastDonationDate(lastDonationDate);
-            bloodDonation.setRecipientId(recipientId);  // Ensure recipientId is set
-            bloodDonationRepository.save(bloodDonation);
-        } else {
-            // Optionally, create a new record if none exists
-            bloodDonation = new BloodDonation();
-            bloodDonation.setUserId(userId);
-            bloodDonation.setRecipientId(recipientId);  // Ensure recipientId is set
-            bloodDonation.setLastDonationDate(lastDonationDate);
-            bloodDonation.setLastDonationDate(lastDonationDate);
-            bloodDonationRepository.save(bloodDonation);
-        }
+        BloodDonation bloodDonation = bloodDonationRepository.findByUserId(recipientId);
 
-        // Log the recipient ID as well (if needed)
-        System.out.println("Updated last donation date for user ID: " + userId + " for recipient ID: " + recipientId);
+        if (bloodDonation != null) {
+            // Check if the recipient is different
+            if (!userId.equals(bloodDonation.getUserId())) {
+                bloodDonation.setLastDonationDate(lastDonationDate);
+                bloodDonation.setRecipientId(userId);
+                bloodDonation.setHospitalName(hospitalName); // Set hospital name
+                bloodDonationRepository.save(bloodDonation);
+                
+                // Log the update
+                System.out.println("Updated last donation date for user ID: " + recipientId + 
+                                   ", recipient ID: " + userId +
+                                   ", hospital name: " + hospitalName);
+            } else {
+                // Log no update required
+                System.out.println("No update needed for user ID: " + recipientId + 
+                                   ", recipient ID remains the same: " + userId);
+            }
+        } else {
+            // Create a new record if none exists
+            bloodDonation = new BloodDonation();
+            bloodDonation.setUserId(recipientId);
+            bloodDonation.setRecipientId(userId);
+            bloodDonation.setLastDonationDate(lastDonationDate);
+            bloodDonation.setHospitalName(hospitalName); // Set hospital name
+            bloodDonationRepository.save(bloodDonation);
+            
+            // Log the creation
+            System.out.println("Created new donation record for user ID: " + recipientId + 
+                               ", recipient ID: " + userId +
+                               ", hospital name: " + hospitalName);
+        }
     }
-    
-   
+
     
     public List<BloodDonation> getDonationsByRecipientId(Long recipientId) {
         return bloodDonationRepository.findByRecipientId(recipientId);
     }
     
+   
     public List<BloodDonation> getAllDonations() {
         return bloodDonationRepository.findAll();
     }
-    
     
     public Map<Long, LocalDateTime> getLastDonationDatesByRecipientIds(List<Long> recipientIds) {
         List<Object[]> results = bloodDonationRepository.findLastDonationDatesByRecipientIds(recipientIds);
@@ -73,12 +86,10 @@ public class BloodDonationService {
     }
     
     public List<BloodDonation> getAllDonations(int page, int pageSize) {
-        // Fetch paginated donations
         return bloodDonationRepository.findAll(PageRequest.of(page, pageSize)).getContent();
     }
 
     public long countAllDonations() {
-        // Count the total number of donations
         return bloodDonationRepository.count();
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.repo.ConfirmationRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class ConfirmationService {
 
@@ -22,7 +24,9 @@ public class ConfirmationService {
         return confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
     }
 
-    public boolean saveConfirmation(Long recipientId, Long loggedInUserId) {
+    @Transactional
+    public boolean saveConfirmation(Long recipientId, Long loggedInUserId, String hospitalName) {
+        // Retrieve any existing confirmation for the recipient
         Confirmation existingConfirmation = confirmationRepository
                 .findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
 
@@ -31,16 +35,22 @@ public class ConfirmationService {
             return false;
         }
 
+        // Create new Confirmation object
         Confirmation confirmation = new Confirmation();
-        confirmation.setRecipientId(recipientId);
-        confirmation.setLoggedInUserId(loggedInUserId);
+        confirmation.setRecipientId(loggedInUserId);
+        confirmation.setLoggedInUserId(recipientId);
+        confirmation.setHospitalName(hospitalName);  // Set the hospital name
         confirmation.setConfirmedAt(LocalDateTime.now());
-        // Save the initial confirmation
-        confirmation = confirmationRepository.save(confirmation);
 
-        // Step 2: Update confirmed field to true after saving the initial entity
-        confirmation.setConfirmed(true);
-        confirmationRepository.save(confirmation); // Save the updated confirmation
+        // Print the values to the console before saving
+        System.out.println("Saving Confirmation with the following details:");
+        System.out.println("Recipient ID: " + loggedInUserId);
+        System.out.println("Logged-in User ID: " + recipientId);
+        System.out.println("Hospital Name: " + hospitalName);
+        System.out.println("Confirmed At: " + confirmation.getFormattedConfirmedAt());
+
+        // Save the confirmation with the hospital name included
+        confirmationRepository.save(confirmation);
 
         return true;
     }
@@ -113,29 +123,28 @@ public class ConfirmationService {
         return confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
     }
     
-    public Confirmation createNewConfirmation(Long recipientId, Long loggedInUserId) {
-        // Check if a confirmation already exists for the given recipientId and loggedInUserId
+    @Transactional
+    public Confirmation createNewConfirmation(Long recipientId, Long loggedInUserId, String hospitalName) {
         Confirmation existingConfirmation = confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
 
-        // If an existing confirmed confirmation exists, don't create a new one
         if (existingConfirmation != null && existingConfirmation.isConfirmed()) {
-            // Optionally, throw an exception or return the existing confirmation
-            System.out.println("Confirmation already exists and is confirmed for recipientId: " + recipientId + " and loggedInUserId: " + loggedInUserId);
+            System.out.println("Confirmation already exists and is confirmed for recipientId: " + recipientId + 
+                               " and loggedInUserId: " + loggedInUserId);
             return existingConfirmation;
         }
 
-        // If no existing confirmed confirmation, create a new one
         Confirmation confirmation = new Confirmation();
-        confirmation.setRecipientId(recipientId);
-        confirmation.setLoggedInUserId(loggedInUserId);
-        confirmation.setConfirmedAt(LocalDateTime.now());  // Set confirmation time
+        confirmation.setRecipientId(loggedInUserId);
+        confirmation.setLoggedInUserId(recipientId);
+        confirmation.setHospitalName(hospitalName);  // Set hospital name
+        confirmation.setConfirmedAt(LocalDateTime.now());
         confirmationRepository.save(confirmation);
 
-        System.out.println("New confirmation created for recipientId: " + recipientId + " and loggedInUserId: " + loggedInUserId);
+        System.out.println("New confirmation created for recipientId: " + loggedInUserId + 
+                           ", loggedInUserId: " + recipientId + 
+                           ", hospitalName: " + hospitalName);
         return confirmation;
     }
-
-
 	
 
 	public List<Confirmation> getAllConfirmations() {
@@ -166,5 +175,7 @@ public class ConfirmationService {
 	    public long countAllRequests() {
 	        return confirmationRepository.count(); // This assumes count() is defined in your repository
 	    }
+
+		
 	  
 }

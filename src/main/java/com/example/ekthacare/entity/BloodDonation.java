@@ -27,6 +27,9 @@ public class BloodDonation {
     @Column(name = "last_donation_date")
     private LocalDateTime lastDonationDate;
 
+    @Column(name = "hospital_name", length = 255)  // New column for hospital name
+    private String hospitalName;
+
     // Default constructor
     public BloodDonation() {
     }
@@ -66,6 +69,14 @@ public class BloodDonation {
         } else {
             this.lastDonationDate = null;
         }
+    }
+
+    public String getHospitalName() {
+        return hospitalName;
+    }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
     }
 
     public String getFormattedTimestamp() {

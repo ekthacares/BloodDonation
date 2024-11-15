@@ -167,6 +167,7 @@
             <th>ID</th>
             <th>Donated to</th>            
             <th>Last Donation Date</th>
+            <th>Donation Place</th>
         </tr>
         </thead>
                <tbody>
@@ -175,14 +176,13 @@
                 <td>
                     <a href="#" 
                        data-toggle="modal" data-target="#userProfileModal" 
-                       th:attr="data-user-id=${donation.userId}" 
+                       th:attr="data-user-id=${donation.recipientId}" 
                        class="view-profile1">
-                       <span th:text="${donation.userId}">User ID</span>
+                       <span th:text="${donation.recipientId}">User ID</span>
                     </a>
-                </td>
-                 
+                </td>                 
                  <td th:text="${donation.formattedTimestamp}">DonationDate</td>
-               
+               	<td th:text="${donation.hospitalName}">Hospital Name</td>
             </tr>
         </tbody>
             </table>

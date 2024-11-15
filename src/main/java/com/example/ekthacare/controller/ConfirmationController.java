@@ -40,6 +40,7 @@ public class ConfirmationController {
     @GetMapping("/confirmRequest")
     public String confirmRequest(
             @RequestParam String token, 
+            @RequestParam(required = false) String hospitalName, // Make hospitalName optional
             Model model) {
 
         try {
@@ -78,7 +79,15 @@ public class ConfirmationController {
                 }
             }
 
-            // No existing completed confirmation, proceed with generating OTP for this user
+            // Print the hospital name before sending OTP
+            System.out.println("Hospital Name: " + hospitalName);  // Log the hospital name
+            
+            // Ensure that the hospital name is set in the confirmation creation
+            if (hospitalName == null || hospitalName.isEmpty()) {
+                hospitalName = "Unknown Hospital"; // Default if no hospital name provided
+            }
+
+            // Proceed with generating OTP for this user
             String otp = otpVerificationService.generateAndSaveOtp(recipientId, loggedInUserId);
 
             // Find the recipient user based on recipientId
@@ -99,9 +108,10 @@ public class ConfirmationController {
                 return "errorPage";  // If the recipient does not exist, show error page
             }
 
-            // Add recipient and logged-in user info to model for the OTP verification page
+            // Add recipient, logged-in user, and hospital name info to the model
             model.addAttribute("recipientId", recipientId);
             model.addAttribute("loggedInUserId", loggedInUserId);
+            model.addAttribute("hospitalName", hospitalName);  // Add hospital name to the model (if present)
 
             System.out.println("OTP generated and sent for recipient ID: " + recipientId + " by user ID: " + loggedInUserId);
             return "otpVerificationforConfirmurl";  // Redirect to OTP input page for user to enter OTP
@@ -111,6 +121,8 @@ public class ConfirmationController {
             return "errorPage";  // Handle generic errors
         }
     }
+
+
 
 
     @PostMapping("/startDonation")

@@ -9,4 +9,5 @@ import com.example.ekthacare.entity.BloodRequest;
 
 public interface BloodRequestRepository extends JpaRepository<BloodRequest, Long> {
   
+	
 }

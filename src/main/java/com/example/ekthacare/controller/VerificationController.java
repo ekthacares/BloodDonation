@@ -29,37 +29,41 @@ public class VerificationController {
 	
          
     @PostMapping("/verifyOtp")
-    public String verifyOtp(@RequestParam Long recipientId, @RequestParam Long loggedInUserId, @RequestParam String otp, Model model, RedirectAttributes redirectAttributes) {
-        // Validate OTP using the service
+    public String verifyOtp(@RequestParam Long recipientId, 
+                            @RequestParam Long loggedInUserId, 
+                            @RequestParam String otp, 
+                            @RequestParam(required = false) String hospitalName,  // Add hospital name here
+                            Model model, 
+                            RedirectAttributes redirectAttributes) {
+        System.out.println("Hospital Name passed to verifyOtp: " + hospitalName);  // Print hospital name here
+
         if (otpVerificationService.validateOtp(recipientId, loggedInUserId, otp)) {
             System.out.println("OTP validated successfully, processing confirmation.");
 
-            // Check if confirmation already exists
             Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientId(recipientId);
 
             if (existingConfirmation != null && !existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
-                // If another user has already donated to this recipient, show a message
                 redirectAttributes.addFlashAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getLoggedInUserId());
-                return "redirect:/donationTracking";  // Redirect to donation tracking page
+                return "redirect:/donationTracking";
             }
 
-            // No existing confirmation or valid for the logged-in user, create a new confirmation
-            Confirmation newConfirmation = confirmationService.createNewConfirmation(recipientId, loggedInUserId);
+            // Pass hospitalName to the confirmation service if applicable
+            Confirmation newConfirmation = confirmationService.createNewConfirmation(recipientId, loggedInUserId, hospitalName);
+            System.out.println("Hospital Name in createNewConfirmation: " + hospitalName);  // Print hospital name here too
             redirectAttributes.addFlashAttribute("confirmation", newConfirmation);
 
-            // Update the last donation date
-            bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now());
+            bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);  // Pass hospital name here as well
+            System.out.println("Hospital Name in updateLastDonationDate: " + hospitalName);  // Print hospital name here too
 
-            // Redirect to the donation tracking page
             return "redirect:/donationTracking";
         } else {
-            // If OTP is invalid, display error and stay on the OTP verification page
             model.addAttribute("error", "Invalid OTP. Please try again.");
-            model.addAttribute("recipientId", recipientId);  // Retain recipientId and loggedInUserId to allow retry
+            model.addAttribute("recipientId", recipientId);
             model.addAttribute("loggedInUserId", loggedInUserId);
-            return "otpVerificationforConfirmurl";  // Return to OTP verification page
+            return "otpVerificationforConfirmurl";
         }
     }
+
     
     @GetMapping("/donationTracking")
     public String showDonationTracking(Model model) {

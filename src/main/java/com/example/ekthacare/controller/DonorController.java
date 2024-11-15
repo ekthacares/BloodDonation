@@ -1,6 +1,7 @@
 package com.example.ekthacare.controller;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -374,9 +375,8 @@ public class DonorController {
 	                // Initialize results list
 	                List<User> results = new ArrayList<>();
 
-	                // Perform search only if bloodgroup and city are provided
+	                // Perform search only if bloodgroup, city, or state is provided
 	                if (bloodgroup != null || city != null || state != null) {
-	                    // Ensure that we do not search with incomplete parameters
 	                    System.out.println("Searching for bloodgroup: " + bloodgroup + ", city: " + city + ", state: " + state);
 	                    results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
 
@@ -399,6 +399,14 @@ public class DonorController {
 	                                .collect(Collectors.toList());
 
 	                        System.out.println("Filtered results (no donation date): " + results);
+
+	                        // Further filter out the logged-in user based on ID or email
+	                        results = results.stream()
+	                                .filter(user -> !user.getId().equals(loggedInUser.getId()) && 
+	                                                !user.getEmailid().equalsIgnoreCase(loggedInUser.getEmailid()))
+	                                .collect(Collectors.toList());
+
+	                        System.out.println("Final filtered results (excluding logged-in user): " + results);
 	                    } else {
 	                        System.out.println("No results found based on the provided parameters.");
 	                    }
@@ -406,15 +414,13 @@ public class DonorController {
 	                    // Save the search request
 	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
-	                    // Send an email to each user in the search results
-	                    if (loggedInUser != null) {
-	                        for (User user : results) {
-	                            try {
-	                                sendEmailToUser(user, loggedInUser,bloodgroup, hospitalName);
-	                            } catch (Exception e) {
-	                                System.out.println("Error sending email to user: " + user.getId());
-	                                e.printStackTrace();
-	                            }
+	                    // Send an email to each user in the filtered search results
+	                    for (User user : results) {
+	                        try {
+	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+	                        } catch (Exception e) {
+	                            System.out.println("Error sending email to user: " + user.getId());
+	                            e.printStackTrace();
 	                        }
 	                    }
 	                } else {
@@ -436,7 +442,6 @@ public class DonorController {
 	            return "donorlogin"; // Or redirect to login page
 	        }
 	    }
-
 	    
 	    
 	    public DonorController(SentEmailRepository sentEmailRepository) {
@@ -445,7 +450,8 @@ public class DonorController {
 	  
 	    private void sendEmailToUser(User user, User loggedInUser, String bloodgroup, String hospitalName) {
 	        String subject = "Blood Search Alert";
-	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId());
+	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId(), hospitalName);
+
 
 	        String locationInfo = (hospitalName != null && !hospitalName.isEmpty()) ? 
 	                "The blood is needed at " + hospitalName : 
@@ -473,10 +479,12 @@ public class DonorController {
 	  //      return "http://localhost:8082/confirmRequest?recipientId=" + recipientId + "&loggedInUserId=" + loggedInUserId;
 	  //  }  
 	    
-	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId) {
+	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
-	        return "http://localhost:8082/confirmRequest?token=" + token;  // Use token instead of raw IDs
+	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
+	        return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
+
 	    
 	 // Method to generate a secure token (could use JWT or encryption)
 	    private String generateSecureToken(Long recipientId, Long loggedInUserId) {

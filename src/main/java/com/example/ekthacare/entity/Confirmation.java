@@ -3,6 +3,7 @@ package com.example.ekthacare.entity;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +20,9 @@ public class Confirmation {
     private LocalDateTime confirmedAt;
     private LocalDateTime startedAt;
     private LocalDateTime stoppedAt;
-    
+    @Column(name = "hospital_name")
+    private String hospitalName;  // Ensure the hospitalName field is included
+
     // Getters and setters...
 
     public boolean isConfirmed() {
@@ -82,12 +85,20 @@ public class Confirmation {
 	public void setStoppedAt(LocalDateTime stoppedAt) {
 		this.stoppedAt = stoppedAt;
 	}
+	
+	 public String getHospitalName() {
+	        return hospitalName;
+	    }
+
+	    public void setHospitalName(String hospitalName) {
+	        this.hospitalName = hospitalName;
+	    }
 
 	@Override
 	public String toString() {
 		return "Confirmation [id=" + id + ", recipientId=" + recipientId + ", loggedInUserId=" + loggedInUserId
 				+ ", confirmedAt=" + confirmedAt + ", startedAt=" + startedAt + ", stoppedAt=" + stoppedAt
-				+ ", confirmed=" + confirmed + "]";
+				+ ", confirmed=" + confirmed + ", hospitalName=" + hospitalName + "]";
 	}
 
 	
@@ -99,7 +110,7 @@ public class Confirmation {
 	}
 
 	public Confirmation(Long id, Long recipientId, Long loggedInUserId, LocalDateTime confirmedAt,
-			LocalDateTime startedAt, LocalDateTime stoppedAt, boolean confirmed) {
+			LocalDateTime startedAt, LocalDateTime stoppedAt, boolean confirmed, String hospitalName) {
 		super();
 		this.id = id;
 		this.recipientId = recipientId;
@@ -108,6 +119,7 @@ public class Confirmation {
 		this.startedAt = startedAt;
 		this.stoppedAt = stoppedAt;
 		this.confirmed = confirmed;
+		this.hospitalName = hospitalName;
 	}
 
 	public Confirmation() {
