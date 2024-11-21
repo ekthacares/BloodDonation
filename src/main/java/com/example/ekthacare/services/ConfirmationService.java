@@ -37,15 +37,16 @@ public class ConfirmationService {
 
         // Create new Confirmation object
         Confirmation confirmation = new Confirmation();
-        confirmation.setRecipientId(loggedInUserId);
-        confirmation.setLoggedInUserId(recipientId);
+        confirmation.setRecipientId(recipientId);
+        confirmation.setLoggedInUserId(loggedInUserId);
         confirmation.setHospitalName(hospitalName);  // Set the hospital name
         confirmation.setConfirmedAt(LocalDateTime.now());
-
+        confirmation.setConfirmed(true);
+        
         // Print the values to the console before saving
         System.out.println("Saving Confirmation with the following details:");
-        System.out.println("Recipient ID: " + loggedInUserId);
-        System.out.println("Logged-in User ID: " + recipientId);
+        System.out.println("Recipient ID: " + recipientId );
+        System.out.println("Logged-in User ID: " + loggedInUserId);
         System.out.println("Hospital Name: " + hospitalName);
         System.out.println("Confirmed At: " + confirmation.getFormattedConfirmedAt());
 
@@ -123,6 +124,11 @@ public class ConfirmationService {
         return confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
     }
     
+    public Confirmation getConfirmationByRecipientIdAndLoggedInUserId(Long recipientId, Long loggedInUserId) {
+        return confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
+    }
+
+    
     @Transactional
     public Confirmation createNewConfirmation(Long recipientId, Long loggedInUserId, String hospitalName) {
         Confirmation existingConfirmation = confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
@@ -134,14 +140,15 @@ public class ConfirmationService {
         }
 
         Confirmation confirmation = new Confirmation();
-        confirmation.setRecipientId(loggedInUserId);
-        confirmation.setLoggedInUserId(recipientId);
+        confirmation.setRecipientId(recipientId);
+        confirmation.setLoggedInUserId(loggedInUserId);
         confirmation.setHospitalName(hospitalName);  // Set hospital name
         confirmation.setConfirmedAt(LocalDateTime.now());
+        confirmation.setConfirmed(true);
         confirmationRepository.save(confirmation);
 
-        System.out.println("New confirmation created for recipientId: " + loggedInUserId + 
-                           ", loggedInUserId: " + recipientId + 
+        System.out.println("New confirmation created for recipientId: " + recipientId  + 
+                           ", loggedInUserId: " + loggedInUserId + 
                            ", hospitalName: " + hospitalName);
         return confirmation;
     }

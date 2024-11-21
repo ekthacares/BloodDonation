@@ -129,6 +129,7 @@
     </div> 
     <section class="section-content-block">
     <div class="registration_container">
+        
         <form th:action="@{/searchforblood}" method="get">
             <!-- Blood Group -->
             <div class="form-group">
@@ -177,9 +178,15 @@
             </div>
         </form>
 
-        <!-- Results Display -->
-        <div class="results" th:if="${results != null and #lists.size(results) > 0}">
-            <h2 th:text="'Number of results: ' + ${#lists.size(results)}"></h2>
+          <!-- Show message only after search -->
+    <div th:if="${searchPerformed}">
+               <!-- Show email sent message -->
+        <div th:if="${emailMessage != null}">
+            <p style="color: green;" th:text="${emailMessage}"></p>
+        </div>
+
+        <div class="results" th:if="${#lists.size(results) > 0}">
+            <p th:text="'Number of results: ' + ${#lists.size(results)}"></p>
             <table>
                 <thead>
                     <tr>
@@ -201,12 +208,14 @@
                 </tbody>
             </table>
         </div>
-        
-        <!-- No results message -->
-        <div class="no-results" th:if="${results == null or #lists.size(results) == 0}">
-            <p>No results found for the selected criteria.</p>
+
+        <!-- Show message if no results found -->
+        <div th:if="${#lists.isEmpty(results)}">
+            <p style="color: red;" th:text="${message}"></p>
         </div>
     </div>
+</div>
+            
 </section>
 <!--  end .section-about-us -->
 

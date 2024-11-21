@@ -242,6 +242,7 @@ public class DonorController {
 
 	     // Add mobile number to model and redirect to OTP input page
 	     model.addAttribute("mobile", mobile);
+	     model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
 	     return "otp";
 	 }
 
@@ -362,60 +363,49 @@ public class DonorController {
 	            @RequestParam(value = "hospital", required = false) String hospitalName,
 	            Model model, HttpSession session) {
 
+	        boolean searchPerformed = false;
+	        List<User> results = new ArrayList<>();
+	        String message = null;
+	        String emailMessage = null;
+
 	        // Retrieve userId from session
 	        Long userId = (Long) session.getAttribute("userId");
-	        System.out.println("Retrieved userId from session: " + userId);
-
 	        if (userId != null) {
 	            User loggedInUser = userService.findById(userId);
 	            if (loggedInUser != null) {
-	                System.out.println("User Details: " + loggedInUser);
 	                model.addAttribute("user", loggedInUser);
 
-	                // Initialize results list
-	                List<User> results = new ArrayList<>();
-
-	                // Perform search only if bloodgroup, city, or state is provided
+	                // Perform search only if any of the parameters are provided
 	                if (bloodgroup != null || city != null || state != null) {
-	                    System.out.println("Searching for bloodgroup: " + bloodgroup + ", city: " + city + ", state: " + state);
+	                    searchPerformed = true;
+
+	                    // Perform the search based on provided criteria
 	                    results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
 
-	                    System.out.println("Initial search results: " + results);
+	                    // Debugging: Print the results before filtering
+	                    System.out.println("Results before filtering: ");
+	                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
 
-	                    if (!results.isEmpty()) {
-	                        // Get all recipient IDs
-	                        List<Long> recipientIds = results.stream()
-	                                .map(User::getId)
-	                                .collect(Collectors.toList());
-	                        System.out.println("Recipient IDs: " + recipientIds);
-	                        
-	                        List<Long> userIds = results.stream()
-	                                .map(User::getId)
-	                                .collect(Collectors.toList());
-	                        System.out.println("user IDs: " + userIds);
-	                        // Fetch last donation dates
-	                        Map<Long, LocalDateTime> lastDonationDates = bloodDonationService.getLastDonationDatesByuserIds(userIds);
-	                        System.out.println("Last donation dates: " + lastDonationDates);
+	                    // Check if the logged-in user is part of the search results (before filtering out the user)
+	                    boolean loggedInUserIsPartOfResults = results.stream()
+	                            .anyMatch(user -> user.getId().equals(loggedInUser.getId()));
 
-	                        // Filter results based on the last donation date (null means no donation date)
+	                    // If the logged-in user is in the results, exclude them based on blood group and other parameters
+	                    if (loggedInUserIsPartOfResults) {
+	                        message = "You cannot be a donor for your own search.";
+	                        // Filter out the logged-in user based on ID or email after checking the results
 	                        results = results.stream()
-	                                .filter(user -> lastDonationDates.get(user.getId()) == null)
-	                                .collect(Collectors.toList());
-
-	                        System.out.println("Filtered results (no donation date): " + results);
-
-	                        // Further filter out the logged-in user based on ID or email
-	                        results = results.stream()
-	                                .filter(user -> !user.getId().equals(loggedInUser.getId()) && 
+	                                .filter(user -> !user.getId().equals(loggedInUser.getId()) &&
 	                                                !user.getEmailid().equalsIgnoreCase(loggedInUser.getEmailid()))
 	                                .collect(Collectors.toList());
-
-	                        System.out.println("Final filtered results (excluding logged-in user): " + results);
-	                    } else {
-	                        System.out.println("No results found based on the provided parameters.");
 	                    }
 
-	                    // Save the search request
+	                    // Check if no results were found matching the criteria
+	                    if (results.isEmpty() && message == null) {
+	                        message = "No donors found matching the specified criteria. Please try again.";
+	                    }
+
+	                    // Save the search request to the repository
 	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
 	                    // Send an email to each user in the filtered search results
@@ -427,27 +417,30 @@ public class DonorController {
 	                            e.printStackTrace();
 	                        }
 	                    }
-	                } else {
-	                    System.out.println("No search parameters provided.");
+
+	                    // Set the email sent message after emails are sent
+	                    emailMessage = "Emails have been successfully sent to the donors.";
 	                }
-
-	                // Add results and other necessary model attributes
-	                model.addAttribute("results", results);
-	                model.addAttribute("cities", userService.getAllCities());
-	                model.addAttribute("states", userService.getAllStates());
-
-	                return "searchforblood";
 	            } else {
 	                model.addAttribute("error", "User not found.");
-	                return "home"; // or any error page you prefer
+	                return "home";
 	            }
 	        } else {
 	            model.addAttribute("error", "No user logged in.");
-	            return "donorlogin"; // Or redirect to login page
+	            return "donorlogin";
 	        }
+
+	        // Add results, messages, and other necessary model attributes
+	        model.addAttribute("results", results);
+	        model.addAttribute("searchPerformed", searchPerformed);
+	        model.addAttribute("message", message);  // Add the message to the model (this will show if no donors or self-donor case)
+	        model.addAttribute("emailMessage", emailMessage); // Add email sent message to the model (only if emails were sent)
+	        model.addAttribute("cities", userService.getAllCities());
+	        model.addAttribute("states", userService.getAllStates());
+
+	        return "searchforblood";
 	    }
-	    
-	    
+
 	    public DonorController(SentEmailRepository sentEmailRepository) {
 	        this.sentEmailRepository = sentEmailRepository;
 	    }

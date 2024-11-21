@@ -24,6 +24,5 @@ public interface BloodDonationRepository extends JpaRepository<BloodDonation, Lo
         @Query("SELECT bd.recipientId, MAX(bd.lastDonationDate) FROM BloodDonation bd WHERE bd.recipientId IN :recipientIds GROUP BY bd.recipientId")
         List<Object[]> findLastDonationDatesByRecipientIds(@Param("recipientIds") List<Long> recipientIds);
   
-        @Query("SELECT bd.userId, MAX(bd.lastDonationDate) FROM BloodDonation bd WHERE bd.userId IN :userIds GROUP BY bd.userId")
-        List<Object[]> findLastDonationDatesByuserIds(@Param("userIds") List<Long> userIds);
+    
 }

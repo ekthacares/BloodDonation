@@ -40,28 +40,45 @@ public class VerificationController {
         if (otpVerificationService.validateOtp(recipientId, loggedInUserId, otp)) {
             System.out.println("OTP validated successfully, processing confirmation.");
 
-            Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientId(recipientId);
+            // Get the existing confirmation based on both recipientId and loggedInUserId
+            Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
 
-            if (existingConfirmation != null && !existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
-                redirectAttributes.addFlashAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getLoggedInUserId());
-                return "redirect:/donationTracking";
+            // Check if an existing confirmation exists
+            if (existingConfirmation != null) {
+                System.out.println("User with ID " + loggedInUserId + " has an existing confirmation.");
+                System.out.println("Existing Confirmation Details: " + existingConfirmation.toString());  // Prints details of the existing confirmation
+
+                // Check if the loggedInUserId matches the confirmation's loggedInUserId
+                if (!existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
+                    redirectAttributes.addFlashAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getLoggedInUserId());
+                    return "redirect:/donationTracking";
+                } else {
+                    // If loggedInUserId matches, process the donation confirmation
+                    redirectAttributes.addFlashAttribute("confirmation", existingConfirmation);
+                }
+            } else {
+                // No existing confirmation found, so create a new one
+            	 // Pass hospitalName to the confirmation service if applicable
+                Confirmation newConfirmation = confirmationService.createNewConfirmation(recipientId, loggedInUserId, hospitalName);
+                System.out.println("New confirmation created for recipientId: " + recipientId + " and loggedInUserId: " + loggedInUserId);
+
+                // Save the new confirmation in the model for further processing
+                redirectAttributes.addFlashAttribute("confirmation", newConfirmation);
             }
 
-            // Pass hospitalName to the confirmation service if applicable
-            Confirmation newConfirmation = confirmationService.createNewConfirmation(recipientId, loggedInUserId, hospitalName);
-            System.out.println("Hospital Name in createNewConfirmation: " + hospitalName);  // Print hospital name here too
-            redirectAttributes.addFlashAttribute("confirmation", newConfirmation);
+            // Additional logic to update the donation tracking
+            bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);  // Update last donation date
+            System.out.println("Hospital Name in updateLastDonationDate: " + hospitalName);  // Print hospital name
 
-            bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);  // Pass hospital name here as well
-            System.out.println("Hospital Name in updateLastDonationDate: " + hospitalName);  // Print hospital name here too
-
-            return "redirect:/donationTracking";
+            return "redirect:/donationTracking";  // Redirect to donation tracking page
         } else {
             model.addAttribute("error", "Invalid OTP. Please try again.");
             model.addAttribute("recipientId", recipientId);
             model.addAttribute("loggedInUserId", loggedInUserId);
-            return "otpVerificationforConfirmurl";
+            return "otpVerificationforConfirmurl";  // Redirect to OTP verification page if OTP is invalid
         }
+
+        
     }
 
     

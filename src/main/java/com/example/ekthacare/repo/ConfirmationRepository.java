@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.ekthacare.entity.Confirmation;
 
 public interface ConfirmationRepository extends JpaRepository<Confirmation, Long> {
-   Confirmation findByRecipientIdAndLoggedInUserId(Long recipientId, Long loggedInUserId);
+    Confirmation findByRecipientIdAndLoggedInUserId(Long recipientId, Long loggedInUserId);
 
 Confirmation findFirstByRecipientIdAndLoggedInUserIdAndStoppedAtIsNull(Long recipientId, Long loggedInUserId);
 

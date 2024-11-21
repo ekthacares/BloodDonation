@@ -40,11 +40,11 @@ public class ConfirmationController {
     @GetMapping("/confirmRequest")
     public String confirmRequest(
             @RequestParam String token, 
-            @RequestParam(required = false) String hospitalName, // Make hospitalName optional
+            @RequestParam(required = false) String hospitalName, 
             Model model) {
 
         try {
-            // Decode the token to retrieve recipientId and loggedInUserId
+            // Decode the token to retrieve loggedInUserId and recipientId
             String decodedData = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8);
             String[] parts = decodedData.split(":");
 
@@ -54,44 +54,53 @@ public class ConfirmationController {
                 return "errorPage";
             }
 
-            Long recipientId = Long.parseLong(parts[0]);
-            Long loggedInUserId = Long.parseLong(parts[1]);
+            Long recipientId = Long.parseLong(parts[1]);
+            Long loggedInUserId = Long.parseLong(parts[0]);
 
-            System.out.println("Recipient ID: " + recipientId + ", Logged-In User ID: " + loggedInUserId);
+            System.out.println("Logged-In User ID: " + loggedInUserId);
 
-            // Retrieve any existing confirmation for the recipient
-            Confirmation existingConfirmation = confirmationService.getConfirmationByRecipientId(recipientId);
+            // Retrieve all existing confirmations for the logged-in user
+            List<Confirmation> existingConfirmations = confirmationService.getConfirmationsByLoggedInUserId(loggedInUserId);
 
-            if (existingConfirmation != null) {
-                // If another user has an existing confirmation, do not allow new confirmation
-                if (!existingConfirmation.getLoggedInUserId().equals(loggedInUserId)) {
-                    model.addAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getLoggedInUserId());
-                    System.out.println("Donation found for recipient ID: " + recipientId + 
-                                       " by another user. Current User ID: " + loggedInUserId + " cannot confirm.");
-                    return "donationTracking";
+            if (existingConfirmations != null && !existingConfirmations.isEmpty()) {
+                // If there are existing confirmations, check them
+                for (Confirmation existingConfirmation : existingConfirmations) {
+                    System.out.println("Existing confirmation found: " + existingConfirmation);
+
+                    // Check if the recipientId in the confirmation matches the current recipientId
+                    if (!existingConfirmation.getRecipientId().equals(recipientId)) {
+                        // If recipientId is different, show a message
+                        System.out.println("Mismatch in recipientId. User has already donated to another recipient.");
+                        model.addAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getRecipientId());
+                        return "donationTracking";
+                    }
+
+                    // Check if this confirmation is already completed
+                    if (existingConfirmation.isCompleted()) {
+                        System.out.println("Completed confirmation found for logged-in user ID: " + loggedInUserId);
+                        model.addAttribute("confirmation", existingConfirmation);
+                        return "donationTracking";
+                    }
                 }
 
-                // If the existing confirmation belongs to the logged-in user and is completed, show completed message
-                if (existingConfirmation.isCompleted()) {
-                    model.addAttribute("confirmation", existingConfirmation);
-                    System.out.println("Completed confirmation found for recipient ID: " + recipientId);
-                    return "donationTracking";
-                }
+                // If no completed confirmations are found, proceed as normal
+                System.out.println("No completed confirmation found for logged-in user ID: " + loggedInUserId);
+            } else {
+                System.out.println("No existing confirmations found for loggedInUserId: " + loggedInUserId);
             }
 
-            // Print the hospital name before sending OTP
-            System.out.println("Hospital Name: " + hospitalName);  // Log the hospital name
-            
             // Ensure that the hospital name is set in the confirmation creation
             if (hospitalName == null || hospitalName.isEmpty()) {
+                System.out.println("Hospital name is missing, setting default value.");
                 hospitalName = "Unknown Hospital"; // Default if no hospital name provided
             }
+            System.out.println("Hospital Name: " + hospitalName);
 
-            // Proceed with generating OTP for this user
+            // Generate OTP for the logged-in user
             String otp = otpVerificationService.generateAndSaveOtp(recipientId, loggedInUserId);
 
             // Find the recipient user based on recipientId
-            User recipient = userService.findById(recipientId);
+            User recipient = userService.findById(loggedInUserId);
             if (recipient != null) {
                 // Send OTP to recipient's email
                 String otpMessage = "Your OTP for confirming the blood donation request is: " + otp;
@@ -100,10 +109,12 @@ public class ConfirmationController {
                     System.out.println("OTP sent to recipient: " + recipient.getEmailid());
                 } catch (Exception e) {
                     System.out.println("Error sending OTP to recipient: " + recipient.getEmailid());
+                    e.printStackTrace();
                     model.addAttribute("message", "Failed to send OTP. Please try again later.");
                     return "errorPage";  // Handle error in sending OTP
                 }
             } else {
+                System.out.println("Recipient not found for recipientId: " + loggedInUserId);
                 model.addAttribute("message", "Recipient not found.");
                 return "errorPage";  // If the recipient does not exist, show error page
             }
@@ -121,8 +132,6 @@ public class ConfirmationController {
             return "errorPage";  // Handle generic errors
         }
     }
-
-
 
 
     @PostMapping("/startDonation")

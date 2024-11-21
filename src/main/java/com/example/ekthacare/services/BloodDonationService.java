@@ -23,40 +23,36 @@ public class BloodDonationService {
     // Updated method to include hospitalName
     public void updateLastDonationDate(Long userId, Long recipientId, LocalDateTime lastDonationDate, String hospitalName) {
         // Retrieve the user's blood donation record
-        BloodDonation bloodDonation = bloodDonationRepository.findByUserId(recipientId);
+        BloodDonation bloodDonation = bloodDonationRepository.findByUserId(userId);
 
         if (bloodDonation != null) {
-            // Check if the recipient is different
-            if (!userId.equals(bloodDonation.getUserId())) {
-                bloodDonation.setLastDonationDate(lastDonationDate);
-                bloodDonation.setRecipientId(userId);
-                bloodDonation.setHospitalName(hospitalName); // Set hospital name
-                bloodDonationRepository.save(bloodDonation);
-                
-                // Log the update
-                System.out.println("Updated last donation date for user ID: " + recipientId + 
-                                   ", recipient ID: " + userId +
-                                   ", hospital name: " + hospitalName);
-            } else {
-                // Log no update required
-                System.out.println("No update needed for user ID: " + recipientId + 
-                                   ", recipient ID remains the same: " + userId);
-            }
+            // Update the existing donation record
+            bloodDonation.setLastDonationDate(lastDonationDate);
+            bloodDonation.setRecipientId(recipientId);
+            bloodDonation.setHospitalName(hospitalName); // Set hospital name
+            bloodDonationRepository.save(bloodDonation);
+
+            // Log the update
+            System.out.println("Updated last donation date for user ID: " + userId + 
+                               ", recipient ID: " + recipientId +
+                               ", hospital name: " + hospitalName);
         } else {
             // Create a new record if none exists
             bloodDonation = new BloodDonation();
-            bloodDonation.setUserId(recipientId);
-            bloodDonation.setRecipientId(userId);
+            bloodDonation.setUserId(userId);
+            bloodDonation.setRecipientId(recipientId);
             bloodDonation.setLastDonationDate(lastDonationDate);
             bloodDonation.setHospitalName(hospitalName); // Set hospital name
             bloodDonationRepository.save(bloodDonation);
-            
+
             // Log the creation
-            System.out.println("Created new donation record for user ID: " + recipientId + 
-                               ", recipient ID: " + userId +
+            System.out.println("Created new donation record for user ID: " + userId + 
+                               ", recipient ID: " + recipientId +
                                ", hospital name: " + hospitalName);
         }
     }
+
+    
 
     
     public List<BloodDonation> getDonationsByRecipientId(Long recipientId) {
@@ -77,14 +73,8 @@ public class BloodDonationService {
                 ));
     }
     
-    public Map<Long, LocalDateTime> getLastDonationDatesByuserIds(List<Long> userIds) {
-        List<Object[]> results = bloodDonationRepository.findLastDonationDatesByuserIds(userIds);
-        return results.stream()
-                .collect(Collectors.toMap(
-                    result -> (Long) result[0],              // recipientId
-                    result -> (LocalDateTime) result[1]     // last donation date (as LocalDateTime)
-                ));
-    }
+ 
+ 
     public BloodDonation findDonationsByUserId(Long userId) {
         return bloodDonationRepository.findByUserId(userId);
     }

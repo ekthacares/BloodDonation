@@ -125,6 +125,11 @@ public class Confirmation {
 	public Confirmation() {
 		// TODO Auto-generated constructor stub
 	}
+
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 	
 	
