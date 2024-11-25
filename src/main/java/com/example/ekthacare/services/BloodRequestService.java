@@ -9,15 +9,17 @@ import org.springframework.stereotype.Service;
 import com.example.ekthacare.entity.BloodRequest;
 import com.example.ekthacare.repo.BloodRequestRepository;
 
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 
 @Service
 public class BloodRequestService {
     @Autowired
     private BloodRequestRepository bloodRequestRepository;
-
-    public BloodRequest saveBloodRequest(BloodRequest bloodRequest) {
-        return bloodRequestRepository.save(bloodRequest);
+    
+    public void saveBloodRequest(BloodRequest bloodRequest) {
+        bloodRequestRepository.save(bloodRequest);
     }
 
     public List<BloodRequest> getAllBloodRequests() {

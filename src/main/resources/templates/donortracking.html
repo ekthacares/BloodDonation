@@ -171,6 +171,7 @@
                         <th>Donation Confirmed At</th>
                         <th>Donation Start Time</th>
                         <th>Donation End Time</th>
+                        <th>Location</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -188,6 +189,7 @@
                         <td th:text="${confirmation.formattedConfirmedAt}"></td>
                         <td th:text="${confirmation.formattedStartedAt}"></td>
                         <td th:text="${confirmation.formattedStoppedAt}"></td>
+                         <td th:text="${confirmation.hospitalName}"></td>
                     </tr>
                 </tbody>
             </table>

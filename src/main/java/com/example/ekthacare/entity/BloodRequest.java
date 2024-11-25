@@ -15,19 +15,17 @@ public class BloodRequest {
     private String name;
     private String bloodgroup;
     private String city;
-    private String state;
-    private String country;
+    private String state; 
     private String mobile;
 
     public BloodRequest() {
     }
 
-    public BloodRequest(String name, String bloodgroup, String city, String state, String country, String mobile) {
+    public BloodRequest(String name, String bloodgroup, String city, String state, String mobile) {
         this.name = name;
         this.bloodgroup = bloodgroup;
         this.city = city;
-        this.state = state;
-        this.country = country;
+        this.state = state;       
         this.mobile = mobile;
     }
     
@@ -73,15 +71,7 @@ public class BloodRequest {
 
 	public void setState(String state) {
 		this.state = state;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
+	}	
 
 	public String getMobile() {
 		return mobile;
@@ -94,7 +84,7 @@ public class BloodRequest {
 	@Override
 	public String toString() {
 		return "BloodRequest [id=" + id + ", name=" + name + ", bloodgroup=" + bloodgroup + ", city=" + city
-				+ ", state=" + state + ", country=" + country + ", mobile=" + mobile + "]";
+				+ ", state=" + state + ", mobile=" + mobile + "]";
 	}
 
     

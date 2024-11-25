@@ -165,6 +165,7 @@
                         <th>Confirmed At</th>
                         <th>Started At</th>
                         <th>Stopped At</th>
+                         <th>Location</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -192,6 +193,7 @@
                         <td th:text="${confirmation.formattedConfirmedAt}"></td>
                         <td th:text="${confirmation.formattedStartedAt}"></td>
                         <td th:text="${confirmation.formattedStoppedAt}"></td>
+                          <td th:text="${confirmation.hospitalName}"></td>
                     </tr>
                 </tbody>
             </table>
