@@ -159,9 +159,11 @@
    		
 			<div class="donortracking_container">
 			
-     
+				<!-- Display message if any -->
+				        <div th:if="${message}" class="message" style="text-align: center; font-weight: bold; color: red;" th:text="${message}"></div>
+
     <div class="results">          
-            <table >
+            <table th:if="${donations != null}" >
                 <thead>
            <tr>
             <th>ID</th>
@@ -181,7 +183,7 @@
                        <span th:text="${donation.recipientId}">User ID</span>
                     </a>
                 </td>                 
-                 <td th:text="${donation.formattedTimestamp}">DonationDate</td>
+                 <td th:text="${donation.formattedStoppedAt}">DonationDate</td>
                	<td th:text="${donation.hospitalName}">Hospital Name</td>
             </tr>
         </tbody>

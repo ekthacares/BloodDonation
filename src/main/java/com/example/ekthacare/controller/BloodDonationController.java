@@ -1,9 +1,11 @@
 package com.example.ekthacare.controller;
 
 import com.example.ekthacare.entity.BloodDonation;
+import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.entity.SearchRequest;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.services.BloodDonationService;
+import com.example.ekthacare.services.ConfirmationService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.UserService;
 
@@ -30,6 +32,9 @@ public class BloodDonationController {
     private SearchRequestService searchRequestService;
     
     @Autowired
+    private ConfirmationService confirmationService;
+    
+    @Autowired
     private UserService userService;
 
     @GetMapping("/mydonations")
@@ -44,9 +49,16 @@ public class BloodDonationController {
             System.out.println("Retrieved loggedInUser from session: " + loggedInUser); // Debug statement
 
             if (loggedInUser != null) {
-                // Fetch donations by userId (donor)
-                BloodDonation donations = bloodDonationService.findDonationsByUserId(userId);
-                model.addAttribute("donations", donations);
+                // Fetch all donations or confirmations made by this user (as a list)
+                List<Confirmation> donations = confirmationService.findDonationsByUserId(userId);
+
+                if (donations.isEmpty()) {
+                    // Add a message if no donations are found
+                    model.addAttribute("message", "You have not donated to anyone");
+                } else {
+                    // Add the list of donations to the model
+                    model.addAttribute("donations", donations);
+                }
 
                 // Return the view name
                 return "mydonations"; // The name of your Thymeleaf template

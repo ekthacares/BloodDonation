@@ -58,9 +58,6 @@ public class DonorController {
 	    private UserRepository userRepository;
 	 
 	 @Autowired
-	    private User1Repository user1Repository;
-	 
-	  @Autowired
 	    private OtpService otpService;
 
 	    @Autowired
@@ -83,9 +80,6 @@ public class DonorController {
 	    @Autowired
 	    private SmsService smsService;
 	    
-	    
-	    @Autowired
-	    private BloodDonationService bloodDonationService;
 	    
 	    @Autowired
 	    private ExcelService excelService;

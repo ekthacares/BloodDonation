@@ -172,8 +172,8 @@ public class ConfirmationController {
             System.out.println("loggedInUser userId from session: " + userId);
             
             if (loggedInUser != null) {
-                // Retrieve confirmations for the logged-in user
-                List<Confirmation> confirmations = confirmationService.getConfirmationsByLoggedInUserId(userId);
+                // Retrieve confirmations for the logged-in user by recipientId
+                List<Confirmation> confirmations = confirmationService.getConfirmationsByRecipientId(userId);
                 if (confirmations == null || confirmations.isEmpty()) {
                     model.addAttribute("message", "No donation tracking information available.");
                 } else {
@@ -195,6 +195,7 @@ public class ConfirmationController {
             return "errorPage";  // Redirect to an error page
         }
     }
+
 
   
     

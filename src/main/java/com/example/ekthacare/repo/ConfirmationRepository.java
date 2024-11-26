@@ -22,6 +22,7 @@ Confirmation findFirstByLoggedInUserIdAndStoppedAtIsNotNull(Long loggedInUserId)
 
 Confirmation findTopByRecipientIdOrderByIdDesc(Long recipientId);
     
+List<Confirmation> findByRecipientId(Long recipientId);
 
 
 }

@@ -181,9 +181,9 @@
                         <td class="center-align">
                             <a href="#" 
                                data-toggle="modal" data-target="#userProfileModal" 
-                               th:attr="data-user-id=${confirmation.recipientId}" 
+                               th:attr="data-user-id=${confirmation.loggedInUserId}" 
                                class="view-profile1">
-                               <span th:text="${confirmation.recipientId}">User ID</span>
+                               <span th:text="${confirmation.loggedInUserId}">User ID</span>
                             </a>
                         </td>
                         <td th:text="${confirmation.formattedConfirmedAt}"></td>

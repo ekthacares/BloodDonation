@@ -163,6 +163,10 @@ public class ConfirmationService {
         return confirmationRepository.findByLoggedInUserId(loggedInUserId);
     }
 	
+	public List<Confirmation> getConfirmationsByRecipientId(Long recipientId) {
+	    return confirmationRepository.findByRecipientId(recipientId);
+	}
+	
 	  public Confirmation findCompletedConfirmationByUserId(Long loggedInUserId) {
 	        return confirmationRepository.findFirstByLoggedInUserIdAndStoppedAtIsNotNull(loggedInUserId);
 	    }
@@ -181,6 +185,11 @@ public class ConfirmationService {
 
 	    public long countAllRequests() {
 	        return confirmationRepository.count(); // This assumes count() is defined in your repository
+	    }
+
+	    public List<Confirmation> findDonationsByUserId(Long userId) {
+	        // This should fetch all confirmations/donations for the user
+	        return confirmationRepository.findByLoggedInUserId(userId);
 	    }
 
 		

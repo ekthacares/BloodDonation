@@ -130,6 +130,11 @@ public class Confirmation {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	public void setFormattedTimestamp(String format) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 	

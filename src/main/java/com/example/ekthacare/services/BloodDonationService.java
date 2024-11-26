@@ -5,17 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.ekthacare.entity.BloodDonation;
+import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.repo.BloodDonationRepository;
+import com.example.ekthacare.repo.ConfirmationRepository;
+
 
 @Service
 public class BloodDonationService {
 
     private final BloodDonationRepository bloodDonationRepository;
-
+    
+    @Autowired
+    private ConfirmationRepository confirmationRepository;
+    
     public BloodDonationService(BloodDonationRepository bloodDonationRepository) {
         this.bloodDonationRepository = bloodDonationRepository;
     }
@@ -51,9 +58,7 @@ public class BloodDonationService {
                                ", hospital name: " + hospitalName);
         }
     }
-
-    
-
+  
     
     public List<BloodDonation> getDonationsByRecipientId(Long recipientId) {
         return bloodDonationRepository.findByRecipientId(recipientId);
@@ -89,5 +94,9 @@ public class BloodDonationService {
 
     public long countAllDonations() {
         return bloodDonationRepository.count();
+    }
+    
+    public List<Confirmation> getAllDonations1() {
+        return confirmationRepository.findAll();
     }
 }
