@@ -15,20 +15,20 @@ public class SmsService {
         String payload_string = "{"
                 + "\"Text\": \"" + message + "\","
                 + "\"Number\": \"91" + mobile + "\","
-                + "\"SenderId\": \"SMSCNT\","
+                + "\"SenderId\": \"EKTHAE\","
                 + "\"DRNotifyUrl\": \"https://www.domainname.com/notifyurl\","
                 + "\"DRNotifyHttpMethod\": \"POST\","
                 + "\"Tool\": \"API\""
                 + "}";
         
-        String apiKey = "yrF1DaJ0heca6ERREmWy";
-        String authToken = "RzdsxZfMNgTYdyLmvFTgVCz0jJ2JHxUBA5nvwgQ2";
+        String apiKey = "OSNeHNEzfPJpshh6SwPc";
+        String authToken = "OUdUnRZzVgODovH2WnLJMjslU2ypjnQ06bcUvyUZ";
         String authorizationKey = apiKey + ":" + authToken;
         
         String encodedString = Base64.getEncoder().encodeToString(authorizationKey.getBytes());
         
         Entity<String> payload = Entity.json(payload_string);
-        Response response = client.target("https://restapi.smscountry.com/v0.1/Accounts/yrF1DaJ0heca6ERREmWy/SMSes/")
+        Response response = client.target("https://restapi.smscountry.com/v0.1/Accounts/OSNeHNEzfPJpshh6SwPc/SMSes/")
                 .request(jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE)
                 .header("Authorization", "Basic " + encodedString)
                 .post(payload);

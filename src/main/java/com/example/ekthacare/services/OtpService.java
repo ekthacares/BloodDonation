@@ -19,7 +19,7 @@ public class OtpService {
 
     public String generateOtp(String mobile) {
         String otp = String.valueOf(100000 + random.nextInt(900000));
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(2);
 
         Otp otpEntity = otpRepository.findByMobile(mobile);
         if (otpEntity == null) {
@@ -37,4 +37,13 @@ public class OtpService {
         Otp otpEntity = otpRepository.findByMobile(mobile);
         return otpEntity != null && otpEntity.getOtp().equals(otp) && otpEntity.getExpirytime().isAfter(LocalDateTime.now());
     }
+    
+    public boolean isOtpExpired(String mobile) {
+        Otp otpEntity = otpRepository.findByMobile(mobile);
+        if (otpEntity == null) {
+            return true; // Consider expired if no OTP exists
+        }
+        return otpEntity.getExpirytime().isBefore(LocalDateTime.now()); // Expired if expiry time has passed
+    }
+
 }

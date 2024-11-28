@@ -6,6 +6,7 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.ekthacare.entity.Otp;
 import com.example.ekthacare.entity.Otp1;
 import com.example.ekthacare.repo.Otp1Repository;
 
@@ -19,7 +20,7 @@ public class Otp1Service {
 
     public String generateOtp(String mobile) {
         String otp = String.valueOf(100000 + random.nextInt(900000));
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(2);
 
         Otp1 otpEntity = Otp1Repository.findByMobile(mobile);
         if (otpEntity == null) {
@@ -36,5 +37,13 @@ public class Otp1Service {
     public boolean validateOtp(String mobile, String otp) {
         Otp1 otpEntity = Otp1Repository.findByMobile(mobile);
         return otpEntity != null && otpEntity.getOtp().equals(otp) && otpEntity.getExpirytime().isAfter(LocalDateTime.now());
+    }
+    
+    public boolean isOtpExpired(String mobile) {
+        Otp1 otpEntity = Otp1Repository.findByMobile(mobile);
+        if (otpEntity == null) {
+            return true; // Consider expired if no OTP exists
+        }
+        return otpEntity.getExpirytime().isBefore(LocalDateTime.now()); // Expired if expiry time has passed
     }
 }

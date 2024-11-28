@@ -108,16 +108,90 @@ public class DonorController {
 	        // Generate and send OTP to the user's mobile number
 	        String otp = otpService.generateOtp(user.getMobile());
 	       
-	        emailService.sendOtp(user.getEmailid(), otp);
-	        String message = "User Admin login OTP is " + otp + " - SMSCNT";
-	         smsService.sendJsonSms(user.getMobile(), message);
-
+	     // Send OTP via email
+		     String emailMessage = "Your OTP for Regristration  is : <b>" + otp + "</b>. For Mobile Number: <b>" + user.getMobile() + "</b>";
+		     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+		     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+		     
+		     // Send OTP via SMS using SMSCountry API
+			    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+			     String message = "Your Registration OTP is " + otp + " - EKTHA PVT LTD";
+			     smsService.sendJsonSms(user.getMobile(), message);
+			     
+			     
 	        // Store user in session for later use
 	        model.addAttribute("mobile", user.getMobile());
-	        model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+	        model.addAttribute("message", "OTP sent to your mobile number/ Email and valids for 2minutes");
 
-	        return "otp"; // Redirect to OTP verification page
+	        return "otpr"; // Redirect to OTP verification page
 	    }
+	 	
+	 @PostMapping("/validateOtpr")
+	 public String validateOtpr(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
+		 // Check if OTP is valid and not expired
+		    if (otpService.isOtpExpired(mobile)) {
+		        model.addAttribute("message", "OTP has expired. Please request a new one.");
+		        model.addAttribute("mobile", mobile);
+		        model.addAttribute("showResendButton", true); // Add flag to display resend button
+		        return "otpr"; // Return to OTP page with the resend button
+		    }
+		 
+		 if (otpService.validateOtp(mobile, otp)) {
+	         User user = userService.findByMobile(mobile);
+	         if (user != null) {
+	             // Assuming you want to set `createdBy` after OTP validation
+	             user.setCreatedBy(user.getId());  // Set the `createdBy` field to the current user's ID (or other relevant field)
+	             
+	             // Set createdByType to "donor" since it is creating this donorregistration
+	    	     user.setCreatedByType("Self");
+	    	     
+	    	  // Set the createdAt field to the current time
+	    	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
+
+	             // Save the user with updated `createdBy`
+	             userService.save(user); // Assuming save method persists the user entity
+	             
+	             // Set session attributes
+	             session.setAttribute("userId", user.getId());
+	             System.out.println("User ID set in session: " + user.getId()); // Debug statement
+	             session.setAttribute("userName", user.getDonorname());
+	             System.out.println("userName set in session: " + user.getDonorname());
+
+	             // Redirect to the donor home page after successful OTP validation and update
+	             return "redirect:/donorhome";
+	         } else {
+	             model.addAttribute("message", "User not found");
+	             return "otpr"; // Return to OTP page if user is not found
+	         }
+	     } else {
+	         model.addAttribute("message", "Invalid OTP");
+	         model.addAttribute("mobile", mobile);
+	         return "otpr"; // Return to OTP page if OTP is invalid
+	     }
+	 }
+	 
+	 @PostMapping("/resendOtpr")
+	 public String resendOtpr(@RequestParam String mobile, Model model) {
+	     String newOtp = otpService.generateOtp(mobile);
+
+	     // Send new OTP via email
+	     User user = userService.findByMobile(mobile);
+	     // Send OTP via email
+	     String emailMessage = "Your OTP for Regristration  is : <b>" + newOtp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
+	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+	     
+	     // Send OTP via SMS using SMSCountry API
+		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+		     String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
+		     smsService.sendJsonSms(mobile, message);
+
+	     
+
+	     model.addAttribute("message", "A new OTP has been sent to your mobile.");
+	     model.addAttribute("mobile", mobile);
+	     return "otpr";
+	 }
 
 	 
 	 /* =========================Donor registration from Admin============================================ */
@@ -165,24 +239,36 @@ public class DonorController {
 
 	     // Generate and send OTP to the user's mobile number
 	     String otp = otpService.generateOtp(user.getMobile());
-	     emailService.sendOtp(user.getEmailid(), otp);
-	     String message = "User Admin login OTP is " + otp + " - SMSCNT";
-	     smsService.sendJsonSms(user.getMobile(), message);
+	     
+	     
+	  // Send OTP via email
+	     String emailMessage = "Your OTP for Regristration  is : <b>" + otp + "</b>. For Mobile Number: <b>" + user.getMobile() + "</b>";
+	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+	     
+	     // Send OTP via SMS using SMSCountry API
+		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+		     String message = "Your Registration OTP is " + otp + " - EKTHA PVT LTD";
+		     smsService.sendJsonSms(user.getMobile(), message);
 
 	     // Set message for OTP verification
 	     model.addAttribute("mobile", user.getMobile());
-	     model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+	     model.addAttribute("message", "OTP sent to your mobile number/ Email and valids for 2minutes");
 
 	     // Proceed to the OTP verification page
 	     return "donorresgisterotp"; // Redirect to OTP verification page
 	 }
-
-
-
-
-	 
+	 	 
 	 @PostMapping("/validatedonorregisterOtp")
 	 public String validatedonorregisterOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
+		 // Check if OTP is valid and not expired
+		    if (otpService.isOtpExpired(mobile)) {
+		        model.addAttribute("message", "OTP has expired. Please request a new one.");
+		        model.addAttribute("mobile", mobile);
+		        model.addAttribute("showResendButton", true); // Add flag to display resend button
+		        return "otpr"; // Return to OTP page with the resend button
+		    }
+		 
 	     if (otpService.validateOtp(mobile, otp)) {
 	         // Skip the user lookup and directly set session attributes if OTP is valid
 	         session.setAttribute("mobile", mobile);
@@ -197,7 +283,29 @@ public class DonorController {
 	         return "donorresgisterotp";
 	     }
 	 }
+	 
+	 @PostMapping("/resendOtpra")
+	 public String resendOtpra(@RequestParam String mobile, Model model) {
+	     String newOtp = otpService.generateOtp(mobile);
 
+	     // Send new OTP via email
+	     User user = userService.findByMobile(mobile);
+	     // Send OTP via email
+	     String emailMessage = "Your OTP for Regristration  is : <b>" + newOtp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
+	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+	     
+	     // Send OTP via SMS using SMSCountry API
+		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+		     String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
+		     smsService.sendJsonSms(mobile, message);
+
+	     
+
+	     model.addAttribute("message", "A new OTP has been sent to your mobile.");
+	     model.addAttribute("mobile", mobile);
+	     return "otpr";
+	 }
 		
 	 /* ============================Login process from donorside====================================== */
 		 
@@ -228,22 +336,33 @@ public class DonorController {
 	     String otp = otpService.generateOtp(mobile);
 
 	     // Send OTP via email
-	     emailService.sendOtp(user.getEmailid(), otp);
+	     String emailMessage = "Your OTP for Donor Login is : <b>" + otp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
+	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
 	     
 	     // Send OTP via SMS using SMSCountry API
-	     String message = "User Admin login OTP is " + otp + " - SMSCNT";
+	    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+	     String message = "Your Donor Login OTP is " + otp + " - EKTHA PVT LTD";
 	     smsService.sendJsonSms(mobile, message);
 
 	     // Add mobile number to model and redirect to OTP input page
 	     model.addAttribute("mobile", mobile);
-	     model.addAttribute("message", "OTP sent to your mobile number. Please verify.");
+	     model.addAttribute("message", "OTP sent to your mobile number/ Email and valids for 2minutes");
 	     return "otp";
 	 }
 
    	   
 	 @PostMapping("/validateOtp")
 	 public String validateOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
-	     if (otpService.validateOtp(mobile, otp)) {
+		 // Check if OTP is valid and not expired
+		    if (otpService.isOtpExpired(mobile)) {
+		        model.addAttribute("message", "OTP has expired. Please request a new one.");
+		        model.addAttribute("mobile", mobile);
+		        model.addAttribute("showResendButton", true); // Add flag to display resend button
+		        return "otp"; // Return to OTP page with the resend button
+		    }
+		 
+		 if (otpService.validateOtp(mobile, otp)) {
 	         User user = userService.findByMobile(mobile);
 	         if (user != null) {
 	             // Assuming you want to set `createdBy` after OTP validation
@@ -275,6 +394,29 @@ public class DonorController {
 	         model.addAttribute("mobile", mobile);
 	         return "otp"; // Return to OTP page if OTP is invalid
 	     }
+	 }
+	 
+	 @PostMapping("/resendOtp")
+	 public String resendOtp(@RequestParam String mobile, Model model) {
+	     String newOtp = otpService.generateOtp(mobile);
+
+	     // Send new OTP via email
+	     User user = userService.findByMobile(mobile);
+	     // Send OTP via email
+	     String emailMessage = "Your OTP for Regristration  is : <b>" + newOtp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
+	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
+	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+	     
+	     // Send OTP via SMS using SMSCountry API
+		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
+		     String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
+		     smsService.sendJsonSms(mobile, message);
+
+	     
+
+	     model.addAttribute("message", "A new OTP has been sent to your mobile.");
+	     model.addAttribute("mobile", mobile);
+	     return "otp";
 	 }
 
 
