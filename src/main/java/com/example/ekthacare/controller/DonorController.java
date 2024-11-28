@@ -67,9 +67,6 @@ public class DonorController {
 	    private UserService userService;
 	    
 	    @Autowired
-	    private User1Service user1Service;
-	    
-	    @Autowired
 	    private SearchRequestService searchRequestRepository;
 	    
 	    

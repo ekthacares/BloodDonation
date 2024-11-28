@@ -19,7 +19,7 @@ public class OtpVerificationService {
     // Method to generate and save OTP
     public String generateAndSaveOtp(Long recipientId, Long loggedInUserId) {
         String otp = generateOtp();
-        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(2);  // OTP expires in 5 minutes
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(15);  // OTP expires in 5 minutes
 
         // Create and save the OTP verification entry
         OtpVerification otpVerification = new OtpVerification(recipientId, loggedInUserId, otp, expirationTime);
