@@ -222,7 +222,7 @@ public class User {
         return isverified;
     }
 
-    public void setVerified(boolean isverified) {
+    public void setIsVerified(boolean isverified) {
         this.isverified = isverified;
     }
 

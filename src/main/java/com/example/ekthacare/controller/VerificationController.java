@@ -67,7 +67,8 @@ public class VerificationController {
             }
 
             // Additional logic to update the donation tracking
-            bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);  // Update last donation date
+            //bloodDonationService.updateLastDonationDate(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);  
+            bloodDonationService.createNewDonationRecord(loggedInUserId, recipientId, LocalDateTime.now(), hospitalName);// Update last donation date
             System.out.println("Hospital Name in updateLastDonationDate: " + hospitalName);  // Print hospital name
 
             return "redirect:/donationTracking";  // Redirect to donation tracking page

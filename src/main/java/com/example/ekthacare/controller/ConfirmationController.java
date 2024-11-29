@@ -1,7 +1,9 @@
 package com.example.ekthacare.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Base64;
 import java.util.List;
 
@@ -33,6 +35,9 @@ public class ConfirmationController {
     private OtpVerificationService otpVerificationService;
     
     @Autowired
+    private BloodDonationService bloodDonationService;
+    
+    @Autowired
     private EmailService emailService;
     
     @Autowired
@@ -62,6 +67,30 @@ public class ConfirmationController {
             Long loggedInUserId = Long.parseLong(parts[0]);
 
             System.out.println("Logged-In User ID: " + loggedInUserId);
+
+            // Check the last donation date for the logged-in user
+            LocalDateTime lastDonationDateTime = bloodDonationService.getLastDonationDateByUserId(loggedInUserId);
+
+            if (lastDonationDateTime != null) {
+                // Convert LocalDateTime to LocalDate
+                LocalDate lastDonationDate = lastDonationDateTime.toLocalDate();
+                LocalDate currentDate = LocalDate.now();
+
+                // Calculate the period
+                Period periodSinceLastDonation = Period.between(lastDonationDate, currentDate);
+                int monthsSinceLastDonation = periodSinceLastDonation.getMonths();
+
+                if (monthsSinceLastDonation < 3) {
+                    model.addAttribute("message", "You are not eligible to donate yet. Your last donation was on " 
+                        + lastDonationDate + ". Please wait for at least 3 months.");
+                    return "donationTracking";
+                }
+            } else {
+                System.out.println("Donor not found for loggedInUserId: " + loggedInUserId);
+                model.addAttribute("message", "Donor information not found.");
+                return "errorPage";
+            }
+
 
             // Retrieve all existing confirmations for the logged-in user
             List<Confirmation> existingConfirmations = confirmationService.getConfirmationsByLoggedInUserId(loggedInUserId);
@@ -112,8 +141,8 @@ public class ConfirmationController {
 
                 // Send OTP via SMS
                 try {
-                    String message = "Your OTP for confirming the blood donation is " + otp + " - EKTHA PVT LTD";
-                    smsService.sendJsonSms(recipient.getMobile(), message);  // Assuming smsService is implemented
+                    // String message = "Your OTP for confirming the blood donation is " + otp + " - EKTHA PVT LTD";
+                    // smsService.sendJsonSms(recipient.getMobile(), message);  // Assuming smsService is implemented
                     System.out.println("OTP sent via SMS to recipient: " + recipient.getMobile());
                 } catch (Exception e) {
                     System.out.println("Error sending OTP via SMS to recipient: " + recipient.getMobile());
@@ -131,7 +160,7 @@ public class ConfirmationController {
             model.addAttribute("loggedInUserId", loggedInUserId);
             model.addAttribute("hospitalName", hospitalName);
 
-            System.out.println("OTP generated and sent for recipient ID: " + loggedInUserId );
+            System.out.println("OTP generated and sent for recipient ID: " + loggedInUserId);
             return "otpVerificationforConfirmurl";
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,8 +168,6 @@ public class ConfirmationController {
             return "errorPage";
         }
     }
-
-
 
     @PostMapping("/startDonation")
     public String startDonation(

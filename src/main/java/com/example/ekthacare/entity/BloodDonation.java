@@ -2,6 +2,7 @@ package com.example.ekthacare.entity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ public class BloodDonation {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "recipient_id", nullable = false)
+    @Column(name = "recipient_id", nullable = true)
     private Long recipientId;
 
     @Column(name = "last_donation_date")
@@ -65,7 +66,7 @@ public class BloodDonation {
 
     public void setLastDonationDate(LocalDateTime lastDonationDate) {
         if (lastDonationDate != null) {
-            this.lastDonationDate = lastDonationDate.withNano(0);
+            this.lastDonationDate = lastDonationDate.truncatedTo(ChronoUnit.SECONDS);
         } else {
             this.lastDonationDate = null;
         }

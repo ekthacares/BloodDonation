@@ -12,14 +12,18 @@ import com.example.ekthacare.services.UserService;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -30,9 +34,6 @@ public class BloodDonationController {
     
     @Autowired
     private SearchRequestService searchRequestService;
-    
-    @Autowired
-    private ConfirmationService confirmationService;
     
     @Autowired
     private UserService userService;
@@ -50,8 +51,9 @@ public class BloodDonationController {
 
             if (loggedInUser != null) {
                 // Fetch all donations or confirmations made by this user (as a list)
-                List<Confirmation> donations = confirmationService.findDonationsByUserId(userId);
-
+              //  List<Confirmation> donations = confirmationService.findDonationsByUserId(userId);
+                List<BloodDonation> donations = bloodDonationService.getAllDonations(userId);
+                
                 if (donations.isEmpty()) {
                     // Add a message if no donations are found
                     model.addAttribute("message", "You have not donated to anyone");
@@ -69,6 +71,45 @@ public class BloodDonationController {
         return "redirect:/donorhome";
     }
 
+    @PostMapping("/addDonation")
+    public String addDonation(@RequestParam(value = "lastDonationDate", required = false) 
+                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDonationDate,
+                              @RequestParam(value = "hospitalName", required = false) String hospitalName,
+                              RedirectAttributes redirectAttributes,
+                              HttpSession session) {
+
+        // Retrieve userId from session
+        Long userId = (Long) session.getAttribute("userId");
+        System.out.println("Retrieved userId from session: " + userId);
+
+        if (userId == null) {
+            // Handle missing userId
+            redirectAttributes.addFlashAttribute("message", "You must be logged in to add a donation.");
+            return "redirect:/login"; // Redirect to login or an appropriate page
+        }
+
+        // Retrieve logged-in user details
+        User loggedInUser = userService.findById(userId);
+        System.out.println("Retrieved loggedInUser from session: " + loggedInUser);
+
+        if (loggedInUser == null) {
+            // Handle case where user is not found in the database
+            redirectAttributes.addFlashAttribute("message", "User not found. Please try again.");
+            return "redirect:/mydonations"; // Redirect back to the donations page
+        }
+
+        if (lastDonationDate == null || hospitalName == null || hospitalName.isEmpty()) {
+            // Handle missing parameters
+            redirectAttributes.addFlashAttribute("message", "Please provide all required details to add a donation.");
+            return "redirect:/mydonations"; // Redirect to the donations form
+        }
+
+        // Save the new donation record
+        bloodDonationService.createNewDonationRecord(userId, null , lastDonationDate, hospitalName);
+        redirectAttributes.addFlashAttribute("message", "Last donation date added successfully!");
+
+        return "redirect:/mydonations"; // Redirect to the donations list page
+    }
 
     
     

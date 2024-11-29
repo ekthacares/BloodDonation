@@ -98,7 +98,7 @@ public class DonorController {
 		        return "register"; // Return to registration page with an error message
 		    }
 		 // Set isVerified to false
-	        user.setVerified(false);
+	        user.setIsVerified(true);
 	        // Save donor information to the database
 	        userRepository.save(user);
 
@@ -144,6 +144,9 @@ public class DonorController {
 	    	     
 	    	  // Set the createdAt field to the current time
 	    	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
+	    	     
+	    	  // Mark the user as verified
+	             user.setIsVerified(true); // Assuming `isVerified` is a boolean field in the `User` entity
 
 	             // Save the user with updated `createdBy`
 	             userService.save(user); // Assuming save method persists the user entity
@@ -219,9 +222,7 @@ public class DonorController {
 	         return "adminlogin"; // Redirect to admin login if session is invalid
 	     }
 	     
-	     // Set isVerified to false
-	     user.setVerified(false);
-	     
+	    	     
 	     // Set createBy column in the User entity to the admin's userId (userId from session)
 	     user.setCreatedBy(userId);  // Set the admin's userId as the creator of the donor
 	     
@@ -230,6 +231,9 @@ public class DonorController {
 	     
 	  // Set the createdAt field to the current time
 	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
+	     
+	     // Set isVerified to false
+	     user.setIsVerified(false);
 
 	     // Save donor information to the database
 	     userRepository.save(user);
@@ -294,8 +298,8 @@ public class DonorController {
 	     
 	     // Send OTP via SMS using SMSCountry API
 		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
-		     String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
-		     smsService.sendJsonSms(mobile, message);
+		  //   String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
+		//     smsService.sendJsonSms(mobile, message);
 
 	     
 
@@ -339,8 +343,8 @@ public class DonorController {
 	     
 	     // Send OTP via SMS using SMSCountry API
 	    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
-	     String message = "Your Donor Login OTP is " + otp + " - EKTHA PVT LTD";
-	     smsService.sendJsonSms(mobile, message);
+	   //  String message = "Your Donor Login OTP is " + otp + " - EKTHA PVT LTD";
+	  //   smsService.sendJsonSms(mobile, message);
 
 	     // Add mobile number to model and redirect to OTP input page
 	     model.addAttribute("mobile", mobile);
@@ -370,6 +374,10 @@ public class DonorController {
 	    	     
 	    	  // Set the createdAt field to the current time
 	    	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
+	    	     
+	    	  // Set isVerified to false
+	    	     user.setIsVerified(true);
+
 
 	             // Save the user with updated `createdBy`
 	             userService.save(user); // Assuming save method persists the user entity
@@ -406,8 +414,8 @@ public class DonorController {
 	     
 	     // Send OTP via SMS using SMSCountry API
 		    // String message = "User Admin login OTP is " + otp + " - SMSCNT";
-		     String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
-		     smsService.sendJsonSms(mobile, message);
+		 //    String message = "Your Registration OTP is " + newOtp + " - EKTHA PVT LTD";
+		  //   smsService.sendJsonSms(mobile, message);
 
 	     
 
@@ -612,7 +620,8 @@ public class DonorController {
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
-	        return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        //return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
 
 	    
