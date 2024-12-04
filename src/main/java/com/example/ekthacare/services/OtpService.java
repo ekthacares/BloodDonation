@@ -19,7 +19,7 @@ public class OtpService {
 
     public String generateOtp(String mobile) {
         String otp = String.valueOf(100000 + random.nextInt(900000));
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(2);
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
 
         Otp otpEntity = otpRepository.findByMobile(mobile);
         if (otpEntity == null) {

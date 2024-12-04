@@ -40,6 +40,12 @@ public class BloodDonationController {
 
     @GetMapping("/mydonations")
     public String getDonations(HttpSession session, Model model) {
+    	
+    	if (session.getAttribute("userId") == null) {
+            // User is not logged in, redirect to login page
+            return "redirect:/donorlogin"; // Adjust the URL to your login page
+        }
+
         // Retrieve the logged-in user's ID from the session
         Long userId = (Long) session.getAttribute("userId");
         System.out.println("Retrieved userId from session: " + userId);

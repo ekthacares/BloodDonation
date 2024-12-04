@@ -176,14 +176,20 @@
 	            <tbody>
 	                <tr th:each="donation : ${donations}">
 	                    <td th:text="${donation.id}"></td>
-	                    <td >
-	                        <a href="#" 
-	                           data-toggle="modal" data-target="#userProfileModal" 
-	                           th:attr="data-user-id=${donation.recipientId}" 
-	                           class="view-profile1">
-	                           <span th:text="${donation.recipientId}">User ID</span>
-	                        </a>
-	                    </td>
+						<td>
+						    <!-- Link when recipientId is not null -->
+						    <a href="#" 
+						       data-toggle="modal" 
+						       data-target="#userProfileModal" 
+						       th:if="${donation.recipientId != null}" 
+						       th:attr="data-user-id=${donation.recipientId}" 
+						       class="view-profile1">
+						        <span th:text="${donation.recipientId}">User ID</span>
+						    </a>
+
+						    <!-- Bold text when recipientId is null -->
+						    <b th:if="${donation.recipientId == null}" th:text="'Login User Added His Own data before registering here'">User Added Data</b>
+						</td>
 	                    <td>
 	                        <span th:if="${donation.lastDonationDate != null}" 
 	                              th:text="${donation.formattedTimestamp}">Donation Date</span>

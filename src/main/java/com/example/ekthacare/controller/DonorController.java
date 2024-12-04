@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -52,6 +55,7 @@ import jakarta.servlet.http.HttpSession;
 
 
 @Controller
+
 public class DonorController {
 	
 	 @Autowired
@@ -354,52 +358,96 @@ public class DonorController {
 
    	   
 	 @PostMapping("/validateOtp")
-	 public String validateOtp(@RequestParam String mobile, @RequestParam String otp, HttpSession session, Model model) {
-		 // Check if OTP is valid and not expired
-		    if (otpService.isOtpExpired(mobile)) {
-		        model.addAttribute("message", "OTP has expired. Please request a new one.");
-		        model.addAttribute("mobile", mobile);
-		        model.addAttribute("showResendButton", true); // Add flag to display resend button
-		        return "otp"; // Return to OTP page with the resend button
-		    }
-		 
-		 if (otpService.validateOtp(mobile, otp)) {
+	 public ResponseEntity<?> validateOtp(@RequestParam String mobile, @RequestParam String otp,
+	                                      @RequestParam(required = false) String source,
+	                                      HttpSession session, Model model) {
+	     Map<String, Object> response = new HashMap<>();
+
+	     // Check if OTP is expired
+	     if (otpService.isOtpExpired(mobile)) {
+	         String message = "OTP has expired. Please request a new one.";
+	         if ("app".equals(source)) {
+	             response.put("status", "error");
+	             response.put("message", message);
+	             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	         } else {
+	             model.addAttribute("message", message);
+	             model.addAttribute("mobile", mobile);
+	             model.addAttribute("showResendButton", true);
+	             return ResponseEntity.ok("otp"); // Return to OTP page with resend button for web
+	         }
+	     }
+
+	     // Validate OTP
+	     if (otpService.validateOtp(mobile, otp)) {
 	         User user = userService.findByMobile(mobile);
 	         if (user != null) {
-	             // Assuming you want to set `createdBy` after OTP validation
-	             user.setCreatedBy(user.getId());  // Set the `createdBy` field to the current user's ID (or other relevant field)
-	             
-	             // Set createdByType to "donor" since it is creating this donorregistration
-	    	     user.setCreatedByType("Self");
-	    	     
-	    	  // Set the createdAt field to the current time
-	    	     user.setCreatedAt(LocalDateTime.now());  // Set the creation timestamp
-	    	     
-	    	  // Set isVerified to false
-	    	     user.setIsVerified(true);
+	             // Update user details
+	             user.setCreatedBy(user.getId());
+	             user.setCreatedByType("Self");
+	             user.setCreatedAt(LocalDateTime.now());
+	             user.setIsVerified(true);
+	             userService.save(user);
 
-
-	             // Save the user with updated `createdBy`
-	             userService.save(user); // Assuming save method persists the user entity
-	             
 	             // Set session attributes
 	             session.setAttribute("userId", user.getId());
-	             System.out.println("User ID set in session: " + user.getId()); // Debug statement
 	             session.setAttribute("userName", user.getDonorname());
-	             System.out.println("userName set in session: " + user.getDonorname());
 
-	             // Redirect to the donor home page after successful OTP validation and update
-	             return "redirect:/donorhome";
+	             // Send email if source is web (app does not require an email)
+	             if (!"app".equals(source)) {
+	                 try {
+	                     String subject = "Welcome to Donor Portal!";
+	                     String link = "http://localhost:8082/mydonations";
+	                     String message = "<p>Dear " + user.getDonorname() + ",</p>"
+	                             + "<p>Thank you for registering and verifying your account. Please add your last donation details, if any:</p>"
+	                             + "<p><a href='" + link + "'>View My Donations</a></p>"
+	                             + "<p>Best regards,<br>Your Donor Portal Team</p>";
+	                     emailService.sendHtmlEmail(user.getEmailid(), subject, message);
+	                 } catch (Exception e) {
+	                     System.err.println("Failed to send email: " + e.getMessage());
+	                 }
+	             }
+
+	             // Return to donor home page after OTP success for web
+	             if (!"app".equals(source)) {
+	                 // Redirecting to donor home page after successful OTP validation
+	                 return ResponseEntity.status(HttpStatus.FOUND)
+	                         .header("Location", "/donorhome") // Set the redirect location to donor home
+	                         .build();
+	             }
+
+	             // Return success for the app
+	             response.put("status", "success");
+	             response.put("message", "OTP validated successfully.");
+	             return ResponseEntity.ok(response);
+
 	         } else {
-	             model.addAttribute("message", "User not found");
-	             return "otp"; // Return to OTP page if user is not found
+	             String message = "User not found.";
+	             if ("app".equals(source)) {
+	                 response.put("status", "error");
+	                 response.put("message", message);
+	                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	             } else {
+	                 model.addAttribute("message", message);
+	                 return ResponseEntity.ok("otp"); // Return to OTP page for web
+	             }
 	         }
 	     } else {
-	         model.addAttribute("message", "Invalid OTP");
-	         model.addAttribute("mobile", mobile);
-	         return "otp"; // Return to OTP page if OTP is invalid
+	         String message = "Invalid OTP.";
+	         if ("app".equals(source)) {
+	             response.put("status", "error");
+	             response.put("message", message);
+	             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	         } else {
+	             model.addAttribute("message", message);
+	             model.addAttribute("mobile", mobile);
+	             return ResponseEntity.ok("otp"); // Return to OTP page for web
+	         }
 	     }
 	 }
+
+
+
 	 
 	 @PostMapping("/resendOtp")
 	 public String resendOtp(@RequestParam String mobile, Model model) {
