@@ -162,6 +162,8 @@ public class UserService {
                 logger.warn("User with mobile {} already exists. Skipping.", user.getMobile());
                 continue; // Skip existing users
             }
+            
+            // Set JWT Secret for the user            
             userRepository.save(user);
         }
     }
@@ -182,10 +184,7 @@ public class UserService {
         return null; // No logged-in user, returning null for anonymous users
     }
     
-    
+	}
 
-}
-
-	
-	
+		
 }

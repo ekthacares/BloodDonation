@@ -75,6 +75,7 @@ public class User {
     private LocalDateTime deletedAt;
 
     private boolean isDeleted = false;
+        
     // No-argument constructor for JPA
     public User() {
     }
@@ -303,4 +304,17 @@ public class User {
     public void setDeletedByType(String deletedByType) {
         this.deletedByType = deletedByType;
     }
+
+		 @Column(name = "jwt_token")  // You can name it whatever you like
+	    private String jwtToken;
+
+	    // Getter and Setter for jwtToken
+	    public String getJwtToken() {
+	        return jwtToken;
+	    }
+
+	    public void setJwtToken(String jwtToken) {
+	        this.jwtToken = jwtToken;
+	    }
+    
 }
