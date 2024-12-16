@@ -9,10 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.EmailService;
@@ -209,6 +214,27 @@ public class APIController {
 	        }
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();  // Unauthorized if JWT token is missing/invalid
 	    }
+	    
+	    @GetMapping("/user")
+		  @ResponseBody
+		  public User getUser(@RequestParam Long id) {
+		      return userService.findById(id);
+		  }
+	 // In your Spring Boot Controller
+	    @PostMapping("/updateProfile")
+	    public ResponseEntity<String> updateProfile(@RequestBody User user) {
+	        try {
+	            // Log incoming data for debugging
+	            System.out.println("Incoming User Data: " + user);
+	            userService.updateUser(user);
+	            return ResponseEntity.ok("Profile updated successfully!");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating profile.");
+	        }
+	    }
 
-
+	    
+	    
+	    
 	   }
