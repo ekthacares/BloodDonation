@@ -1,10 +1,15 @@
 package com.example.ekthacare.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -174,6 +179,48 @@ public class APIController {
 	        }
 	    }
 
+	    
+	    @PostMapping("/app/register")
+	    public ResponseEntity<Map<String, Object>> appregisterDonor(@RequestBody User user) {
+	        Map<String, Object> response = new HashMap<>();	       
+
+	        // Step 2: If the mobile number doesn't exist, proceed with saving the user
+	        user.setIsVerified(false);  // Assuming user should be verified later
+
+	        // Step 3: Save donor information to the database
+	 
+	            userRepository.save(user); // Save the user only if mobile is unique
+	        
+
+	        // Step 4: Generate and send OTP to the user's mobile number
+	        String otp = otpService.generateOtp(user.getMobile());
+
+	        // Step 5: Send OTP via email
+	        try {
+	            String emailMessage = "Your OTP for Registration is: <b>" + otp + "</b>. For Mobile Number: <b>" + user.getMobile() + "</b>";
+	            emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
+	        } catch (Exception e) {
+	            response.put("status", "error");
+	            response.put("message", "Failed to send email. Please try again.");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
+
+	        // Step 6: (Optional) Send OTP via SMS if applicable
+	        try {
+	            // Uncomment and use if you're sending SMS as well
+	            // String message = "Your Registration OTP is " + otp + " - EKTHA PVT LTD";
+	            // smsService.sendJsonSms(user.getMobile(), message);
+	        } catch (Exception e) {
+	            // Handle SMS sending failure (optional)
+	        }
+
+	        // Step 7: Prepare success response
+	        response.put("status", "success");
+	        response.put("message", "OTP sent to your mobile number/email and valid for 2 minutes.");
+	        response.put("mobile", user.getMobile());
+
+	        return ResponseEntity.ok(response); // Return success response
+	    }
 
 	    @GetMapping("/app/viewProfile")
 	    public ResponseEntity<?> viewProfile(HttpSession session, @RequestParam("userId") Long userId,
@@ -275,5 +322,44 @@ public class APIController {
 	        return ResponseEntity.ok(response);
 	    }
 	
+	    @PostMapping("/app/addDonation")
+	    public ResponseEntity<Map<String, Object>> addDonation(
+	            @RequestParam("userId") Long userId,
+	            @RequestParam(value = "lastDonationDate", required = false)
+	            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastDonationDate,
+	            @RequestParam("hospitalName") String hospitalName) {
+
+	        Map<String, Object> response = new HashMap<>();
+
+	        if (userId == null) {
+	            response.put("message", "User ID is missing");
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	        }
+
+	        if (hospitalName == null || hospitalName.trim().isEmpty()) {
+	            response.put("message", "Hospital name is missing");
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	        }
+
+	        if (lastDonationDate == null) {
+	            response.put("message", "Last donation date is missing");
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	        }
+
+	        // Find the user by ID (make sure user exists in the database)
+	        User user = userService.findById(userId);
+	        if (user == null) {
+	            response.put("message", "User not found");
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	        }
+
+	        // Create a new donation record
+	        bloodDonationService.createNewDonationRecord(userId, null, lastDonationDate, hospitalName);
+
+	        response.put("message", "Donation added successfully");
+	        return ResponseEntity.ok(response);
+	    }
+	   
+
 	    
 	   }
