@@ -538,29 +538,20 @@ public class DonorController {
 	                    System.out.println("Results before filtering: ");
 	                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
 
-	                    // Check if the logged-in user is part of the search results (before filtering out the user)
-	                    boolean loggedInUserIsPartOfResults = results.stream()
-	                            .anyMatch(user -> user.getId().equals(loggedInUser.getId()));
-
-	                    // If the logged-in user is in the results, exclude them based on blood group and other parameters
-	                    if (loggedInUserIsPartOfResults) {
-	                        message = "You cannot be a donor for your own search.";
-	                        // Filter out the logged-in user based on ID or email after checking the results
-	                        results = results.stream()
-	                                .filter(user -> !user.getId().equals(loggedInUser.getId()) &&
-	                                                !user.getEmailid().equalsIgnoreCase(loggedInUser.getEmailid()))
-	                                .collect(Collectors.toList());
-	                    }
-
 	                    // Check if no results were found matching the criteria
 	                    if (results.isEmpty() && message == null) {
 	                        message = "No donors found matching the specified criteria. Please try again.";
 	                    }
 
+	                    // Filter out the logged-in user from the results list
+	                    results = results.stream()
+	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
+	                            .collect(Collectors.toList());
+
 	                    // Save the search request to the repository
 	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
-	                    // Send an email to each user in the filtered search results
+	                    // Send an email to each user in the filtered search results (excluding logged-in user)
 	                    for (User user : results) {
 	                        try {
 	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
@@ -592,6 +583,7 @@ public class DonorController {
 
 	        return "searchforblood";
 	    }
+
 
 	    public DonorController(SentEmailRepository sentEmailRepository) {
 	        this.sentEmailRepository = sentEmailRepository;

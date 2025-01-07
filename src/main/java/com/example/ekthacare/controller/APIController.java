@@ -1,10 +1,7 @@
 package com.example.ekthacare.controller;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.ekthacare.entity.BloodDonation;
+import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.OtpService;
+import com.example.ekthacare.services.SentEmailService;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.util.JwtUtil;
-import com.itextpdf.layout.element.List;
-
 import jakarta.servlet.http.HttpSession;
 
 
@@ -55,7 +52,13 @@ public class APIController {
 	    
 	    @Autowired
 	    private BloodDonationService bloodDonationService;
-
+	    
+	    @Autowired
+	    private final SentEmailService sentEmailService;
+	    
+	    public APIController(SentEmailService sentEmailService) {
+	        this.sentEmailService = sentEmailService;
+	    }
 
 	
 	    @PostMapping("/app login")
@@ -360,6 +363,52 @@ public class APIController {
 	        return ResponseEntity.ok(response);
 	    }
 	   
+	    
+	    @GetMapping("/app/sentEmails")
+	    public ResponseEntity<?> getSentEmails(
+	        @RequestHeader("Authorization") String authorizationHeader, 
+	        @RequestHeader("userId") Long userId) {
+
+	        try {
+	            // Check if the Authorization header is present and starts with "Bearer "
+	            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization token is missing or invalid.");
+	            }
+
+	            // Extract the JWT token from the Authorization header
+	            String jwtToken = authorizationHeader.substring(7); // "Bearer " is 7 characters
+
+	          
+	            // Check if the userId is null
+	            if (userId == null) {
+	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not logged in.");
+	            }
+
+	            // Find the logged-in user using the userId
+	            User loggedInUser = userService.findById(userId);
+	            System.out.println("loggedInUser userId from header: " + userId);
+
+	            if (loggedInUser == null) {
+	                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+	            }
+
+	            // Retrieve all sent emails where the logged-in user is the recipient
+	            java.util.List<SentEmail> sentEmails = sentEmailService.getSentEmailsByRecipientId(userId);
+	            System.out.println("Number of sent emails found for recipient: " + sentEmails.size());
+
+	            if (sentEmails.isEmpty()) {
+	                return ResponseEntity.ok(Collections.singletonMap("message", "No Emails received for this user."));
+	            }
+
+	            // Return sent emails as JSON
+	            return ResponseEntity.ok(sentEmails);
+
+	        } catch (Exception e) {
+	            // Handle unexpected errors
+	            e.printStackTrace();
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+	        }
+	    }
 
 	    
 	   }
