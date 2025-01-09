@@ -1,9 +1,14 @@
 package com.example.ekthacare.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,10 +26,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.OtpService;
+import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SentEmailService;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.util.JwtUtil;
@@ -59,7 +66,13 @@ public class APIController {
 	    public APIController(SentEmailService sentEmailService) {
 	        this.sentEmailService = sentEmailService;
 	    }
-
+	    
+	    @Autowired
+	    private SearchRequestService searchRequestRepository;
+	    
+	    
+	    @Autowired
+	    private  SentEmailRepository sentEmailRepository;
 	
 	    @PostMapping("/app login")
 	    public ResponseEntity<?> applogin(@RequestParam String mobile) {
@@ -378,10 +391,9 @@ public class APIController {
 	            // Extract the JWT token from the Authorization header
 	            String jwtToken = authorizationHeader.substring(7); // "Bearer " is 7 characters
 
-	          
-	            // Check if the userId is null
-	            if (userId == null) {
-	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not logged in.");
+	            // Ensure userId is valid
+	            if (userId == null || userId <= 0) {
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid userId.");
 	            }
 
 	            // Find the logged-in user using the userId
@@ -397,7 +409,7 @@ public class APIController {
 	            System.out.println("Number of sent emails found for recipient: " + sentEmails.size());
 
 	            if (sentEmails.isEmpty()) {
-	                return ResponseEntity.ok(Collections.singletonMap("message", "No Emails received for this user."));
+	                return ResponseEntity.ok(new ArrayList<SentEmail>()); // Return an empty list
 	            }
 
 	            // Return sent emails as JSON
@@ -410,5 +422,118 @@ public class APIController {
 	        }
 	    }
 
+	    	
+	    @GetMapping("/app/searchforblood")
+	    public ResponseEntity<Map<String, Object>> searchForBlood(
+	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
+	            @RequestParam(value = "city", required = false) String city,
+	            @RequestParam(value = "state", required = false) String state,
+	            @RequestParam(value = "hospital", required = false) String hospitalName,
+	            @RequestHeader("Authorization") String authorizationHeader, 
+	            @RequestHeader("userId") Long userId) { 
+
+	        Map<String, Object> response = new HashMap<>();
+	        boolean searchPerformed = false;
+	        java.util.List<User> results = new ArrayList<>();
+	        String message = null;
+	        String emailMessage = null;
+
+	        try {
+	            // Check if the Authorization header is present and starts with "Bearer "
+	            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+	                response.put("error", "Authorization token is missing or invalid.");
+	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	            }
+
+	            // Extract the JWT token from the Authorization header
+	            String jwtToken = authorizationHeader.substring(7); // "Bearer " is 7 characters
+	            
+	            // You can add JWT token validation logic here (e.g., verify the token using JWT library)
+	            if (userId != null) {
+	                User loggedInUser = userService.findById(userId);
+	                if (loggedInUser != null) {
+	                    response.put("user", loggedInUser);
+
+	                    // Simulate some logic to perform the search
+	                    if (bloodgroup != null || city != null || state != null) {
+	                        searchPerformed = true;
+
+	                        // Perform the search based on provided parameters
+	                        results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
+
+	                        if (results.isEmpty()) {
+	                            message = "No donors found matching the specified criteria. Please try again.";
+	                        }
+
+	                        // Send emails logic (optional)
+	                        for (User user : results) {
+	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+	                        }
+
+	                        emailMessage = "Emails have been successfully sent to the donors.";
+	                    }
+	                } else {
+	                    // Handle case when logged-in user is not found
+	                    response.put("error", "User not found.");
+	                    return ResponseEntity.status(404).body(response);
+	                }
+	            } else {
+	                // Handle case when no user is logged in
+	                response.put("error", "No user logged in.");
+	                return ResponseEntity.status(401).body(response);  // Unauthorized
+	            }
+
+	        } catch (Exception e) {
+	            // Handle general errors
+	            response.put("error", "An unexpected error occurred: " + e.getMessage());
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
+
+	        // Populate response with the results
+	        response.put("searchPerformed", searchPerformed);
+	        response.put("results", results);
+	        response.put("message", message);
+	        response.put("emailMessage", emailMessage);
+
+	        return ResponseEntity.ok(response);
+	    }
+
+	    private void sendEmailToUser(User user, User loggedInUser, String bloodgroup, String hospitalName) {
+	        String subject = "Blood Search Alert";
+	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId(), hospitalName);
+
+	        String locationInfo = (hospitalName != null && !hospitalName.isEmpty()) ? 
+	                "The blood is needed at " + hospitalName : 
+	                "The blood is urgently needed.";
+
+	        String message = String.format(
+	            "Dear %s,\n\nUser %s is searching for blood group %s in %s, %s. %s\n\n" +
+	            "Contact Information:\nName: %s\nMobile: %s\nEmail: %s\n\n" +
+	            "If you are willing to donate, please confirm by clicking the following link:\n%s\n\nThank you.",
+	            user.getDonorname(), loggedInUser.getDonorname(), bloodgroup, 
+	            loggedInUser.getCity(), loggedInUser.getState(), locationInfo,
+	            loggedInUser.getDonorname(), loggedInUser.getMobile(), loggedInUser.getEmailid(),
+	            confirmationUrl
+	        );
+
+	        System.out.println("Generated Email Message:\n" + message);
+	        emailService.sendEmail(user.getEmailid(), subject, message);
+
+	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId());
+	        sentEmailRepository.save(sentEmail);
+	    }
+
+	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
+	        String token = generateSecureToken(recipientId, loggedInUserId);
+	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
+	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	    }
+
+	    private String generateSecureToken(Long recipientId, Long loggedInUserId) {
+	        String data = recipientId + ":" + loggedInUserId;
+	        return Base64.getUrlEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+	    }
+	}
+	
 	    
-	   }
+	   

@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 
@@ -77,8 +78,11 @@ public class ConfirmationController {
                 LocalDate currentDate = LocalDate.now();
 
                 // Calculate the period
-                Period periodSinceLastDonation = Period.between(lastDonationDate, currentDate);
-                int monthsSinceLastDonation = periodSinceLastDonation.getMonths();
+              //  Period periodSinceLastDonation = Period.between(lastDonationDate, currentDate);
+               // int monthsSinceLastDonation = periodSinceLastDonation.getMonths();
+
+                // Calculate the total months since the last donation
+                long monthsSinceLastDonation = ChronoUnit.MONTHS.between(lastDonationDate, currentDate);
 
                 if (monthsSinceLastDonation < 3) {
                     model.addAttribute("message", "You are not eligible to donate yet. Your last donation was on " 
