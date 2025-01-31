@@ -31,7 +31,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
+		
+ 
         <!-- Spring Boot Starter Thymeleaf for rendering dynamic HTML -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -51,6 +52,14 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+	
+		<!-- Firebase -->
+		<dependency>
+    <groupId>com.google.firebase</groupId>
+    <artifactId>firebase-admin</artifactId>
+    <version>9.1.1</version>
+</dependency>
+
 
         <!-- MySQL Connector -->
         <dependency>

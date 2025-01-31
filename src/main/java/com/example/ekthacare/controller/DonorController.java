@@ -538,18 +538,19 @@ public class DonorController {
 	                    System.out.println("Results before filtering: ");
 	                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
 
-	                    // Check if no results were found matching the criteria
-	                    if (results.isEmpty() && message == null) {
-	                        message = "No donors found matching the specified criteria. Please try again.";
-	                    }
 
 	                    // Filter out the logged-in user from the results list
 	                    results = results.stream()
 	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
 	                            .collect(Collectors.toList());
+	                    
 
-	                    // Save the search request to the repository
-	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
+	                    // Check if no results were found matching the criteria
+	                    if (results.isEmpty()) {
+	                    	message = "No donors found matching the specified criteria. Please try again.";
+	                    }else {
+	                        // Save the search request to the repository
+	                        searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
 	                    // Send an email to each user in the filtered search results (excluding logged-in user)
 	                    for (User user : results) {
@@ -564,6 +565,7 @@ public class DonorController {
 	                    // Set the email sent message after emails are sent
 	                    emailMessage = "Emails have been successfully sent to the donors.";
 	                }
+	                    
 	            } else {
 	                model.addAttribute("error", "User not found.");
 	                return "home";
@@ -572,7 +574,7 @@ public class DonorController {
 	            model.addAttribute("error", "No user logged in.");
 	            return "donorlogin";
 	        }
-
+	        }
 	        // Add results, messages, and other necessary model attributes
 	        model.addAttribute("results", results);
 	        model.addAttribute("searchPerformed", searchPerformed);

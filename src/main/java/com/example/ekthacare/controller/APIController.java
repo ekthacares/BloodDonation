@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,17 +25,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.ekthacare.entity.BloodDonation;
+import com.example.ekthacare.entity.BloodRequest;
+import com.example.ekthacare.entity.Confirmation;
+import com.example.ekthacare.entity.NotificationRequest;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
+import com.example.ekthacare.firebase.FirebaseInit;
+import com.example.ekthacare.repo.NotificationRequestRepository;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
+import com.example.ekthacare.services.BloodRequestService;
+import com.example.ekthacare.services.ConfirmationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SentEmailService;
 import com.example.ekthacare.services.UserService;
 import com.example.ekthacare.util.JwtUtil;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+
+
 import jakarta.servlet.http.HttpSession;
 
 
@@ -63,6 +76,11 @@ public class APIController {
 	    @Autowired
 	    private final SentEmailService sentEmailService;
 	    
+	    @Autowired
+	    private BloodRequestService bloodRequestService;
+	    
+	    
+	    
 	    public APIController(SentEmailService sentEmailService) {
 	        this.sentEmailService = sentEmailService;
 	    }
@@ -73,6 +91,14 @@ public class APIController {
 	    
 	    @Autowired
 	    private  SentEmailRepository sentEmailRepository;
+	    
+	    @Autowired
+	    private ConfirmationService confirmationService;
+	    
+	    
+	    @Autowired
+	    private NotificationRequestRepository notificationRequestRepository;
+
 	
 	    @PostMapping("/app login")
 	    public ResponseEntity<?> applogin(@RequestParam String mobile) {
@@ -461,15 +487,32 @@ public class APIController {
 	                        // Perform the search based on provided parameters
 	                        results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
 
-	                        if (results.isEmpty()) {
-	                            message = "No donors found matching the specified criteria. Please try again.";
-	                        }
+	                     // Debugging: Print the results before filtering
+		                    System.out.println("Results before filtering: ");
+		                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
+
+		                    
+
+		                    // Filter out the logged-in user from the results list
+		                    results = results.stream()
+		                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
+		                            .collect(Collectors.toList());
+		                 // Check if no results were found matching the criteria
+		                    if (results.isEmpty()) {
+		                    	message = "No donors found matching the specified criteria. Please try again.";
+		                    } else {
+		                    // Save the search request to the repository
+		                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
 	                        // Send emails logic (optional)
-	                        for (User user : results) {
-	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
-	                        }
-
+		                    for (User user : results) {
+		                        try {
+		                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+		                        } catch (Exception e) {
+		                            System.out.println("Error sending email to user: " + user.getId());
+		                            e.printStackTrace();
+		                        }
+		                    }
 	                        emailMessage = "Emails have been successfully sent to the donors.";
 	                    }
 	                } else {
@@ -483,7 +526,8 @@ public class APIController {
 	                return ResponseEntity.status(401).body(response);  // Unauthorized
 	            }
 
-	        } catch (Exception e) {
+	        } 
+	        }catch (Exception e) {
 	            // Handle general errors
 	            response.put("error", "An unexpected error occurred: " + e.getMessage());
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -521,6 +565,10 @@ public class APIController {
 
 	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId());
 	        sentEmailRepository.save(sentEmail);
+	        
+	        // Now send the push notification
+	        sendPushNotification(user.getFcmToken(), "Blood Search Alert", "You have request to donate blood");
+	        
 	    }
 
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
@@ -533,7 +581,132 @@ public class APIController {
 	        String data = recipientId + ":" + loggedInUserId;
 	        return Base64.getUrlEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
 	    }
+	    
+	    private void sendPushNotification(String fcmToken, String title, String message) {
+	    	System.out.println("User FCM Token: " + fcmToken);
+	        try {
+	            // Initialize Firebase (Make sure it's done before sending push notifications)
+	            FirebaseInit.initialize();
+
+	            // Build the notification using Notification.Builder
+	            Notification notification = Notification.builder()
+	                    .setTitle(title)
+	                    .setBody(message)
+	                    .build();
+
+	            // Build the message to send using FCM
+	            Message pushMessage = Message.builder()
+	                    .setToken(fcmToken)  // FCM token of the user
+	                    .setNotification(notification)  // Add the notification to the message
+	                    .build();
+
+	            // Send the notification
+	            String response = FirebaseMessaging.getInstance().send(pushMessage);
+
+	            // Log the response from FCM (you can store it in the database if needed)
+	            System.out.println("Successfully sent push notification: " + response);
+	            
+	            // Save the notification in the database
+	            NotificationRequest dbNotification = new NotificationRequest();
+	            dbNotification.setTitle(title);
+	            dbNotification.setMessage(message);
+	            dbNotification.setFcmToken(fcmToken);
+	            dbNotification.setSentTime(LocalDateTime.now());  // Set the timestamp when the notification was sent
+
+	            // Save the notification in the repository (database)
+	            notificationRequestRepository.save(dbNotification);
+
+	            
+	        } catch (Exception e) {
+	            // Handle errors
+	            System.err.println("Error sending push notification: " + e.getMessage());
+	        }
+	    }
+
+	    
+	    @GetMapping("/app/donortracking")
+	    public ResponseEntity<?> getDonationTrackingForLoggedInUser(
+	            @RequestHeader("Authorization") String authorizationHeader,
+	            @RequestHeader("userId") Long userId) {
+	        
+	        Map<String, Object> response = new HashMap<>();
+
+	        // Log request details for debugging
+	        System.out.println("Authorization Header: " + authorizationHeader);
+	        System.out.println("userId Header: " + userId);
+
+	        try {
+	            // Validate Authorization header
+	            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+	                response.put("error", "Authorization token is missing or invalid.");
+	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	            }
+
+	            // Extract the JWT token from the Authorization header
+	            String jwtToken = authorizationHeader.substring(7); // Remove "Bearer " prefix
+	            // Optional: You can validate the JWT token here if needed.
+
+	            // Validate userId
+	            if (userId == null) {
+	                response.put("message", "User not logged in.");
+	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	            }
+
+	            // Find the user
+	            User loggedInUser = userService.findById(userId);
+	            if (loggedInUser == null) {
+	                response.put("message", "User not found.");
+	                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	            }
+
+	            // Retrieve confirmations for the logged-in user
+	            java.util.List<Confirmation> confirmations = confirmationService.getConfirmationsByRecipientId(userId);
+	            if (confirmations == null || confirmations.isEmpty()) {
+	                response.put("message", "No donation tracking information available.");
+	                response.put("user", loggedInUser);
+	                return ResponseEntity.ok(response);
+	            }
+
+	            // Construct the successful response
+	            response.put("user", loggedInUser);
+	            response.put("confirmations", confirmations);
+	            return ResponseEntity.ok(response);
+
+	        } catch (Exception ex) {
+	            // Handle any unexpected errors
+	            response.put("error", "An unexpected error occurred: " + ex.getMessage());
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
+	    }
+	    	
+	    
+	    @PostMapping("/users/{id}/fcm-token")
+	    public ResponseEntity<?> updateFcmToken(@PathVariable("id") Long userId, @RequestBody Map<String, String> requestBody) {
+	        String fcmToken = requestBody.get("fcmToken");  // Ensure key matches the one sent from Android
+
+	        if (fcmToken == null || fcmToken.isEmpty()) {
+	            return ResponseEntity.badRequest().body("FCM token is missing.");
+	        }
+
+	        userService.updateFcmToken(userId, fcmToken);  
+	        return ResponseEntity.ok().build();
+	    }
+
+	    
+	    @PostMapping("/app/request")    
+	    
+	    public ResponseEntity<Map<String, String>> submitRequest(@RequestBody BloodRequest bloodRequest) {
+	        bloodRequestService.saveBloodRequest(bloodRequest);
+
+	        Map<String, String> response = new HashMap<>();
+	        response.put("message", "Blood request submitted successfully!");
+
+	        return ResponseEntity.ok(response);
+	    }
 	}
+
+
+
 	
 	    
 	   
