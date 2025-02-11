@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Campaign</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script>
+        function toggleMobileField() {
+            let specificUsersOption = document.getElementById("specificUsers");
+            let mobileField = document.getElementById("mobileField");
+            mobileField.style.display = specificUsersOption.checked ? "block" : "none";
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Create a New Campaign</h2>
+        <form action="#" th:action="@{/save}" method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Message</label>
+                <textarea class="form-control" id="message" name="message" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Send Notification To:</label><br>
+                <input type="radio" id="allUsers" name="sendTo" value="all" checked onclick="toggleMobileField()"> All Users<br>
+                <input type="radio" id="specificUsers" name="sendTo" value="specific" onclick="toggleMobileField()"> Specific Users<br>
+            </div>
+
+            <div class="mb-3" id="mobileField" style="display: none;">
+                <label for="mobileNumbers" class="form-label">Enter Mobile Numbers (comma-separated)</label>
+                <input type="text" class="form-control" id="mobileNumbers" name="mobileNumbers">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Campaign</button>
+        </form>
+    </div>
+</body>
+</html>

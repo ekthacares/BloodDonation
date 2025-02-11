@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	  List<User> findAllById(Iterable<Long> ids);
 	  
-	  
+	  List<User> findByMobileIn(List<String> mobile);
 	
 }
 

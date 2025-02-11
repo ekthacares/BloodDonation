@@ -3,6 +3,7 @@ package com.example.ekthacare.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -163,12 +164,13 @@ public class SuperAdminController {
 	        int pageSize = 10; // Define the number of users per page
 
 	        // Fetch the paginated list of users
-	        List<User> users = userService.getAllUsers(page, pageSize);
+			/* List<User> users = userService.getAllUsers(page, pageSize); */
+	        Page<User> userPage = userService.getAllUsers(page, pageSize);
 	        long totalUsers = userService.countAllRequests(); // Count the total number of users
 	        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
 
 	        // Add necessary attributes to the model
-	        model.addAttribute("users", users);           // List of users on current page
+	        model.addAttribute("users", userPage.getContent());           // List of users on current page
 	        model.addAttribute("currentPage", page);      // Current page number
 	        model.addAttribute("totalPages", totalPages); // Total number of pages
 	        model.addAttribute("pageSize", pageSize);     // Page size
