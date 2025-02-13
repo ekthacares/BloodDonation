@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,13 +26,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.BloodRequest;
-import com.example.ekthacare.entity.Campaigns;
 import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.entity.NotificationRequest;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.firebase.FirebaseInit;
-import com.example.ekthacare.repo.CampaignsRepository;
 import com.example.ekthacare.repo.NotificationRequestRepository;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
@@ -101,9 +98,7 @@ public class APIController {
 	    
 	    @Autowired
 	    private NotificationRequestRepository notificationRequestRepository;
-	    
-	    @Autowired
-	    private CampaignsRepository campaignsRepository;
+
 	
 	    @PostMapping("/app login")
 	    public ResponseEntity<?> applogin(@RequestParam String mobile) {
@@ -598,14 +593,11 @@ public class APIController {
 	                    .setTitle(title)
 	                    .setBody(message)
 	                    .build();
-	                      
 
 	            // Build the message to send using FCM
 	            Message pushMessage = Message.builder()
 	                    .setToken(fcmToken)  // FCM token of the user
-	                   // .setNotification(notification)  // Add the notification to the message
-	                    .putData("title", title)
-	                    .putData("body", message)
+	                    .setNotification(notification)  // Add the notification to the message
 	                    .build();
 
 	            // Send the notification
@@ -710,13 +702,6 @@ public class APIController {
 	        response.put("message", "Blood request submitted successfully!");
 
 	        return ResponseEntity.ok(response);
-	    }
-	    
-	    
-	    @GetMapping("/campaigns")
-	    public ResponseEntity<List<Campaigns>> getAllCampaigns() {
-	        List<Campaigns> campaigns = campaignsRepository.findAll();
-	        return ResponseEntity.ok(campaigns);
 	    }
 	}
 

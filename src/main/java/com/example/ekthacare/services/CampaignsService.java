@@ -1,9 +1,6 @@
 package com.example.ekthacare.services;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-
 import com.example.ekthacare.entity.Campaigns;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.repo.CampaignsRepository;
@@ -86,6 +83,4 @@ public class CampaignsService {
     public List<Campaigns> getAllCampaigns() {
         return campaignsRepository.findAll();
     }
-    
-   
 }
