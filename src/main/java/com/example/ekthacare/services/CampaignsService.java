@@ -70,7 +70,7 @@ public class CampaignsService {
 
         try {
             System.out.println("🚀 Calling FCMService to send notification...");
-            fcmService.sendPushNotification(tokens, title, message);
+            fcmService.sendPushNotification(tokens, title, message, "campaign");
             System.out.println("✅ FCMService call completed.");
         } catch (Exception e) {
             System.out.println("❌ Error calling FCMService: " + e.getMessage());

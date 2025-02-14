@@ -10,7 +10,7 @@ import java.io.IOException;
 public class FirebaseInit {
     public static void initialize() {
         try {
-            FileInputStream serviceAccount = new FileInputStream("src/main/resources/ekthacares-7e31a-firebase-adminsdk-fbsvc-02a229bcae.json");
+            FileInputStream serviceAccount = new FileInputStream("src/main/resources/ekthacares-7e31a-firebase-adminsdk-fbsvc-4d46249eb6.json");
             // Set Firebase options
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
