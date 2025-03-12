@@ -580,7 +580,7 @@ public class APIController {
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
-	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
 
 	    private String generateSecureToken(Long recipientId, Long loggedInUserId) {

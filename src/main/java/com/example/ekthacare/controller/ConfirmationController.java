@@ -69,19 +69,20 @@ public class ConfirmationController {
 
             System.out.println("Logged-In User ID: " + loggedInUserId);
 
+            // Check if the user exists in the system
+            User loggedInUser = userService.findById(loggedInUserId);
+            if (loggedInUser == null) {
+                System.out.println("User not found for loggedInUserId: " + loggedInUserId);
+                model.addAttribute("message", "User information not found.");
+                return "errorPage";
+            }
+
             // Check the last donation date for the logged-in user
             LocalDateTime lastDonationDateTime = bloodDonationService.getLastDonationDateByUserId(loggedInUserId);
 
             if (lastDonationDateTime != null) {
-                // Convert LocalDateTime to LocalDate
                 LocalDate lastDonationDate = lastDonationDateTime.toLocalDate();
                 LocalDate currentDate = LocalDate.now();
-
-                // Calculate the period
-              //  Period periodSinceLastDonation = Period.between(lastDonationDate, currentDate);
-               // int monthsSinceLastDonation = periodSinceLastDonation.getMonths();
-
-                // Calculate the total months since the last donation
                 long monthsSinceLastDonation = ChronoUnit.MONTHS.between(lastDonationDate, currentDate);
 
                 if (monthsSinceLastDonation < 3) {
@@ -90,11 +91,9 @@ public class ConfirmationController {
                     return "donationTracking";
                 }
             } else {
-                System.out.println("Donor not found for loggedInUserId: " + loggedInUserId);
-                model.addAttribute("message", "Donor information not found.");
-                return "errorPage";
+                // Instead of throwing an error, allow new donors who have never donated before.
+                System.out.println("No previous donation record found for loggedInUserId: " + loggedInUserId);
             }
-
 
             // Retrieve all existing confirmations for the logged-in user
             List<Confirmation> existingConfirmations = confirmationService.getConfirmationsByLoggedInUserId(loggedInUserId);
@@ -128,7 +127,7 @@ public class ConfirmationController {
             String otp = otpVerificationService.generateAndSaveOtp(recipientId, loggedInUserId);
 
             // Find the recipient user based on recipientId
-            User recipient = userService.findById(loggedInUserId);
+            User recipient = userService.findById(recipientId);
             if (recipient != null) {
                 String otpMessage = "Your OTP for confirming the blood donation request is: " + otp;
 
@@ -145,8 +144,6 @@ public class ConfirmationController {
 
                 // Send OTP via SMS
                 try {
-                    // String message = "Your OTP for confirming the blood donation is " + otp + " - EKTHA PVT LTD";
-                    // smsService.sendJsonSms(recipient.getMobile(), message);  // Assuming smsService is implemented
                     System.out.println("OTP sent via SMS to recipient: " + recipient.getMobile());
                 } catch (Exception e) {
                     System.out.println("Error sending OTP via SMS to recipient: " + recipient.getMobile());
@@ -172,6 +169,7 @@ public class ConfirmationController {
             return "errorPage";
         }
     }
+
 
     @PostMapping("/startDonation")
     public String startDonation(

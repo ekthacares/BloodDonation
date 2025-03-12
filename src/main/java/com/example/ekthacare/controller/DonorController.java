@@ -541,19 +541,18 @@ public class DonorController {
 	                    System.out.println("Results before filtering: ");
 	                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
 
+	                    // Check if no results were found matching the criteria
+	                    if (results.isEmpty() && message == null) {
+	                        message = "No donors found matching the specified criteria. Please try again.";
+	                    }
 
 	                    // Filter out the logged-in user from the results list
 	                    results = results.stream()
 	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
 	                            .collect(Collectors.toList());
-	                    
 
-	                    // Check if no results were found matching the criteria
-	                    if (results.isEmpty()) {
-	                    	message = "No donors found matching the specified criteria. Please try again.";
-	                    }else {
-	                        // Save the search request to the repository
-	                        searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
+	                    // Save the search request to the repository
+	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
 
 	                    // Send an email to each user in the filtered search results (excluding logged-in user)
 	                    for (User user : results) {
@@ -568,7 +567,6 @@ public class DonorController {
 	                    // Set the email sent message after emails are sent
 	                    emailMessage = "Emails have been successfully sent to the donors.";
 	                }
-	                    
 	            } else {
 	                model.addAttribute("error", "User not found.");
 	                return "home";
@@ -577,7 +575,7 @@ public class DonorController {
 	            model.addAttribute("error", "No user logged in.");
 	            return "donorlogin";
 	        }
-	        }
+
 	        // Add results, messages, and other necessary model attributes
 	        model.addAttribute("results", results);
 	        model.addAttribute("searchPerformed", searchPerformed);
@@ -629,7 +627,7 @@ public class DonorController {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
 	        //return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
-	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
 
 	    
@@ -639,6 +637,7 @@ public class DonorController {
 	        return Base64.getUrlEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
 	    }
 	   
+
 
 	    /* ============================Edit Profile process ====================================== */   
 	    @PostMapping("/updateProfile")
