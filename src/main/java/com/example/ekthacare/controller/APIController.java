@@ -700,7 +700,24 @@ public class APIController {
 	        userService.updateFcmToken(userId, fcmToken);  
 	        return ResponseEntity.ok().build();
 	    }
+	    
+	    @GetMapping("/users/{id}/fcm-token")
+	    public ResponseEntity<?> getFcmToken(@PathVariable("id") Long userId) {
+	        System.out.println("Fetching FCM token for user ID: " + userId);
 
+	        String fcmToken = userService.getFcmTokenByUserId(userId);
+
+	        if (fcmToken == null || fcmToken.isEmpty()) {
+	            System.out.println("FCM token not found for user ID: " + userId);
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("FCM token not found for user ID: " + userId);
+	        }
+
+	        System.out.println("FCM Token for user " + userId + ": " + fcmToken);
+	        return ResponseEntity.ok(Collections.singletonMap("fcmToken", fcmToken));
+	    }
+
+
+	    
 	    
 	    @PostMapping("/app/request")    
 	    
