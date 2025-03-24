@@ -3,6 +3,7 @@ package com.example.ekthacare.repo;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.example.ekthacare.entity.User;
 
@@ -18,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	  List<User> findAllById(Iterable<Long> ids);
 	  
 	  List<User> findByMobileIn(List<String> mobile);
+	  
+	  @Query("SELECT u.fcmToken FROM User u WHERE u.id = :id")
+	    String findFcmTokenById(Long id);
 	
 }
 

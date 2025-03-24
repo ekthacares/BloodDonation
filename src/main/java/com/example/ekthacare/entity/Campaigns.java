@@ -1,12 +1,11 @@
 package com.example.ekthacare.entity;
 
-
 import jakarta.persistence.*;
-
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
-
 public class Campaigns {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,6 +13,10 @@ public class Campaigns {
 
     private String title;
     private String message;
+    @Column(name = "date")
+    private LocalDate campaignDate;
+    @Column(name = "time")
+    private LocalTime campaignTime;
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -21,49 +24,65 @@ public class Campaigns {
         this.createdAt = LocalDateTime.now();
     }
 
-	public Long getId() {
-		return id;
-	}
+    // Constructors
+    public Campaigns() {
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Campaigns(Long id, String title, String message, LocalDate campaignDate, LocalTime campaignTime, LocalDateTime createdAt) {
+        this.id = id;
+        this.title = title;
+        this.message = message;
+        this.campaignDate = campaignDate;
+        this.campaignTime = campaignTime;
+        this.createdAt = createdAt;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	public Campaigns(Long id, String title, String message, LocalDateTime createdAt) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.message = message;
-		this.createdAt = createdAt;
-	}
+    public LocalDate getCampaignDate() {
+        return campaignDate;
+    }
 
-	public Campaigns() {
-		// TODO Auto-generated constructor stub
-	}
-    
-    
+    public void setCampaignDate(LocalDate campaignDate) {
+        this.campaignDate = campaignDate;
+    }
+
+    public LocalTime getCampaignTime() {
+        return campaignTime;
+    }
+
+    public void setCampaignTime(LocalTime campaignTime) {
+        this.campaignTime = campaignTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

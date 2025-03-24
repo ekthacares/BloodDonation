@@ -1,5 +1,8 @@
 package com.example.ekthacare.services;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.ekthacare.entity.Campaigns;
 import com.example.ekthacare.entity.User;
@@ -7,6 +10,8 @@ import com.example.ekthacare.repo.CampaignsRepository;
 import com.example.ekthacare.repo.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 
 @Service
@@ -22,14 +27,18 @@ public class CampaignsService {
         this.fcmService = fcmService;
     }
 
-    public Campaigns createCampaign(String title, String message, String sendTo, String mobile) {
+    public Campaigns createCampaign(String title, String message, String sendTo, String mobile, LocalDate campaignDate, LocalTime campaignTime) {
         System.out.println("📢 Creating campaign with Title: " + title);
         System.out.println("📜 Message: " + message);
+        System.out.println("📅 Date: " + campaignDate);
+        System.out.println("⏰ Time: " + campaignTime);
 
         // Save campaign in the database
         Campaigns campaign = new Campaigns();
         campaign.setTitle(title);
         campaign.setMessage(message);
+        campaign.setCampaignDate(campaignDate);
+        campaign.setCampaignTime(campaignTime);
         campaign = campaignsRepository.save(campaign);
 
         List<String> tokens;
@@ -82,5 +91,10 @@ public class CampaignsService {
 
     public List<Campaigns> getAllCampaigns() {
         return campaignsRepository.findAll();
+    }
+    
+    public List<Campaigns> getLastTwoCampaigns() {
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return campaignsRepository.findTop2ByOrderByCreatedAtDesc(pageable);
     }
 }

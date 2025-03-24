@@ -55,11 +55,19 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
     
-    @GetMapping("/user")
+    @GetMapping("/fcmuser")
     public ResponseEntity<List<NotificationRequest>> getUserNotifications(@RequestParam String fcmToken) {
         List<NotificationRequest> notifications = notificationRepository.findByFcmToken(fcmToken);
         return ResponseEntity.ok(notifications);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<NotificationRequest>> getUserNotifications(@PathVariable Long userId) {
+        List<NotificationRequest> notifications = notificationRepository.findByUserId(userId);
+        return ResponseEntity.ok(notifications);
+    }
+    
+    
 
 
 }

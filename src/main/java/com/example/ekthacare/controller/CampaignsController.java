@@ -8,6 +8,10 @@ import com.example.ekthacare.services.User1Service;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -85,12 +89,41 @@ public class CampaignsController {
 }
     
 
+/*
+ * @PostMapping("/save") public String createCampaign(@RequestParam String
+ * title,
+ * 
+ * @RequestParam String message,
+ * 
+ * @RequestParam String sendTo,
+ * 
+ * @RequestParam(required = false) String mobileNumbers) {
+ * campaignsService.createCampaign(title, message, sendTo, mobileNumbers);
+ * return "redirect:/create"; }
+ */
+    
     @PostMapping("/save")
     public String createCampaign(@RequestParam String title, 
-                                 @RequestParam String message,
-                                 @RequestParam String sendTo,
-                                 @RequestParam(required = false) String mobileNumbers) {
-        campaignsService.createCampaign(title, message, sendTo, mobileNumbers);
+                               @RequestParam String message, 
+                               @RequestParam String sendTo, 
+                               @RequestParam(required = false) String mobileNumbers,
+                               @RequestParam String campaignDate,
+                               @RequestParam String campaignTime) {
+        try {
+            // Convert campaignDate (String) -> LocalDate
+            LocalDate date = LocalDate.parse(campaignDate);
+
+            // Convert campaignTime (String) -> LocalTime
+            LocalTime time = LocalTime.parse(campaignTime);
+
+            // Call createCampaign with the correct number of arguments
+            campaignsService.createCampaign(title, message, sendTo, mobileNumbers, date, time);
+        } catch (DateTimeParseException e) {
+            System.out.println("❌ Error parsing date/time: " + e.getMessage());
+            return "redirect:/error";
+        }
+
         return "redirect:/create";
     }
+    
 }

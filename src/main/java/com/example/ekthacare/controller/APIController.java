@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,7 @@ import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.BloodRequestService;
+import com.example.ekthacare.services.CampaignsService;
 import com.example.ekthacare.services.ConfirmationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.OtpService;
@@ -104,6 +106,9 @@ public class APIController {
 	    
 	    @Autowired
 	    private CampaignsRepository campaignsRepository;
+	    
+	    @Autowired
+	    private CampaignsService campaignsService;
 
 	
 	    @PostMapping("/app login")
@@ -573,14 +578,14 @@ public class APIController {
 	        sentEmailRepository.save(sentEmail);
 	        
 	        // Now send the push notification
-	        sendPushNotification(user.getFcmToken(), "Blood Search Alert", "You have request to donate blood", "Notification");
+	        sendPushNotification(user.getId(), user.getFcmToken(), "Blood Search Alert", "You have request to donate blood", "Notification");
 	        
 	    }
 
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
-	        return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
 
 	    private String generateSecureToken(Long recipientId, Long loggedInUserId) {
@@ -588,11 +593,22 @@ public class APIController {
 	        return Base64.getUrlEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
 	    }
 	    
-	    private void sendPushNotification(String fcmToken, String title, String message, String type) {
+	    private void sendPushNotification(Long userId,String fcmToken, String title, String message, String type) {
 	    	System.out.println("User FCM Token: " + fcmToken);
-	        try {
+	    	// Check if the FCM token is missing or invalid
+	        	        try {
 	            // Initialize Firebase (Make sure it's done before sending push notifications)
 	            FirebaseInit.initialize();
+	            
+	            // Retrieve the recipient's FCM token using the userId
+	            if (fcmToken == null || fcmToken.isEmpty()) {
+	                // Get the FCM token for the recipient user from the database
+	                fcmToken = userRepository.findFcmTokenById(userId);
+	                if (fcmToken == null || fcmToken.isEmpty()) {
+	                    System.err.println("FCM token not found for User ID: " + userId);
+	                    return;  // Exit if the token is not found
+	                }
+	            }
 
 	            // Build the notification using Notification.Builder
 	            Notification notification = Notification.builder()
@@ -603,7 +619,7 @@ public class APIController {
 	            // Build the message to send using FCM
 	            Message pushMessage = Message.builder()
 	                    .setToken(fcmToken)  // FCM token of the user
-	                    //.setNotification(notification)  // Add the notification to the message
+	                    .putData("userId", String.valueOf(userId)) // ✅ Include userId in FCM payload
 	                    .putData("title", title)
 	                    .putData("body", message)
 	                    .putData("type", type) // 🔹 Important: Differentiates between "notification" & "campaign"
@@ -617,6 +633,7 @@ public class APIController {
 	            
 	            // Save the notification in the database
 	            NotificationRequest dbNotification = new NotificationRequest();
+	            dbNotification.setUserId(userId); // ✅ Save the user ID
 	            dbNotification.setTitle(title);
 	            dbNotification.setMessage(message);
 	            dbNotification.setFcmToken(fcmToken);
@@ -737,6 +754,12 @@ public class APIController {
 	        return ResponseEntity.ok(campaigns);
 	    }
 	    
+	    @GetMapping("/campaigns/latest")
+	    public ResponseEntity<List<Campaigns>> getLatestCampaigns() {
+	        return ResponseEntity.ok(campaignsService.getLastTwoCampaigns());
+	    }
+	    
+	   
 	}
 
 

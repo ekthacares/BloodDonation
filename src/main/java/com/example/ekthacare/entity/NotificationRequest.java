@@ -15,12 +15,21 @@ public class NotificationRequest {
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
-
+	 private Long userId;  // ✅ Store the user ID
     private String fcmToken;  // FCM Token of the device
     private String title;     // Title of the notification
     private String message;   // Body of the notification
     private LocalDateTime sentTime;
     // Getters and Setters
+    
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+    
     public String getFcmToken() {
         return fcmToken;
     }
