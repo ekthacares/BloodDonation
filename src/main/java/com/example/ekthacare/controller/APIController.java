@@ -686,7 +686,7 @@ public class APIController {
 	            }
 
 	            // Retrieve confirmations for the logged-in user
-	            java.util.List<Confirmation> confirmations = confirmationService.getConfirmationsByRecipientId(userId);
+	            java.util.List<Confirmation> confirmations = confirmationService.getConfirmationsByLoggedInUserId(userId);
 	            if (confirmations == null || confirmations.isEmpty()) {
 	                response.put("message", "No donation tracking information available.");
 	                response.put("user", loggedInUser);
