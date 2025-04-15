@@ -22,21 +22,31 @@ public class SentEmail {
     private String confirmationUrl;
     private Long recipientId;
     private Long loggedInUserId;
+    private String hospitalName; // ✅ New field
+    private String bloodgroup;  // Add this field
 
     // Default constructor
     public SentEmail() {
     }
 
-    public SentEmail(Long id, String email, LocalDateTime sentAt, String confirmationUrl, Long recipientId, Long loggedInUserId) {
-        this.id = id;
-        this.email = email;
-        this.setSentAt(sentAt);  // Ensures timestamp precision is set when value is assigned
-        this.confirmationUrl = confirmationUrl;
-        this.recipientId = recipientId;
-        this.loggedInUserId = loggedInUserId;
-    }
+   
 
-    // Getters and Setters
+    public SentEmail(Long id, String email, LocalDateTime sentAt, String confirmationUrl, Long recipientId,
+			Long loggedInUserId, String hospitalName, String bloodgroup) {
+		super();
+		this.id = id;
+		this.email = email;
+		this.sentAt = sentAt;
+		this.confirmationUrl = confirmationUrl;
+		this.recipientId = recipientId;
+		this.loggedInUserId = loggedInUserId;
+		this.hospitalName = hospitalName;
+		this.bloodgroup = bloodgroup;
+	}
+
+
+
+	// Getters and Setters
     public Long getId() {
         return id;
     }
@@ -94,10 +104,35 @@ public class SentEmail {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         return this.sentAt != null ? this.sentAt.format(formatter) : "";
     }
-
-    @Override
-    public String toString() {
-        return "SentEmail [id=" + id + ", email=" + email + ", sentAt=" + sentAt + ", confirmationUrl=" + confirmationUrl
-                + ", recipientId=" + recipientId + ", loggedInUserId=" + loggedInUserId + "]";
+    
+    public String getHospitalName() {
+        return hospitalName;
     }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
+    }
+    
+    
+    
+    public String getBloodgroup() {
+		return bloodgroup;
+	}
+
+
+
+	public void setBloodgroup(String bloodgroup) {
+		this.bloodgroup = bloodgroup;
+	}
+
+
+
+	@Override
+	public String toString() {
+		return "SentEmail [id=" + id + ", email=" + email + ", sentAt=" + sentAt + ", confirmationUrl="
+				+ confirmationUrl + ", recipientId=" + recipientId + ", loggedInUserId=" + loggedInUserId
+				+ ", hospitalName=" + hospitalName + ", bloodgroup=" + bloodgroup + "]";
+	}
+    
+    
 }

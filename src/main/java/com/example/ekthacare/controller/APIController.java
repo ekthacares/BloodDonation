@@ -574,7 +574,7 @@ public class APIController {
 	        System.out.println("Generated Email Message:\n" + message);
 	        emailService.sendEmail(user.getEmailid(), subject, message);
 
-	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId());
+	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId(), hospitalName, bloodgroup);
 	        sentEmailRepository.save(sentEmail);
 	        
 	        // Now send the push notification
@@ -585,6 +585,7 @@ public class APIController {
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
+	        //return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	    }
 
@@ -759,7 +760,7 @@ public class APIController {
 	        return ResponseEntity.ok(campaignsService.getLastTwoCampaigns());
 	    }
 	    
-	   
+	    
 	}
 
 

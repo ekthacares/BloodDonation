@@ -595,7 +595,7 @@ public class DonorController {
 	    private void sendEmailToUser(User user, User loggedInUser, String bloodgroup, String hospitalName) {
 	        String subject = "Blood Search Alert";
 	        String confirmationUrl = generateConfirmationUrl(user.getId(), loggedInUser.getId(), hospitalName);
-
+ 
 
 	        String locationInfo = (hospitalName != null && !hospitalName.isEmpty()) ? 
 	                "The blood is needed at " + hospitalName : 
@@ -614,7 +614,7 @@ public class DonorController {
 	        System.out.println("Generated Email Message:\n" + message);
 	        emailService.sendEmail(user.getEmailid(), subject, message);
 
-	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId());
+	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId(),hospitalName, bloodgroup);
 	        sentEmailRepository.save(sentEmail);
 	    }
 
@@ -627,7 +627,9 @@ public class DonorController {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
 	        //return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
-	        return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        //return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	      return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	        
 	    }
 
 	    

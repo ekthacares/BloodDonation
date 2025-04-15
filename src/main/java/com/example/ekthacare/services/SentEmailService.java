@@ -6,6 +6,9 @@ import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.repo.SentEmailRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class SentEmailService {
@@ -32,6 +35,7 @@ public class SentEmailService {
         return sentEmailRepository.findByRecipientId(recipientId);
     }
     
- 
     
+
+
 }
