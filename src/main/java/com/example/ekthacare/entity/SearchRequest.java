@@ -1,9 +1,11 @@
 package com.example.ekthacare.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,13 +23,18 @@ public class SearchRequest {
     private String bloodgroup;
     private String city;
     private String state;
-    private LocalDateTime timestamp; // Keep as LocalDateTime for internal processing
+    
+    @Column(name = "requested_date")
+    private LocalDate requestedDate; // New field
 
-    public SearchRequest() {
-        // Default constructor
-    }
+    private LocalDateTime timestamp; // Internal processing timestamp
 
-    // Getters and Setters
+ 
+	public SearchRequest() {
+		// TODO Auto-generated constructor stub
+	}
+
+	// Getters and Setters
     public Long getId() {
         return id;
     }
@@ -68,30 +75,37 @@ public class SearchRequest {
         this.state = state;
     }
 
+    public LocalDate getRequestedDate() {
+        return requestedDate;
+    }
+
+    public void setRequestedDate(LocalDate requestedDate) {
+        this.requestedDate = requestedDate;
+    }
+
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
     public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS); // Ensure timestamp has no milliseconds/nanoseconds
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
     }
 
     @PrePersist
     @PreUpdate
     public void updateTimestamp() {
-        this.timestamp = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS); // Set current time without milliseconds/nanoseconds
+        this.timestamp = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
     }
 
-    
     public String getFormattedTimestamp() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         return this.timestamp.format(formatter);
     }
 
-
     @Override
     public String toString() {
-        return "SearchRequest [id=" + id + ", userId=" + userId + ", bloodgroup=" + bloodgroup + ", city=" + city
-                + ", state=" + state + ", timestamp=" + timestamp + "]";
+        return "SearchRequest [id=" + id + ", userId=" + userId + ", bloodgroup=" + bloodgroup +
+                ", city=" + city + ", state=" + state + ", requestedDate=" + requestedDate +
+                ", timestamp=" + timestamp + "]";
     }
 }

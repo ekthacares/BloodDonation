@@ -3,6 +3,7 @@ package com.example.ekthacare.controller;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -515,14 +517,17 @@ public class DonorController {
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
 	            @RequestParam(value = "city", required = false) String city,
 	            @RequestParam(value = "state", required = false) String state,
-	            @RequestParam(value = "hospital", required = false) String hospitalName,
+	            @RequestParam(value = "hospital", required = false) String hospitalName,	           
+	            @RequestParam(value = "requestedDate", required = false) LocalDate requestedDate,	          
 	            Model model, HttpSession session) {
 
 	        boolean searchPerformed = false;
 	        List<User> results = new ArrayList<>();
 	        String message = null;
 	        String emailMessage = null;
-
+	        
+	       
+	        
 	        // Retrieve userId from session
 	        Long userId = (Long) session.getAttribute("userId");
 	        if (userId != null) {
@@ -552,14 +557,15 @@ public class DonorController {
 	                            .collect(Collectors.toList());
 
 	                    // Save the search request to the repository
-	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state);
+	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state, requestedDate);
 
 	                    // Send an email to each user in the filtered search results (excluding logged-in user)
 	                    for (User user : results) {
 	                        try {
+	                            System.out.println("Processing user ID for email: " + user.getId());
 	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
 	                        } catch (Exception e) {
-	                            System.out.println("Error sending email to user: " + user.getId());
+	                            System.err.println("Error sending email to user: " + user.getId());
 	                            e.printStackTrace();
 	                        }
 	                    }
@@ -612,10 +618,19 @@ public class DonorController {
 	        );
 
 	        System.out.println("Generated Email Message:\n" + message);
+
+	        try {
 	        emailService.sendEmail(user.getEmailid(), subject, message);
 
-	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId(),hospitalName, bloodgroup);
+	        SentEmail sentEmail = new SentEmail(null, user.getEmailid(), LocalDateTime.now(), confirmationUrl, user.getId(), loggedInUser.getId(), hospitalName, bloodgroup);
 	        sentEmailRepository.save(sentEmail);
+	        System.out.println("Successfully saved SentEmail for user ID " + user.getId());
+
+	    } catch (Exception e) {
+	        System.err.println("Failed to send/save email for user: " + user.getId());
+	        e.printStackTrace();
+	    }
+	        
 	    }
 
 	    
@@ -628,7 +643,7 @@ public class DonorController {
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL
 	        //return "http://localhost:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	        //return "http://192.168.29.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
-	      return "http://192.168.0.205:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
+	      return "http://192.168.29.122:8082/confirmRequest?token=" + token + "&hospitalName=" + encodedHospitalName;
 	        
 	    }
 

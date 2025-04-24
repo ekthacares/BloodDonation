@@ -171,7 +171,13 @@
                     <option th:each="state : ${states}" th:text="${state}" th:value="${state}"></option>
                 </select>
             </div>
-
+			
+			<!-- Requested Date -->
+			<div class="form-group">
+			    <label for="requested_date">Requested Date</label>
+			    <input type="date" id="requestedDate" name="requestedDate" required>
+			</div>
+					   
             <!-- Submit Button -->
             <div class="form-group">
                 <button type="submit" class="btn">Search</button>
@@ -435,6 +441,15 @@
         <script src="js/jquery.counterup.min.js"></script>
         <script src="js/venobox.min.js"></script>
         <script src="js/custom-scripts.js"></script>
+		<script>
+		// Get today's date in YYYY-MM-DD format
+		const today = new Date().toISOString().split('T')[0];
+
+		// Set the minimum date to today and set today's date as the default
+		const dateInput = document.getElementById('requestedDate');
+		dateInput.min = today;
+		dateInput.value = today;
+		</script>
     </body>
 
 </html>

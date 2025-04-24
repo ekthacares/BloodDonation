@@ -1,6 +1,7 @@
 package com.example.ekthacare.services;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
@@ -26,12 +27,13 @@ public class SearchRequestService {
         return repository.findById(userId).orElse(null);
     }
 
-    public void saveSearchRequest(Long userId, String bloodgroup, String city, String state) {
+    public void saveSearchRequest(Long userId, String bloodgroup, String city, String state, LocalDate requestedDate) {
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.setUserId(userId);       
         searchRequest.setBloodgroup(bloodgroup);
         searchRequest.setCity(city);
-        searchRequest.setState(state);
+        searchRequest.setState(state);        
+        searchRequest.setRequestedDate(requestedDate);
         searchRequest.updateTimestamp();
         repository.save(searchRequest);
     }    
