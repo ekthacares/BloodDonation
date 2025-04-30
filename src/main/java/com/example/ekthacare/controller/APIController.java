@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -588,8 +589,9 @@ public class APIController {
 	        e.printStackTrace();
 	    }
 	        
-	        // Now send the push notification
-	        sendPushNotification(user.getId(), user.getFcmToken(), "Blood Search Alert", "You have request to donate blood", "Notification");
+	        String pushMessage = String.format("You have a request to donate blood for %s.", bloodgroup);
+	        sendPushNotification(user.getId(), user.getFcmToken(), "Blood Search Alert", pushMessage, "Notification");
+
 	        
 	    }
 
@@ -771,6 +773,19 @@ public class APIController {
 	        return ResponseEntity.ok(campaignsService.getLastTwoCampaigns());
 	    }
 	    
+	    
+	    @PutMapping("/users/{id}")
+	    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody User user) {
+	        user.setId(id);
+	        userService.updateUser(user);
+
+	        Map<String, String> response = new HashMap<>();
+	        response.put("message", "User updated successfully");
+	        return ResponseEntity.ok(response);
+	    }
+
+
+
 	    
 	}
 

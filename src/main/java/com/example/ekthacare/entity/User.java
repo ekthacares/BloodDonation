@@ -73,6 +73,10 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+    
+    @Column(name = "profile_path", columnDefinition = "LONGTEXT")
+    private String profileImage;
+
 
     private boolean isDeleted = false;
         
@@ -80,55 +84,54 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String donorname, String mobile, String emailid, LocalDate dateofbirth,
-            String bloodgroup, Integer age, String gender, String address, String city, String state,
-            boolean isverified, Long createdBy, Long updatedBy, Long deletedBy,
-            LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
-    this.id = id;
-    this.donorname = donorname;
-    this.mobile = mobile;
-    this.emailid = emailid;
-    this.dateofbirth = dateofbirth;
-    this.bloodgroup = bloodgroup;
-    this.age = age;
-    this.gender = gender;
-    this.address = address;
-    this.city = city;
-    this.state = state;
-    this.isverified = isverified;
-    this.createdBy = createdBy;
-    this.updatedBy = updatedBy;
-    this.deletedBy = deletedBy;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.deletedAt = deletedAt;
-}
+    
+    
 
-    // Getters and setters...
+    public User(Long id, String donorname, String mobile, String emailid, LocalDate dateofbirth, String bloodgroup,
+			Integer age, String gender, String address, String city, String state, boolean isverified, Long createdBy,
+			String createdByType, Long updatedBy, Long deletedBy, String deletedByType, LocalDateTime createdAt,
+			LocalDateTime updatedAt, LocalDateTime deletedAt, String profileImage, boolean isDeleted, String jwtToken,
+			String fcmToken) {
+		super();
+		this.id = id;
+		this.donorname = donorname;
+		this.mobile = mobile;
+		this.emailid = emailid;
+		this.dateofbirth = dateofbirth;
+		this.bloodgroup = bloodgroup;
+		this.age = age;
+		this.gender = gender;
+		this.address = address;
+		this.city = city;
+		this.state = state;
+		this.isverified = isverified;
+		this.createdBy = createdBy;
+		this.createdByType = createdByType;
+		this.updatedBy = updatedBy;
+		this.deletedBy = deletedBy;
+		this.deletedByType = deletedByType;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.deletedAt = deletedAt;
+		this.profileImage = profileImage;
+		this.isDeleted = isDeleted;
+		this.jwtToken = jwtToken;
+		this.fcmToken = fcmToken;
+	}
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", donorname='" + donorname + '\'' +
-                ", mobile='" + mobile + '\'' +
-                ", emailid='" + emailid + '\'' +
-                ", dateofbirth=" + dateofbirth +
-                ", bloodgroup='" + bloodgroup + '\'' +
-                ", age=" + age +
-                ", gender='" + gender + '\'' +
-                ", address='" + address + '\'' +
-                ", city='" + city + '\'' +
-                ", state='" + state + '\'' +
-                ", isverified=" + isverified +
-                ", createdBy='" + createdBy + '\'' +
-                ", updatedBy='" + updatedBy + '\'' +
-                ", deletedBy='" + deletedBy + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", deletedAt=" + deletedAt +
-                '}';
-    }
+
+
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", donorname=" + donorname + ", mobile=" + mobile + ", emailid=" + emailid
+				+ ", dateofbirth=" + dateofbirth + ", bloodgroup=" + bloodgroup + ", age=" + age + ", gender=" + gender
+				+ ", address=" + address + ", city=" + city + ", state=" + state + ", isverified=" + isverified
+				+ ", createdBy=" + createdBy + ", createdByType=" + createdByType + ", updatedBy=" + updatedBy
+				+ ", deletedBy=" + deletedBy + ", deletedByType=" + deletedByType + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + ", deletedAt=" + deletedAt + ", profileImage=" + profileImage
+				+ ", isDeleted=" + isDeleted + ", jwtToken=" + jwtToken + ", fcmToken=" + fcmToken + "]";
+	}
     
     // Getters and setters
     public Long getId() {
@@ -300,8 +303,20 @@ public class User {
     public String getDeletedByType() {
         return deletedByType;
     }
+    
+    
 
-    public void setDeletedByType(String deletedByType) {
+    public String getProfileImage() {
+		return profileImage;
+	}
+
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
+
+
+	public void setDeletedByType(String deletedByType) {
         this.deletedByType = deletedByType;
     }
 
