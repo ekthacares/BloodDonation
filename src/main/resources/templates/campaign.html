@@ -22,7 +22,12 @@
         <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" >
         <link href="css/venobox.css" rel="stylesheet" type="text/css" >
         <link rel="stylesheet" href="css/styles.css" />
-
+		
+	<style>
+		.section-content-block{
+			padding: 0px 10px 10px 10px;
+		}
+	</style>
     <body> 
 
         <div id="preloader">
@@ -110,12 +115,11 @@
         </header> <!-- end main-header  -->
 
 		<div class="contact-form-block">
-		        <h2 class="contact-title"> Search for blood
+		        <h2 class="contact-title"> Campaign
 		</h2>
-		    </div> 
-        
+		    </div>         
         <!--  FEATURED ABOUT US SECTION-->  
-<section class="section-content-block">      
+<section class="section-content-block" >      
 	<div class="registration_container">
 	       <form action="#" th:action="@{/save}" method="post">
 	           <div class="mb-3">
@@ -123,7 +127,7 @@
 	               <input type="text" class="form-control" id="title" name="title" required>
 	           </div>
 	           <div class="mb-3">
-	               <label for="message" class="form-label">Message</label>
+	               <label for="message" class="form-label">Location Details</label>
 	               <textarea class="form-control" id="message" name="message" required></textarea>
 	           </div>
 			   
