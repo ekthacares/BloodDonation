@@ -154,6 +154,15 @@
            	  <input type="text" id="hospital" name="hospital" placeholder="Enter Hospital/Blood Bank Name" required> 
             </div>
 			
+			<!-- Area -->
+			            <div class="form-group">
+			                <label for="area">Area:</label>
+			                <select id="area" name="area" required>
+			                    <option value="" disabled selected>Select Area</option>
+			                    <option th:each="area : ${areas}" th:text="${area}" th:value="${area}"></option>
+			                </select>
+			            </div>
+			
             <!-- City -->
             <div class="form-group">
                 <label for="city">City:</label>
@@ -198,6 +207,7 @@
                     <tr>
                         <th>Donor Name</th>
                         <th>Blood Group</th>
+						<th>Area</th>
                         <th>City</th>
                         <th>State</th>
                         <th>Mobile</th>
@@ -207,6 +217,7 @@
                     <tr th:each="result : ${results}">
                         <td th:text="${result.donorname}"></td>
                         <td th:text="${result.bloodgroup}"></td>
+						<td th:text="${result.area}"></td>
                         <td th:text="${result.city}"></td>
                         <td th:text="${result.state}"></td>
                         <td th:text="${result.mobile}"></td>

@@ -27,12 +27,14 @@ public class SearchRequestService {
         return repository.findById(userId).orElse(null);
     }
 
-    public void saveSearchRequest(Long userId, String bloodgroup, String city, String state, LocalDate requestedDate) {
+    public void saveSearchRequest(Long userId, String bloodgroup, String city, String state, String area,String address, LocalDate requestedDate) {
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.setUserId(userId);       
         searchRequest.setBloodgroup(bloodgroup);
         searchRequest.setCity(city);
-        searchRequest.setState(state);        
+        searchRequest.setState(state); 
+        searchRequest.setArea(area);        // NEW
+        searchRequest.setAddress(address);  // NEW
         searchRequest.setRequestedDate(requestedDate);
         searchRequest.updateTimestamp();
         repository.save(searchRequest);

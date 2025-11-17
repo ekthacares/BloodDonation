@@ -41,6 +41,9 @@ public class User {
 
     @Column(name = "address")
     private String address;
+    
+    @Column(name = "area")        // ✅ NEW FIELD
+    private String area;
 
     @Column(name = "city")
     private String city;
@@ -88,7 +91,7 @@ public class User {
     
 
     public User(Long id, String donorname, String mobile, String emailid, LocalDate dateofbirth, String bloodgroup,
-			Integer age, String gender, String address, String city, String state, boolean isverified, Long createdBy,
+			Integer age, String gender, String address,String area, String city, String state, boolean isverified, Long createdBy,
 			String createdByType, Long updatedBy, Long deletedBy, String deletedByType, LocalDateTime createdAt,
 			LocalDateTime updatedAt, LocalDateTime deletedAt, String profileImage, boolean isDeleted, String jwtToken,
 			String fcmToken) {
@@ -102,6 +105,7 @@ public class User {
 		this.age = age;
 		this.gender = gender;
 		this.address = address;
+		this.area = area;
 		this.city = city;
 		this.state = state;
 		this.isverified = isverified;
@@ -126,7 +130,7 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", donorname=" + donorname + ", mobile=" + mobile + ", emailid=" + emailid
 				+ ", dateofbirth=" + dateofbirth + ", bloodgroup=" + bloodgroup + ", age=" + age + ", gender=" + gender
-				+ ", address=" + address + ", city=" + city + ", state=" + state + ", isverified=" + isverified
+				+ ", address=" + address + ", area=" + area + ", city=" + city + ", state=" + state + ", isverified=" + isverified
 				+ ", createdBy=" + createdBy + ", createdByType=" + createdByType + ", updatedBy=" + updatedBy
 				+ ", deletedBy=" + deletedBy + ", deletedByType=" + deletedByType + ", createdAt=" + createdAt
 				+ ", updatedAt=" + updatedAt + ", deletedAt=" + deletedAt + ", profileImage=" + profileImage
@@ -204,6 +208,14 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+    
+    public String getArea() {
+    	return area; 
+    }
+    
+    public void setArea(String area) {
+    	this.area = area; 
     }
 
     public String getCity() {

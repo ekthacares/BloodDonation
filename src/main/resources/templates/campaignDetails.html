@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<h4>Campaign Details</h4>
+
+<div th:if="${campaign != null}">
+    <p><b>ID:</b> <span th:text="${campaign.id}"></span></p>
+    <p><b>Title:</b> <span th:text="${campaign.title}"></span></p>
+    <p><b>Location:</b> <span th:text="${campaign.message}"></span></p>
+    <p><b>Date:</b> <span th:text="${campaign.campaignDate}"></span></p>
+    <p><b>Time:</b> <span th:text="${campaign.campaignTime}"></span></p>   
+</div>
+
+<div th:if="${campaign == null}">
+    <p style="color:red;">Campaign not found</p>
+</div>
+
+</body>
+</html>

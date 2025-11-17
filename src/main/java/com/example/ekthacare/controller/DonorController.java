@@ -517,60 +517,55 @@ public class DonorController {
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
 	            @RequestParam(value = "city", required = false) String city,
 	            @RequestParam(value = "state", required = false) String state,
-	            @RequestParam(value = "hospital", required = false) String hospitalName,	           
-	            @RequestParam(value = "requestedDate", required = false) LocalDate requestedDate,	          
+	            @RequestParam(value = "area", required = false) String area,          // NEW
+	            @RequestParam(value = "address", required = false) String address,    // NEW
+	            @RequestParam(value = "hospital", required = false) String hospitalName,
+	            @RequestParam(value = "requestedDate", required = false) LocalDate requestedDate,
 	            Model model, HttpSession session) {
 
 	        boolean searchPerformed = false;
 	        List<User> results = new ArrayList<>();
 	        String message = null;
 	        String emailMessage = null;
-	        
-	       
-	        
-	        // Retrieve userId from session
+
 	        Long userId = (Long) session.getAttribute("userId");
 	        if (userId != null) {
 	            User loggedInUser = userService.findById(userId);
 	            if (loggedInUser != null) {
 	                model.addAttribute("user", loggedInUser);
 
-	                // Perform search only if any of the parameters are provided
-	                if (bloodgroup != null || city != null || state != null) {
+	                if (bloodgroup != null || area!=null || city != null || state != null) {
 	                    searchPerformed = true;
 
-	                    // Perform the search based on provided criteria
-	                    results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
+	                    results = userService.findByBloodgroupAndAreaAndCityAndState(bloodgroup, area, city, state);
 
-	                    // Debugging: Print the results before filtering
-	                    System.out.println("Results before filtering: ");
-	                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
-
-	                    // Check if no results were found matching the criteria
 	                    if (results.isEmpty() && message == null) {
 	                        message = "No donors found matching the specified criteria. Please try again.";
 	                    }
 
-	                    // Filter out the logged-in user from the results list
 	                    results = results.stream()
-	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
+	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))
 	                            .collect(Collectors.toList());
 
-	                    // Save the search request to the repository
-	                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state, requestedDate);
+	                    // 🔥 NEW — Save area & address too
+	                    searchRequestRepository.saveSearchRequest(
+	                            userId,
+	                            bloodgroup,
+	                            city,
+	                            state,
+	                            area,
+	                            address,
+	                            requestedDate
+	                    );
 
-	                    // Send an email to each user in the filtered search results (excluding logged-in user)
 	                    for (User user : results) {
 	                        try {
-	                            System.out.println("Processing user ID for email: " + user.getId());
 	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
 	                        } catch (Exception e) {
-	                            System.err.println("Error sending email to user: " + user.getId());
 	                            e.printStackTrace();
 	                        }
 	                    }
 
-	                    // Set the email sent message after emails are sent
 	                    emailMessage = "Emails have been successfully sent to the donors.";
 	                }
 	            } else {
@@ -582,16 +577,17 @@ public class DonorController {
 	            return "donorlogin";
 	        }
 
-	        // Add results, messages, and other necessary model attributes
 	        model.addAttribute("results", results);
 	        model.addAttribute("searchPerformed", searchPerformed);
-	        model.addAttribute("message", message);  // Add the message to the model (this will show if no donors or self-donor case)
-	        model.addAttribute("emailMessage", emailMessage); // Add email sent message to the model (only if emails were sent)
+	        model.addAttribute("message", message);
+	        model.addAttribute("emailMessage", emailMessage);
+	        model.addAttribute("areas", userService.getAllAreas());
 	        model.addAttribute("cities", userService.getAllCities());
 	        model.addAttribute("states", userService.getAllStates());
 
 	        return "searchforblood";
 	    }
+
 
 
 	    public DonorController(SentEmailRepository sentEmailRepository) {

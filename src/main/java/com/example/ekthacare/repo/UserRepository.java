@@ -12,6 +12,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	User findByMobile(String mobile);
 	
 	List<User> findByBloodgroupAndCityAndState(String bloodgroup, String city, String state);
+	
+	List<User> findByBloodgroupAndAreaAndCityAndState(
+	        String bloodgroup,
+	        String area,
+	        String city,
+	        String state
+	);
+
 
 	User findByDonorname(String donorname);
 	

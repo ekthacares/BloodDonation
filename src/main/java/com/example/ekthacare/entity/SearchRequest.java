@@ -23,70 +23,43 @@ public class SearchRequest {
     private String bloodgroup;
     private String city;
     private String state;
-    
+
+    private String area;      // NEW
+    private String address;   // NEW
+
     @Column(name = "requested_date")
-    private LocalDate requestedDate; // New field
+    private LocalDate requestedDate;
 
-    private LocalDateTime timestamp; // Internal processing timestamp
+    private LocalDateTime timestamp;
 
- 
-	public SearchRequest() {
-		// TODO Auto-generated constructor stub
-	}
+    public SearchRequest() {}
 
-	// Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public String getBloodgroup() { return bloodgroup; }
+    public void setBloodgroup(String bloodgroup) { this.bloodgroup = bloodgroup; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public String getBloodgroup() {
-        return bloodgroup;
-    }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
 
-    public void setBloodgroup(String bloodgroup) {
-        this.bloodgroup = bloodgroup;
-    }
+    public String getArea() { return area; }
+    public void setArea(String area) { this.area = area; }
 
-    public String getCity() {
-        return city;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+    public LocalDate getRequestedDate() { return requestedDate; }
+    public void setRequestedDate(LocalDate requestedDate) { this.requestedDate = requestedDate; }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public LocalDate getRequestedDate() {
-        return requestedDate;
-    }
-
-    public void setRequestedDate(LocalDate requestedDate) {
-        this.requestedDate = requestedDate;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
+    public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
     }
@@ -104,8 +77,14 @@ public class SearchRequest {
 
     @Override
     public String toString() {
-        return "SearchRequest [id=" + id + ", userId=" + userId + ", bloodgroup=" + bloodgroup +
-                ", city=" + city + ", state=" + state + ", requestedDate=" + requestedDate +
+        return "SearchRequest [id=" + id +
+                ", userId=" + userId +
+                ", bloodgroup=" + bloodgroup +
+                ", city=" + city +
+                ", state=" + state +
+                ", area=" + area +
+                ", address=" + address +
+                ", requestedDate=" + requestedDate +
                 ", timestamp=" + timestamp + "]";
     }
 }

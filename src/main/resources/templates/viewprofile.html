@@ -114,6 +114,7 @@
                 <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span th:text="${user.emailid}"></span></p>
                 <p><strong><i class="fa fa-phone"></i> Mobile Number:</strong> <span th:text="${user.mobile}"></span></p>
                 <p><strong><i class="fa fa-home"></i> Address:</strong> <span th:text="${user.address}"></span></p>
+				<p><strong><i class="fa fa-home"></i> Area:</strong> <span th:text="${user.area}"></span></p>
                 <p><strong><i class="fa fa-map-marker"></i> City:</strong> <span th:text="${user.city}"></span></p>
                 <p><strong><i class="fa fa-map"></i> State:</strong> <span th:text="${user.state}"></span></p>
                 <p><strong><i class="fa fa-birthday-cake"></i> Date of Birth:</strong> <span th:text="${user.dateofbirth}"></span></p>
@@ -146,6 +147,9 @@
 
                         <label for="address">Address:</label>
                         <input type="text" id="address" th:name="address" th:value="${user.address}" required/>
+						
+						<label for="address">AREA:</label>
+						<input type="text" id="area" th:name="area" th:value="${user.area}" required/>
 
                         <label for="city">City:</label>
                         <input type="text" id="city" th:name="city" th:value="${user.city}" required/>

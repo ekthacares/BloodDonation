@@ -97,4 +97,8 @@ public class CampaignsService {
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
         return campaignsRepository.findTop2ByOrderByCreatedAtDesc(pageable);
     }
+    
+    public Campaigns findById(Long id) {
+        return campaignsRepository.findById(id).orElse(null);
+    }
 }

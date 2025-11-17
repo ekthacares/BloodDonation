@@ -465,6 +465,8 @@ public class APIController {
 	    @GetMapping("/app/searchforblood")
 	    public ResponseEntity<Map<String, Object>> searchForBlood(
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
+	            @RequestParam(value = "area", required = false) String area,          // NEW
+	            @RequestParam(value = "address", required = false) String address,    // NEW
 	            @RequestParam(value = "city", required = false) String city,
 	            @RequestParam(value = "state", required = false) String state,
 	            @RequestParam(value = "hospital", required = false) String hospitalName,
@@ -499,7 +501,8 @@ public class APIController {
 	                        searchPerformed = true;
 
 	                        // Perform the search based on provided parameters
-	                        results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
+	                       // results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
+	                        results = userService.findByBloodgroupAndAreaAndCityAndState(bloodgroup, area, city, state);
 
 	                     // Debugging: Print the results before filtering
 		                    System.out.println("Results before filtering: ");
@@ -516,7 +519,7 @@ public class APIController {
 		                    	message = "No donors found matching the specified criteria. Please try again.";
 		                    } else {
 		                    // Save the search request to the repository
-		                    searchRequestRepository.saveSearchRequest(userId, bloodgroup, city, state, requestedDate);
+		                    searchRequestRepository.saveSearchRequest(userId, bloodgroup,area,address, city, state, requestedDate);
 
 	                        // Send emails logic (optional)
 		                    for (User user : results) {
