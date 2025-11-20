@@ -1,8 +1,6 @@
 package com.example.ekthacare.entity;
 
-
 import java.time.LocalDate;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -14,62 +12,45 @@ public class CampaignAttendance {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;         // who clicked "I AM IN"
+    private Long userId;
 
     @Column(name = "campaign_id", nullable = false)
-    private Long campaignId;     // related campaign ID
+    private Long campaignId;
 
     @Column(length = 255)
-    private String message;      // Example: "I AM IN"
+    private String message;
 
     @Column(name = "clicked_date")
-    private LocalDate date;  // When user clicked
+    private LocalDate date;
 
-    // Default constructor
+    @Column(name = "active", nullable = false)
+    private boolean active = true;   // <-- NEW FIELD
+
     public CampaignAttendance() {}
 
-    // Constructor with fields
     public CampaignAttendance(Long userId, Long campaignId, String message, LocalDate date) {
         this.userId = userId;
         this.campaignId = campaignId;
         this.message = message;
         this.date = date;
+        this.active = true;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    // Getters & Setters
+    public Long getId() { return id; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public Long getCampaignId() { return campaignId; }
+    public void setCampaignId(Long campaignId) { this.campaignId = campaignId; }
 
-    public Long getCampaignId() {
-        return campaignId;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public void setCampaignId(Long campaignId) {
-        this.campaignId = campaignId;
-    }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    public boolean isActive() { return active; }   // <--- NEW
+    public void setActive(boolean active) { this.active = active; } // <--- NEW
 }

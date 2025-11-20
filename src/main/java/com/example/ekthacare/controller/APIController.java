@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.ekthacare.entity.BloodDonation;
 import com.example.ekthacare.entity.BloodRequest;
@@ -487,71 +488,58 @@ public class APIController {
 	                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
 	            }
 
-	            // Extract the JWT token from the Authorization header
-	            String jwtToken = authorizationHeader.substring(7); // "Bearer " is 7 characters
-	            
-	            // You can add JWT token validation logic here (e.g., verify the token using JWT library)
+	            String jwtToken = authorizationHeader.substring(7);
+
 	            if (userId != null) {
 	                User loggedInUser = userService.findById(userId);
 	                if (loggedInUser != null) {
 	                    response.put("user", loggedInUser);
 
-	                    // Simulate some logic to perform the search
 	                    if (bloodgroup != null || city != null || state != null) {
 	                        searchPerformed = true;
 
-	                        // Perform the search based on provided parameters
-	                       // results = userService.findByBloodgroupAndCityAndState(bloodgroup, city, state);
 	                        results = userService.findByBloodgroupAndAreaAndCityAndState(bloodgroup, area, city, state);
 
-	                     // Debugging: Print the results before filtering
-		                    System.out.println("Results before filtering: ");
-		                    results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
+	                        System.out.println("Results before filtering:");
+	                        results.forEach(user -> System.out.println(user.getBloodgroup() + " - " + user.getCity() + " - " + user.getState()));
 
-		                    
+	                        results = results.stream()
+	                                .filter(user -> !user.getId().equals(loggedInUser.getId()))
+	                                .collect(Collectors.toList());
 
-		                    // Filter out the logged-in user from the results list
-		                    results = results.stream()
-		                            .filter(user -> !user.getId().equals(loggedInUser.getId()))  // Exclude logged-in user
-		                            .collect(Collectors.toList());
-		                 // Check if no results were found matching the criteria
-		                    if (results.isEmpty()) {
-		                    	message = "No donors found matching the specified criteria. Please try again.";
-		                    } else {
-		                    // Save the search request to the repository
-		                    searchRequestRepository.saveSearchRequest(userId, bloodgroup,area,address, city, state, requestedDate);
+	                        if (results.isEmpty()) {
+	                            message = "No donors found matching the specified criteria. Please try again.";
+	                        } else {
+	                            searchRequestRepository.saveSearchRequest(userId, bloodgroup, area, address, city, state, requestedDate);
 
-	                        // Send emails logic (optional)
-		                    for (User user : results) {
-		                        try {
-		                            System.out.println("Processing user ID for email: " + user.getId());
-		                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
-		                        } catch (Exception e) {
-		                            System.err.println("Error sending email to user: " + user.getId());
-		                            e.printStackTrace();
-		                        }
-		                    }
-	                        emailMessage = "Emails have been successfully sent to the donors.";
+	                            for (User user : results) {
+	                                try {
+	                                    System.out.println("Processing user ID for email: " + user.getId());
+	                                    sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+	                                } catch (Exception e) {
+	                                    System.err.println("Error sending email to user: " + user.getId());
+	                                    e.printStackTrace();
+	                                }
+	                            }
+
+	                            emailMessage = "Emails have been successfully sent to the donors.";
+	                        }
 	                    }
 	                } else {
-	                    // Handle case when logged-in user is not found
 	                    response.put("error", "User not found.");
 	                    return ResponseEntity.status(404).body(response);
 	                }
 	            } else {
-	                // Handle case when no user is logged in
 	                response.put("error", "No user logged in.");
-	                return ResponseEntity.status(401).body(response);  // Unauthorized
+	                return ResponseEntity.status(401).body(response);
 	            }
 
-	        } 
-	        }catch (Exception e) {
-	            // Handle general errors
+	        } catch (Exception e) {     // ✔ FIXED — no extra }
 	            response.put("error", "An unexpected error occurred: " + e.getMessage());
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 	        }
 
-	        // Populate response with the results
+	        // Always return response at end
 	        response.put("searchPerformed", searchPerformed);
 	        response.put("results", results);
 	        response.put("message", message);
@@ -730,7 +718,9 @@ public class APIController {
 	        if (fcmToken == null || fcmToken.isEmpty()) {
 	            return ResponseEntity.badRequest().body("FCM token is missing.");
 	        }
-
+	        
+	        // Remove quotes if JSON string was passed
+	        fcmToken = fcmToken.replace("\"", "").trim();
 	        userService.updateFcmToken(userId, fcmToken);  
 	        return ResponseEntity.ok().build();
 	    }

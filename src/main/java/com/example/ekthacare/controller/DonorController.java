@@ -30,15 +30,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.ekthacare.entity.NotificationRequest;
 import com.example.ekthacare.entity.SentEmail;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.entity.User1;
+import com.example.ekthacare.repo.NotificationRequestRepository;
 import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.User1Repository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.ExcelService;
+import com.example.ekthacare.services.FCMService;
 import com.example.ekthacare.services.OtpService;
 import com.example.ekthacare.services.SearchRequestService;
 import com.example.ekthacare.services.SmsService;
@@ -58,6 +61,7 @@ import jakarta.servlet.http.HttpSession;
 
 
 @Controller
+
 
 public class DonorController {
 	
@@ -84,6 +88,11 @@ public class DonorController {
 	    @Autowired
 	    private SmsService smsService;
 	    
+	    @Autowired
+	    private FCMService fcmservice;
+	    
+	    @Autowired
+	    private NotificationRequestRepository notificationRepository;
 	    
 	    @Autowired
 	    private ExcelService excelService;
@@ -561,6 +570,52 @@ public class DonorController {
 	                    for (User user : results) {
 	                        try {
 	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+	                            
+	                         // ✅ 2) Send Push ONLY to this user
+	                            String token = user.getFcmToken();
+
+	                         // 🔥 Debug log
+	                         System.out.println("🔍 User: " + user.getId() + " | FCM Token = " + token);
+
+	                         // ❌ If token missing → skip, but show warning
+	                         if (token == null || token.trim().isEmpty()) {
+	                             System.out.println("⚠️ Skipping push notification. Token is NULL or empty for user " + user.getId());
+	                             continue;   // IMPORTANT: go to next user
+	                         }
+
+	                         // Build dynamic push message
+	                         String pushMessage = String.format(
+	                                 "User %s is searching for blood group %s in %s, %s. %s",
+	                                 loggedInUser.getDonorname(),
+	                                 bloodgroup,
+	                                 area != null ? area : "",
+	                                 city != null ? city : "",
+	                                 state != null ? state : ""
+	                         );
+
+	                         // Save to DB
+	                         NotificationRequest notification = new NotificationRequest();
+	                         notification.setUserId(user.getId());
+	                         notification.setTitle("Urgent Blood Request - " + bloodgroup);
+	                         notification.setMessage(pushMessage);
+	                         notification.setFcmToken(token);
+	                         notification.setSentTime(LocalDateTime.now());
+
+	                         notificationRepository.save(notification);
+
+	                         System.out.println("💾 Saved notification for user: " + user.getId());
+
+	                         // 🔥 FINAL log before calling FCM
+	                         System.out.println("🚀 Calling fcmservice.sendPushNotification()...");
+
+	                         // ✅ CALL FCM SERVICE
+	                         fcmservice.sendPushNotification(
+	                                 List.of(token),
+	                                 notification.getTitle(),
+	                                 notification.getMessage(),
+	                                 "notification"
+	                         );
+
 	                        } catch (Exception e) {
 	                            e.printStackTrace();
 	                        }
@@ -590,8 +645,9 @@ public class DonorController {
 
 
 
-	    public DonorController(SentEmailRepository sentEmailRepository) {
+	    public DonorController(SentEmailRepository sentEmailRepository,FCMService fcmservice) {
 	        this.sentEmailRepository = sentEmailRepository;
+	        this.fcmservice = fcmservice;
 	    }
 	  
 	    private void sendEmailToUser(User user, User loggedInUser, String bloodgroup, String hospitalName) {

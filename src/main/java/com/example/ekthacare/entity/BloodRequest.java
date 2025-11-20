@@ -15,78 +15,59 @@ public class BloodRequest {
     private String name;
     private String bloodgroup;
     private String city;
-    private String state; 
+    private String state;
+    private String area;      // ➜ NEW
+    private String address;   // ➜ NEW
     private String mobile;
 
     public BloodRequest() {
     }
 
-    public BloodRequest(String name, String bloodgroup, String city, String state, String mobile) {
+    public BloodRequest(String name, String bloodgroup, String city, String state, String area, String address, String mobile) {
         this.name = name;
         this.bloodgroup = bloodgroup;
         this.city = city;
-        this.state = state;       
+        this.state = state;
+        this.area = area;
+        this.address = address;
         this.mobile = mobile;
     }
-    
-    
+
     // Getters and Setters
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public Long getId() {
-		return id;
-	}
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public String getBloodgroup() { return bloodgroup; }
+    public void setBloodgroup(String bloodgroup) { this.bloodgroup = bloodgroup; }
 
-	public String getName() {
-		return name;
-	}
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
 
-	public String getBloodgroup() {
-		return bloodgroup;
-	}
+    public String getArea() { return area; }
+    public void setArea(String area) { this.area = area; }
 
-	public void setBloodgroup(String bloodgroup) {
-		this.bloodgroup = bloodgroup;
-	}
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-	public String getCity() {
-		return city;
-	}
+    public String getMobile() { return mobile; }
+    public void setMobile(String mobile) { this.mobile = mobile; }
 
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}	
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
-
-	@Override
-	public String toString() {
-		return "BloodRequest [id=" + id + ", name=" + name + ", bloodgroup=" + bloodgroup + ", city=" + city
-				+ ", state=" + state + ", mobile=" + mobile + "]";
-	}
-
-    
-    
+    @Override
+    public String toString() {
+        return "BloodRequest [id=" + id +
+                ", name=" + name +
+                ", bloodgroup=" + bloodgroup +
+                ", city=" + city +
+                ", state=" + state +
+                ", area=" + area +
+                ", address=" + address +
+                ", mobile=" + mobile + "]";
+    }
 }
