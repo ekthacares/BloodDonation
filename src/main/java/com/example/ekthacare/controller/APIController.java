@@ -114,7 +114,7 @@ public class APIController {
 	    private CampaignsService campaignsService;
 
 	
-	    @PostMapping("/app login")
+	    @PostMapping("/applogin")
 	    public ResponseEntity<?> applogin(@RequestParam String mobile) {
 	        Map<String, Object> response = new HashMap<>();
 

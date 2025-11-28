@@ -39,6 +39,7 @@ import com.example.ekthacare.repo.SentEmailRepository;
 import com.example.ekthacare.repo.User1Repository;
 import com.example.ekthacare.repo.UserRepository;
 import com.example.ekthacare.services.BloodDonationService;
+import com.example.ekthacare.services.BloodRecipientRequestService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.ExcelService;
 import com.example.ekthacare.services.FCMService;
@@ -78,7 +79,7 @@ public class DonorController {
 	    private UserService userService;
 	    
 	    @Autowired
-	    private SearchRequestService searchRequestRepository;
+	    private SearchRequestService searchRequestService;
 	    
 	    
 	    @Autowired
@@ -96,6 +97,9 @@ public class DonorController {
 	    
 	    @Autowired
 	    private ExcelService excelService;
+	    
+	    @Autowired
+	    private BloodRecipientRequestService bloodRequestRecipienttService;
 	  
 	    
 		/* =======================New user/registration from Donorside============================= */
@@ -526,65 +530,122 @@ public class DonorController {
 	            @RequestParam(value = "bloodgroup", required = false) String bloodgroup,
 	            @RequestParam(value = "city", required = false) String city,
 	            @RequestParam(value = "state", required = false) String state,
-	            @RequestParam(value = "area", required = false) String area,          // NEW
-	            @RequestParam(value = "address", required = false) String address,    // NEW
+	            @RequestParam(value = "area", required = false) String area,
+	            @RequestParam(value = "address", required = false) String address,
 	            @RequestParam(value = "hospital", required = false) String hospitalName,
 	            @RequestParam(value = "requestedDate", required = false) LocalDate requestedDate,
-	            Model model, HttpSession session) {
+	            @RequestParam(value = "message", required = false) String userMessage,
+	            @RequestParam(value = "actionType", required = false) String actionType,
+	            Model model, HttpSession session
+	    ) {
+
+	        // ---------- USER LOGIN CHECK ----------
+	        Long userId = (Long) session.getAttribute("userId");
+	        if (userId == null) {
+	            model.addAttribute("error", "No user logged in.");
+	            return "donorlogin";
+	        }
+
+	        User loggedInUser = userService.findById(userId);
+	        if (loggedInUser == null) {
+	            model.addAttribute("error", "User not found.");
+	            return "home";
+	        }
+
+	        model.addAttribute("user", loggedInUser);
 
 	        boolean searchPerformed = false;
 	        List<User> results = new ArrayList<>();
 	        String message = null;
-	        String emailMessage = null;
 
-	        Long userId = (Long) session.getAttribute("userId");
-	        if (userId != null) {
-	            User loggedInUser = userService.findById(userId);
-	            if (loggedInUser != null) {
-	                model.addAttribute("user", loggedInUser);
+	        // ---------- CHECK WHETHER SEARCH CRITERIA PROVIDED ----------
+	        boolean hasSearchFilters =
+	                bloodgroup != null || area != null || city != null || state != null;
 
-	                if (bloodgroup != null || area!=null || city != null || state != null) {
-	                    searchPerformed = true;
+	        if (hasSearchFilters) {
 
-	                    results = userService.findByBloodgroupAndAreaAndCityAndState(bloodgroup, area, city, state);
+	            // ---------- PERFORM SEARCH ----------
+	            results = userService.findByBloodgroupAndAreaAndCityAndState(
+	                    bloodgroup, area, city, state
+	            );
 
-	                    if (results.isEmpty() && message == null) {
-	                        message = "No donors found matching the specified criteria. Please try again.";
-	                    }
+	            // Remove self from results
+	            results = results.stream()
+	                    .filter(u -> !u.getId().equals(loggedInUser.getId()))
+	                    .collect(Collectors.toList());
 
-	                    results = results.stream()
-	                            .filter(user -> !user.getId().equals(loggedInUser.getId()))
-	                            .collect(Collectors.toList());
+	            searchPerformed = true;
 
-	                    // 🔥 NEW — Save area & address too
-	                    searchRequestRepository.saveSearchRequest(
-	                            userId,
-	                            bloodgroup,
-	                            city,
-	                            state,
-	                            area,
-	                            address,
-	                            requestedDate
-	                    );
+	            model.addAttribute("results", results);
+	            model.addAttribute("resultCount", results.size());
+	            
 
-	                    for (User user : results) {
-	                        try {
-	                            sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
-	                            
-	                         // ✅ 2) Send Push ONLY to this user
-	                            String token = user.getFcmToken();
+	            // ============================================================
+	            // 🟢 CASE 1: SEARCH BUTTON CLICKED
+	            // ============================================================
+	            if ("search".equalsIgnoreCase(actionType)) {
 
-	                         // 🔥 Debug log
-	                         System.out.println("🔍 User: " + user.getId() + " | FCM Token = " + token);
+	                searchRequestService.saveSearchRequest(
+	                        userId, bloodgroup, city, state, area, address, requestedDate
+	                );
 
-	                         // ❌ If token missing → skip, but show warning
-	                         if (token == null || token.trim().isEmpty()) {
-	                             System.out.println("⚠️ Skipping push notification. Token is NULL or empty for user " + user.getId());
-	                             continue;   // IMPORTANT: go to next user
-	                         }
+	             // ⭐ DYNAMIC NO MATCH MESSAGE
+	                if (results.isEmpty()) {
+	                    StringBuilder noMatchMsg = new StringBuilder("No donors found ");
 
-	                         // Build dynamic push message
-	                         String pushMessage = String.format(
+	                    if (area != null && !area.isEmpty())
+	                        noMatchMsg.append("in area ").append(area).append(" ");
+
+	                    if (city != null && !city.isEmpty())
+	                        noMatchMsg.append("in city ").append(city).append(" ");                   
+
+	                    noMatchMsg.append("for blood group ").append(bloodgroup).append(".");
+
+	                    model.addAttribute("message", noMatchMsg.toString());
+	                } else {
+	                    model.addAttribute("message", results.size() + " donors found.");
+	                }
+              
+	                model.addAttribute("searchPerformed", true);
+	                // NO EMAIL / NO PUSH
+	                return "searchforblood";
+	            }
+
+	            // ============================================================
+	            // 🔴 CASE 2: SEND REQUEST BUTTON CLICKED
+	            // ============================================================
+	            if ("send".equalsIgnoreCase(actionType)) {
+
+	                // ---------- SAVE BLOOD REQUEST ----------
+	            	bloodRequestRecipienttService.saveBloodRecipientRequest(
+	                        userId,
+	                        bloodgroup,
+	                        hospitalName,
+	                        city,
+	                        state,
+	                        area,
+	                        address,
+	                        requestedDate,
+	                        results.size(),                       // donors count
+	                        userMessage             // notes
+	                );
+
+	                // ---------- SEND EMAIL + PUSH ----------
+	                for (User user : results) {
+
+	                    try {
+	                        // EMAIL
+	                        sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
+
+	                        // PUSH NOTIFICATION
+	                        String token = user.getFcmToken();
+
+	                        if (token == null || token.isEmpty()) {
+	                            System.out.println("⚠️ No token for user " + user.getId());
+	                            continue;
+	                        }
+
+	                        String pushMessage = String.format(
 	                                 "User %s is searching for blood group %s in %s, %s. %s",
 	                                 loggedInUser.getDonorname(),
 	                                 bloodgroup,
@@ -593,7 +654,7 @@ public class DonorController {
 	                                 state != null ? state : ""
 	                         );
 
-	                         // Save to DB
+	                     // Save to DB
 	                         NotificationRequest notification = new NotificationRequest();
 	                         notification.setUserId(user.getId());
 	                         notification.setTitle("Urgent Blood Request - " + bloodgroup);
@@ -616,26 +677,20 @@ public class DonorController {
 	                                 "notification"
 	                         );
 
-	                        } catch (Exception e) {
-	                            e.printStackTrace();
-	                        }
+	                    } catch (Exception e) {
+	                        e.printStackTrace();
 	                    }
-
-	                    emailMessage = "Emails have been successfully sent to the donors.";
 	                }
-	            } else {
-	                model.addAttribute("error", "User not found.");
-	                return "home";
+
+	                message = "Blood request sent successfully to " + results.size() + " donors.";
+	                model.addAttribute("message", message);
+
+	                return "searchforblood";
 	            }
-	        } else {
-	            model.addAttribute("error", "No user logged in.");
-	            return "donorlogin";
 	        }
 
-	        model.addAttribute("results", results);
+	        // ---------- DEFAULT PAGE LOAD DATA ----------
 	        model.addAttribute("searchPerformed", searchPerformed);
-	        model.addAttribute("message", message);
-	        model.addAttribute("emailMessage", emailMessage);
 	        model.addAttribute("areas", userService.getAllAreas());
 	        model.addAttribute("cities", userService.getAllCities());
 	        model.addAttribute("states", userService.getAllStates());
@@ -685,11 +740,7 @@ public class DonorController {
 	        
 	    }
 
-	    
-	   // private String generateConfirmationUrl(Long recipientId, Long loggedInUserId) {
-	  //      return "http://localhost:8082/confirmRequest?recipientId=" + recipientId + "&loggedInUserId=" + loggedInUserId;
-	  //  }  
-	    
+	  
 	    private String generateConfirmationUrl(Long recipientId, Long loggedInUserId, String hospitalName) {
 	        String token = generateSecureToken(recipientId, loggedInUserId);
 	        String encodedHospitalName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8);  // Encode hospital name for URL

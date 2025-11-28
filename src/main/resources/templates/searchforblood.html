@@ -131,6 +131,7 @@
     <div class="registration_container">
         
         <form th:action="@{/searchforblood}" method="get">
+			<input type="hidden" name="actionType" value="search">
             <!-- Blood Group -->
             <div class="form-group">
                 <label for="bloodgroup">Blood Group:</label>
@@ -189,48 +190,59 @@
 					   
             <!-- Submit Button -->
             <div class="form-group">
-                <button type="submit" class="btn">Search</button>
+                <button type="submit" class="btn" th:disabled="${searchPerformed == true}">Search</button>
             </div>
         </form>
+		<!-- SHOW SEARCH MESSAGE -->
+		   <div th:if="${message != null}">
+		       <p style="margin-top:15px; color:blue; font-size:18px; font-weight:bold;" th:text="${message}"></p>
+		   </div>
 
           <!-- Show message only after search -->
-    <div th:if="${searchPerformed}">
-               <!-- Show email sent message -->
-        <div th:if="${emailMessage != null}">
-            <p style="color: green;" th:text="${emailMessage}"></p>
-        </div>
+		  <div th:if="${searchPerformed}">
+		             <div th:if="${#lists.size(results) > 0}">
+		                 <p style="font-size:18px; font-weight:bold;">
+		                     Found <span th:text="${#lists.size(results)}"></span> matching donors.
+		                 </p>
+		             </div>
 
-        <div class="results" th:if="${#lists.size(results) > 0}">
-            <p th:text="'Number of results: ' + ${#lists.size(results)}"></p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Donor Name</th>
-                        <th>Blood Group</th>
-						<th>Area</th>
-                        <th>City</th>
-                        <th>State</th>
-                        <th>Mobile</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="result : ${results}">
-                        <td th:text="${result.donorname}"></td>
-                        <td th:text="${result.bloodgroup}"></td>
-						<td th:text="${result.area}"></td>
-                        <td th:text="${result.city}"></td>
-                        <td th:text="${result.state}"></td>
-                        <td th:text="${result.mobile}"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+		             <p th:if="${#lists.isEmpty(results)}" style="color:red;">
+		                 No donors found.
+		             </p>
+		         </div>
 
-        <!-- Show message if no results found -->
-        <div th:if="${#lists.isEmpty(results)}">
-            <p style="color: red;" th:text="${message}"></p>
-        </div>
-    </div>
+		         <!-- ======================================== -->
+		         <!-- MESSAGE + SEND REQUEST (ONLY IF FOUND)   -->
+		         <!-- ======================================== -->
+		         <div th:if="${searchPerformed == true and results != null and #lists.size(results) > 0}">
+		             <h3>Send Blood Request</h3>
+
+		             <form th:action="@{/searchforblood}" method="get">
+
+		                 <!-- RE-SEND SEARCH INFO -->
+		                 <input type="hidden" name="bloodgroup" th:value="${param.bloodgroup}">
+		                 <input type="hidden" name="hospital" th:value="${param.hospital}">
+		                 <input type="hidden" name="area" th:value="${param.area}">
+		                 <input type="hidden" name="city" th:value="${param.city}">
+		                 <input type="hidden" name="state" th:value="${param.state}">
+		                 <input type="hidden" name="requestedDate" th:value="${param.requestedDate}">
+		                 <input type="hidden" name="actionType" value="send">
+
+		                 <!-- MESSAGE REQUIRED -->
+		                 <div class="form-group">
+		                     <label>Message (Required)</label>
+		                     <textarea id="message" name="message" class="form-control"
+		                               placeholder="Enter your message to donors..." required></textarea>
+		                 </div>
+
+		                 <!-- SEND BUTTON -->
+		                 <button id="sendBtn" type="submit" class="btn btn-danger" disabled>
+		                     Send Request
+		                 </button>
+
+		             </form>
+					
+					 </div>
 </div>
             
 </section>
@@ -460,6 +472,19 @@
 		const dateInput = document.getElementById('requestedDate');
 		dateInput.min = today;
 		dateInput.value = today;
+		</script>
+		<script>
+		    // enable send button only when typed
+		    document.addEventListener("DOMContentLoaded", function () {
+		        const msg = document.getElementById("message");
+		        const btn = document.getElementById("sendBtn");
+
+		        if (msg) {
+		            msg.addEventListener("input", function () {
+		                btn.disabled = msg.value.trim().length === 0;
+		            });
+		        }
+		    });
 		</script>
     </body>
 
