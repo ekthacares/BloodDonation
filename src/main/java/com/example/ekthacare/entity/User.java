@@ -54,6 +54,9 @@ public class User {
     @Column(name = "isverified")
     private boolean isverified;
     
+    @Column(name = "is_admin")
+    private boolean isAdmin = false;
+    
     // New fields for tracking creation, update, and deletion
     @Column(name = "created_by")
     private Long createdBy;  // Changed from String to Long
@@ -91,7 +94,7 @@ public class User {
     
 
     public User(Long id, String donorname, String mobile, String emailid, LocalDate dateofbirth, String bloodgroup,
-			Integer age, String gender, String address,String area, String city, String state, boolean isverified, Long createdBy,
+			Integer age, String gender, String address,String area, String city, String state, boolean isverified, boolean isAdmin, Long createdBy,
 			String createdByType, Long updatedBy, Long deletedBy, String deletedByType, LocalDateTime createdAt,
 			LocalDateTime updatedAt, LocalDateTime deletedAt, String profileImage, boolean isDeleted, String jwtToken,
 			String fcmToken) {
@@ -109,6 +112,7 @@ public class User {
 		this.city = city;
 		this.state = state;
 		this.isverified = isverified;
+		this.isAdmin = isAdmin;
 		this.createdBy = createdBy;
 		this.createdByType = createdByType;
 		this.updatedBy = updatedBy;
@@ -130,8 +134,8 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", donorname=" + donorname + ", mobile=" + mobile + ", emailid=" + emailid
 				+ ", dateofbirth=" + dateofbirth + ", bloodgroup=" + bloodgroup + ", age=" + age + ", gender=" + gender
-				+ ", address=" + address + ", area=" + area + ", city=" + city + ", state=" + state + ", isverified=" + isverified
-				+ ", createdBy=" + createdBy + ", createdByType=" + createdByType + ", updatedBy=" + updatedBy
+				+ ", address=" + address + ", area=" + area + ", city=" + city + ", state=" + state + ", isverified=" + isverified 
+				+ ", isAdmin=" + isAdmin + ", createdBy=" + createdBy + ", createdByType=" + createdByType + ", updatedBy=" + updatedBy
 				+ ", deletedBy=" + deletedBy + ", deletedByType=" + deletedByType + ", createdAt=" + createdAt
 				+ ", updatedAt=" + updatedAt + ", deletedAt=" + deletedAt + ", profileImage=" + profileImage
 				+ ", isDeleted=" + isDeleted + ", jwtToken=" + jwtToken + ", fcmToken=" + fcmToken + "]";
@@ -241,7 +245,16 @@ public class User {
     public void setIsVerified(boolean isverified) {
         this.isverified = isverified;
     }
-
+    
+    public boolean isAdmin() {
+    	return isAdmin;
+   	}
+    
+    public void setAdmin(boolean isAdmin) {    	
+    	this.isAdmin = isAdmin;
+    }
+    
+    
 	public boolean isPresent() {
 		// TODO Auto-generated method stub
 		return false;

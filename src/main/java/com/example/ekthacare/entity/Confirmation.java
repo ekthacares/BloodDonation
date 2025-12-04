@@ -77,6 +77,11 @@ public class Confirmation {
 	public void setStartedAt(LocalDateTime startedAt) {
 		this.startedAt = startedAt;
 	}
+	
+	 public LocalDateTime getStoppedAt() {
+	        return stoppedAt;
+	    }
+
 
 	public String getFormattedStoppedAt() {
         return stoppedAt != null ? stoppedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) : "";

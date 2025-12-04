@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.ekthacare.entity.BloodRecipientRequest;
 import com.example.ekthacare.entity.Confirmation;
 import com.example.ekthacare.entity.User;
 import com.example.ekthacare.services.BloodDonationService;
+import com.example.ekthacare.services.BloodRecipientRequestService;
 import com.example.ekthacare.services.ConfirmationService;
 import com.example.ekthacare.services.EmailService;
 import com.example.ekthacare.services.OtpVerificationService;
@@ -39,6 +41,9 @@ public class ConfirmationController {
     private BloodDonationService bloodDonationService;
     
     @Autowired
+    private BloodRecipientRequestService bloodRecipientRequestService;
+    
+    @Autowired
     private EmailService emailService;
     
     @Autowired
@@ -51,6 +56,7 @@ public class ConfirmationController {
     public String confirmRequest(
             @RequestParam String token,
             @RequestParam(required = false) String hospitalName,
+          
             Model model) {
 
         try {
@@ -82,8 +88,19 @@ public class ConfirmationController {
 
             if (lastDonationDateTime != null) {
                 LocalDate lastDonationDate = lastDonationDateTime.toLocalDate();
-                LocalDate currentDate = LocalDate.now();
-                long monthsSinceLastDonation = ChronoUnit.MONTHS.between(lastDonationDate, currentDate);
+                BloodRecipientRequest request = bloodRecipientRequestService.getLatestRequestByUserId(recipientId);
+
+                
+                if (request == null || request.getRequestedDate() == null) {
+                    model.addAttribute("message", "Request date not found for this recipient.");
+                    return "errorPage";
+                }
+
+                LocalDate requestedDate = request.getRequestedDate();
+                
+             // Calculate months difference
+                long monthsSinceLastDonation = ChronoUnit.MONTHS.between(lastDonationDate, requestedDate);
+
 
                 if (monthsSinceLastDonation < 3) {
                     model.addAttribute("message", "You are not eligible to donate yet. Your last donation was on " 
@@ -102,16 +119,24 @@ public class ConfirmationController {
                 for (Confirmation existingConfirmation : existingConfirmations) {
                     System.out.println("Existing confirmation found: " + existingConfirmation);
 
-                    if (!existingConfirmation.getRecipientId().equals(recipientId)) {
+                    if (existingConfirmation.getRecipientId().equals(recipientId)) {
                         System.out.println("Mismatch in recipientId. User has already donated to another recipient.");
                         model.addAttribute("message", "You have already donated to the Registered UserID: " + existingConfirmation.getRecipientId());
                         return "donationTracking";
                     }
 
+                 // Case 2: If user donated to ANYONE within last 3 months, block
                     if (existingConfirmation.isCompleted()) {
-                        System.out.println("Completed confirmation found for logged-in user ID: " + loggedInUserId);
-                        model.addAttribute("confirmation", existingConfirmation);
-                        return "donationTracking";
+
+                        LocalDate completedDate = existingConfirmation.getStoppedAt().toLocalDate();
+                        long monthsSinceDonation = ChronoUnit.MONTHS.between(completedDate, LocalDate.now());
+
+                        if (monthsSinceDonation < 3) {
+                            model.addAttribute("message",
+                                    "You recently donated on " + completedDate +
+                                    ". You can donate again after 3 months.");
+                            return "donationTracking";
+                        }
                     }
                 }
             } else {

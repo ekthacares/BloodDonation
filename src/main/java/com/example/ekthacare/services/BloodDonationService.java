@@ -70,7 +70,7 @@ public class BloodDonationService {
         bloodDonationRepository.save(bloodDonation);
 
         // Log the creation
-        System.out.println("Created new donation record for user ID: " + userId + 
+        System.out.println("Created new confirmation donation record for user ID: " + userId + 
                            ", recipient ID: " + recipientId +
                            ", hospital name: " + hospitalName);
     }

@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -100,6 +101,9 @@ public class DonorController {
 	    
 	    @Autowired
 	    private BloodRecipientRequestService bloodRequestRecipienttService;
+	    
+	    @Autowired
+	    private BloodDonationService bloodDonationService;
 	  
 	    
 		/* =======================New user/registration from Donorside============================= */
@@ -355,9 +359,11 @@ public class DonorController {
 
 	     // Generate OTP
 	     String otp = otpService.generateOtp(mobile);
+	     
+	     String loginType = user.isAdmin() ? "Admin Login" : "Donor Login";   // 👈 IDENTIFY ROLE
 
 	     // Send OTP via email
-	     String emailMessage = "Your OTP for Donor Login is : <b>" + otp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
+	     String emailMessage = "Your OTP for " + loginType + " is : <b>" + otp + "</b>. For Mobile Number: <b>" + mobile + "</b>";
 	     //emailService.sendOtp(user.getEmailid(),  "Your OTP Code", emailMessage);
 	     emailService.sendHtmlEmail(user.getEmailid(), "Your OTP Code", emailMessage);
 	     
@@ -396,9 +402,11 @@ public class DonorController {
 	             // Set session attributes
 	             session.setAttribute("userId", user.getId());
 	             session.setAttribute("userName", user.getDonorname());
+	             session.setAttribute("isAdmin", user.isAdmin());
 	             System.out.println("User ID set in session: " + user.getId());
 	             System.out.println("userName set in session: " + user.getDonorname());
-
+	             
+	            
 	             // Send a thank-you email with a link
 	             try {
 	                 String subject = "Welcome to Donor Portal!";
@@ -414,7 +422,11 @@ public class DonorController {
 	             }
 
 	             // Redirect to the donor home page after successful OTP validation and update
-	             return "redirect:/donorhome";
+	             if (user.isAdmin()) {
+	                 return "redirect:/adminhome";   // ADMIN DASHBOARD
+	             } else {
+	                 return "redirect:/donorhome";   // DONOR DASHBOARD
+	             }
 	         } else {
 	             model.addAttribute("message", "User not found");
 	             return "otp"; // Return to OTP page if user is not found
@@ -426,6 +438,34 @@ public class DonorController {
 	     }
 	 }
 
+	 @GetMapping("/adminhome")
+	 public String showAdminHome(HttpSession session, Model model) {
+
+	     Long userId = (Long) session.getAttribute("userId");
+	     Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+
+	     System.out.println("Retrieved userId from session: " + userId);
+
+	     // If not logged in or not admin → redirect
+	     if (userId == null || isAdmin == null || !isAdmin) {
+	         return "redirect:/donorlogin";
+	     }
+
+	     // Fetch admin from donors table (User entity)
+	     User user = userService.findById(userId);
+
+	     System.out.println("Retrieved User from donors table (admin): " + user);
+
+	     if (user == null) {
+	         return "redirect:/donorlogin";
+	     }
+
+	     // Send user to Thymeleaf
+	     model.addAttribute("user", user);
+	     model.addAttribute("userId", userId);
+
+	     return "adminhome";
+	 }
 
 	 
 	 @PostMapping("/resendOtp")
@@ -570,9 +610,37 @@ public class DonorController {
 	            );
 
 	            // Remove self from results
+//	            results = results.stream()
+//	                    .filter(u -> !u.getId().equals(loggedInUser.getId()))
+//	                    .collect(Collectors.toList());
+	            
 	            results = results.stream()
+	                    // remove self
 	                    .filter(u -> !u.getId().equals(loggedInUser.getId()))
+
+	                    // filter based on last donation date from blood_donation table
+	                    .filter(u -> {
+	                        LocalDateTime lastDonation = bloodDonationService.getLastDonationDateByUserId(u.getId());
+
+	                        // Never donated → eligible
+	                        if (lastDonation == null) return true;
+	                        
+	                        
+	                        LocalDate compareDate = (requestedDate != null)
+	                                ? requestedDate
+	                                : LocalDate.now();
+
+	                        long days = ChronoUnit.DAYS.between(
+	                                lastDonation.toLocalDate(),
+	                                compareDate
+	                        );
+
+	                        // Eligible only if 90+ days completed
+	                        return days >= 90;
+	                    })
+
 	                    .collect(Collectors.toList());
+
 
 	            searchPerformed = true;
 
@@ -632,7 +700,9 @@ public class DonorController {
 
 	                // ---------- SEND EMAIL + PUSH ----------
 	                for (User user : results) {
-
+	                	
+	                    System.out.println("🚨 Preparing to send email to userId=" + user.getId());
+	                    
 	                    try {
 	                        // EMAIL
 	                        sendEmailToUser(user, loggedInUser, bloodgroup, hospitalName);
@@ -694,6 +764,9 @@ public class DonorController {
 	        model.addAttribute("areas", userService.getAllAreas());
 	        model.addAttribute("cities", userService.getAllCities());
 	        model.addAttribute("states", userService.getAllStates());
+	        model.addAttribute("minDate", LocalDate.now());
+	        model.addAttribute("maxDate", LocalDate.now().plusDays(7));
+
 
 	        return "searchforblood";
 	    }
@@ -719,7 +792,7 @@ public class DonorController {
 	            "Contact Information:\nName: %s\nMobile: %s\nEmail: %s\n\n" +
 	            "If you are willing to donate, please confirm by clicking the following link:\n%s\n\nThank you.",
 	            user.getDonorname(), loggedInUser.getDonorname(), bloodgroup, // Use the searched blood group
-	            loggedInUser.getCity(), loggedInUser.getState(), locationInfo,
+	            user.getCity(), user.getState(), locationInfo,
 	            loggedInUser.getDonorname(), loggedInUser.getMobile(), loggedInUser.getEmailid(),
 	            confirmationUrl
 	        );

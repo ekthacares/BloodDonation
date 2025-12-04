@@ -188,7 +188,13 @@
           		  </td>
                     <td th:text="${email.formattedSentAt}"></td>
                     <td>
-                        <a th:href="${email.confirmationUrl}" target="_blank">Confirm Donation</a>
+                      <!--  <a th:href="${email.confirmationUrl}" target="_blank">Confirm Donation</a>-->
+					  
+					  <a href="#"
+					      th:attr="data-url=${email.confirmationUrl}"
+					      onclick="return confirmAndOpen(this);">
+					       Confirm Donation
+					   </a>
                     </td>
                       
                 </tr>
@@ -454,7 +460,22 @@
             });
         });
     });
+
+function confirmAndOpen(element) {
+    var url = element.getAttribute("data-url");
+    if (!url) {
+        console.error("No URL found on element");
+        return false;
+    }
+
+    if (confirm("Are you sure you want to confirm this donation?")) {
+        window.open(url, '_blank'); // open in new tab
+    }
+
+    return false; // ❗ prevent normal link navigation
+}
 </script>
+
     </body>
 
 </html>

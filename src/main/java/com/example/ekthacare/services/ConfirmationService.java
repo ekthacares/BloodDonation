@@ -19,6 +19,9 @@ public class ConfirmationService {
 
     @Autowired
     private ConfirmationRepository confirmationRepository;
+    
+    @Autowired
+    private BloodDonationService bloodDonationService;
 
     public Confirmation getConfirmation(Long recipientId, Long loggedInUserId) {
         return confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
@@ -104,20 +107,58 @@ public class ConfirmationService {
 
 
     
+//    public boolean stopDonation(Long recipientId, Long loggedInUserId) {
+//        try {
+//            Confirmation confirmation = confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
+//            if (confirmation != null && confirmation.isStarted()) {
+//                confirmation.setStoppedAt(LocalDateTime.now());
+//                confirmationRepository.save(confirmation);
+//                return true;  // Return true if update is successful
+//            }
+//            return false;  // Return false if confirmation not found or donation not started
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;  // Return false if an error occurs
+//        }
+//    }
+    
+    
     public boolean stopDonation(Long recipientId, Long loggedInUserId) {
         try {
-            Confirmation confirmation = confirmationRepository.findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
+            Confirmation confirmation = confirmationRepository
+                    .findByRecipientIdAndLoggedInUserId(recipientId, loggedInUserId);
+
             if (confirmation != null && confirmation.isStarted()) {
-                confirmation.setStoppedAt(LocalDateTime.now());
+
+                // 1️⃣ Set STOP time
+                LocalDateTime stoppedAt = LocalDateTime.now();
+                confirmation.setStoppedAt(stoppedAt);
+                
                 confirmationRepository.save(confirmation);
-                return true;  // Return true if update is successful
+
+                System.out.println("STOPPED donation for user: " + loggedInUserId);
+
+                // 2️⃣ SAVE BLOOD DONATION RECORD HERE
+                bloodDonationService.createNewDonationRecord(
+                        loggedInUserId,              // donor
+                        recipientId,                 // recipient
+                        stoppedAt,                   // real donation date
+                        confirmation.getHospitalName()
+                );
+
+                System.out.println("Blood donation saved after STOP event.");
+
+                return true;
             }
-            return false;  // Return false if confirmation not found or donation not started
+
+            return false;
+
         } catch (Exception e) {
             e.printStackTrace();
-            return false;  // Return false if an error occurs
+            return false;
         }
     }
+
 
     public Confirmation getConfirmationByUserIds(Long recipientId, Long loggedInUserId) {
         // Logic to retrieve confirmation based on recipientId and loggedInUserId

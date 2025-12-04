@@ -185,7 +185,13 @@
 			<!-- Requested Date -->
 			<div class="form-group">
 			    <label for="requested_date">Requested Date</label>
-			    <input type="date" id="requestedDate" name="requestedDate" required>
+			   <!-- <input type="date" id="requestedDate" name="requestedDate" required>-->
+				<input type="date"
+				       id="requestedDate"
+				       name="requestedDate"
+				        th:attr="min=${minDate}, max=${maxDate}"
+				       required>
+
 			</div>
 					   
             <!-- Submit Button -->
